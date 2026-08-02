@@ -99,11 +99,28 @@ jobs:
           chmod +x llvm.sh
           sudo ./llvm.sh 21
           sudo apt-get install -y zip zstd patch bc flex bison \
-            libssl-dev libncurses-dev libelf-dev dwarves python3
+            libssl-dev libncurses-dev libelf-dev dwarves python3 ccache
           echo "/usr/lib/llvm-21/bin" >> "$GITHUB_PATH"
 
       - name: 验证工具链
         run: clang --version && clang -print-prog-name=ld.lld
+
+      # ---------- ccache 缓存（仿 cctv18）----------
+      - name: 配置 ccache
+        run: |
+          echo "CCACHE_DIR=$HOME/.ccache_ace6" >> "$GITHUB_ENV"
+          echo "CCACHE_MAXSIZE=3G" >> "$GITHUB_ENV"
+          ccache --version | head -1
+
+      - name: 载入 ccache 缓存
+        uses: actions/cache@v5
+        id: ccache-restore
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-ace6-${{ runner.os }}-${{ github.ref_name }}
+          restore-keys: |
+            ccache-ace6-${{ runner.os }}-
+            ccache-ace6-
 
       # ---------- 准备源码: 基线三兄弟 ----------
       - name: 准备源码基线
@@ -111,26 +128,20 @@ jobs:
           set -e
           mkdir -p work
           cd work
-          # src: 基线内核（浅克隆固定 commit，避免全量 3.4GB）
-          git init src
-          cd src
-          git remote add origin "${{ vars.REPO_BASE || 'https://github.com' }}/GuLingguang/oneplus-sm8750-kernel-pro.git"
-          git fetch --depth 1 origin d1ddd249869aa87f876b4edc76f18997e662316d
-          git checkout FETCH_HEAD
-          cd ..
-          # 兄弟目录（浅克隆固定 commit）
-          git init sm8750-modules
-          cd sm8750-modules
-          git remote add origin "${{ vars.REPO_BASE || 'https://github.com' }}/Ace6-Development/android_kernel_oneplus_sm8750-modules.git"
-          git fetch --depth 1 origin 694285bd56d8f299816fae50e6aee18d492da37d
-          git checkout FETCH_HEAD
-          cd ..
-          git init sm8750-devicetrees
-          cd sm8750-devicetrees
-          git remote add origin "${{ vars.REPO_BASE || 'https://github.com' }}/LineageOS/android_kernel_oneplus_sm8750-devicetrees.git"
-          git fetch --depth 1 origin f287404c72b51928184d7abb034148b0e83a25b4
-          git checkout FETCH_HEAD
-          cd ..
+          # 源码用 zip 下载分支头（cctv18 式，比 git clone 快，不拉历史）
+          # 内核主仓（我们的 fork，lineage-23.2 分支头）
+          curl -sL "${{ vars.REPO_BASE || 'https://github.com' }}/GuLingguang/oneplus-sm8750-kernel-pro/archive/refs/heads/lineage-23.2.zip" -o src.zip
+          unzip -q src.zip
+          mv oneplus-sm8750-kernel-pro-lineage-23.2 src
+          # modules（上游分支头）
+          curl -sL "${{ vars.REPO_BASE || 'https://github.com' }}/Ace6-Development/android_kernel_oneplus_sm8750-modules/archive/refs/heads/lineage-23.2.zip" -o modules.zip
+          unzip -q modules.zip
+          mv android_kernel_oneplus_sm8750-modules-lineage-23.2 sm8750-modules
+          # devicetrees（上游分支头）
+          curl -sL "${{ vars.REPO_BASE || 'https://github.com' }}/LineageOS/android_kernel_oneplus_sm8750-devicetrees/archive/refs/heads/lineage-23.2.zip" -o dt.zip
+          unzip -q dt.zip
+          mv android_kernel_oneplus_sm8750-devicetrees-lineage-23.2 sm8750-devicetrees
+          rm -f src.zip modules.zip dt.zip
           # 验证符号链接目标
           for t in src/drivers/base/kernelFwUpdate/Kconfig src/arch/arm64/boot/dts/vendor; do
             [ -e "$t" ] || { echo "符号链接目标缺失: $t"; exit 1; }
@@ -317,7 +328,9 @@ jobs:
           export KBUILD_BUILD_HOST="$BUILD_HOST"
           cd work/src
           set -o pipefail
-          make LLVM=1 LLVM_IAS=1 ARCH=arm64 -j$(nproc) Image
+          make LLVM=1 LLVM_IAS=1 ARCH=arm64 CC="ccache clang" -j$(nproc) Image
+          echo "ccache 状态:"
+          ccache -s | head -8
           [ -f arch/arm64/boot/Image ] || exit 1
 
       # ---------- 验证 ----------
@@ -327,6 +340,14 @@ jobs:
           grep -q '6.6.139-4k-gdc4c44f3ecc0-dirty' include/generated/utsrelease.h || exit 1
           strings arch/arm64/boot/Image | grep -q "Linux version 6.6.139" || exit 1
           ls -la arch/arm64/boot/Image
+
+      # ---------- 保存 ccache 缓存 ----------
+      - name: 保存 ccache 缓存
+        if: always() && steps.ccache-restore.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-ace6-${{ runner.os }}-${{ github.ref_name }}
 
       # ---------- 打包 AK3 ----------
       - name: 打包 AK3
