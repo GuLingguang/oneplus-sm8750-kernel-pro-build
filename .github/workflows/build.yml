@@ -284,7 +284,7 @@ jobs:
         run: |
           if [ "${{ inputs.attribution_enable }}" = "true" ]; then
             echo "BUILD_USER=${{ inputs.build_user }}" >> "$GITHUB_ENV"
-            echo "BUILD_HOST=${{ inputs.build_user }}" >> "$GITHUB_ENV"
+            echo "BUILD_HOST=kernel-builder" >> "$GITHUB_ENV"
             # KSU 版本串署名（REPO_NAME）
             if [ "${{ inputs.ksu_type }}" != "none" ]; then
               sed -i "s/^REPO_NAME := .*/REPO_NAME := ${{ inputs.build_user }}/" work/src/KernelSU/kernel/Kbuild
