@@ -193,6 +193,15 @@ jobs:
             cp -r patches/extra/fs/susfs.c work/src/fs/
             cp -r patches/extra/include/linux/susfs.h patches/extra/include/linux/susfs_def.h work/src/include/linux/
           fi
+          # lz4 1.10 新库文件
+          if [ "${{ inputs.lz4_zstd }}" = "true" ]; then
+            cp -r patches/extra/lib/lz4 work/src/lib/
+          fi
+          # zstd 1.5.7 新库文件
+          if [ "${{ inputs.lz4_zstd }}" = "true" ]; then
+            cp -r patches/extra/lib/zstd/common/allocations.h patches/extra/lib/zstd/common/bits.h work/src/lib/zstd/common/
+            cp -r patches/extra/lib/zstd/compress/zstd_preSplit.c patches/extra/lib/zstd/compress/zstd_preSplit.h work/src/lib/zstd/compress/
+          fi
           # LZ4KD 新增文件
           if [ "${{ inputs.lz4kd_enable }}" = "true" ]; then
             cp -r patches/extra/crypto/lz4k.c patches/extra/crypto/lz4kd.c work/src/crypto/
