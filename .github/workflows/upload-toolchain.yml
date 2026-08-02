@@ -7,6 +7,8 @@ jobs:
   upload:
     runs-on: ubuntu-24.04
     steps:
+      - uses: actions/checkout@v4
+
       - name: 下载 AOSP clang r563880c
         run: |
           curl -sL "https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r563880c.tar.gz" -o clang-r563880c.tar.gz
