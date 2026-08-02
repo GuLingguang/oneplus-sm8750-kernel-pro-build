@@ -312,7 +312,8 @@ jobs:
           export KBUILD_BUILD_USER="$BUILD_USER"
           export KBUILD_BUILD_HOST="$BUILD_HOST"
           cd work/src
-          make LLVM=1 LLVM_IAS=1 ARCH=arm64 -j$(nproc) Image 2>&1 | tail -20
+          set -o pipefail
+          make LLVM=1 LLVM_IAS=1 ARCH=arm64 -j$(nproc) Image
           [ -f arch/arm64/boot/Image ] || exit 1
 
       # ---------- 验证 ----------
