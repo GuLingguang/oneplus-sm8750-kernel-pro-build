@@ -11,9 +11,11 @@ jobs:
 
       - name: 下载 AOSP clang r563880c
         run: |
-          # git clone prebuilts 仓库（main 分支，含 clang-r563880c）
+          # git clone prebuilts 仓库 + checkout 指定 commit（r563880c 在 f8439f06）
           git clone --depth 1 --filter=blob:none --sparse https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 clang-prebuilts
           cd clang-prebuilts
+          git fetch --depth 1 origin f8439f0628d799092dd07df440a6334cab28939c
+          git checkout FETCH_HEAD
           git sparse-checkout set clang-r563880c
           cd ..
           # 打包工具链
