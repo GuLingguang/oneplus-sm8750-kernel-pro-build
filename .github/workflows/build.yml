@@ -339,13 +339,18 @@ jobs:
         run: |
           set -e
           mkdir -p out pack
+          [ -f work/src/arch/arm64/boot/Image ] || { echo "❌ Image 不存在"; exit 1; }
           cp -a ak3/. pack/
           cp work/src/arch/arm64/boot/Image pack/Image
+          # 验证 Image（大小参照 FINAL 版 37816832）
+          SIZE=$(stat -c%s work/src/arch/arm64/boot/Image)
+          echo "Image 大小: $SIZE"
+          [ "$SIZE" -gt 35000000 ] || { echo "❌ Image 过小，可能异常"; exit 1; }
           # AK3 署名
           if [ "${{ inputs.attribution_enable }}" = "true" ]; then
-            sed -i "s|kernel.string=.*|kernel.string=Ace6 Kernel | Build by ${{ inputs.build_user }}|" pack/anykernel.sh
+            sed -i "s#kernel.string=.*#kernel.string=Ace6 Kernel | Build by ${{ inputs.build_user }}#" pack/anykernel.sh
           else
-            sed -i "s|kernel.string=.*|kernel.string=Ace6 Kernel|" pack/anykernel.sh
+            sed -i "s#kernel.string=.*#kernel.string=Ace6 Kernel#" pack/anykernel.sh
           fi
           STAMP=$(date +%Y%m%d)
           ZIP="Kernel-Ace6-${{ inputs.build_user }}-$STAMP.zip"
