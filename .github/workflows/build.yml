@@ -141,47 +141,47 @@ jobs:
 
       # ---------- 应用补丁（按功能开关）----------
       - name: 应用编译修复补丁（必打）
-        run: patch -p1 -F3 --batch -f < patches/split/07_compile_fixes.patch
+        run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/07_compile_fixes.patch
         working-directory: work/src
 
       - name: 应用 KSU 钩子补丁（ksu_type != none 必打）
         if: ${{ inputs.ksu_type != 'none' }}
-        run: patch -p1 -F3 --batch -f < patches/split/00_ksu_hooks.patch
+        run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/00_ksu_hooks.patch
         working-directory: work/src
 
       - name: 应用 SUSFS 主树补丁
         if: ${{ inputs.susfs_enable && inputs.ksu_type != 'none' }}
-        run: patch -p1 -F3 --batch -f < patches/split/01_susfs_main.patch
+        run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/01_susfs_main.patch
         working-directory: work/src
 
       - name: 应用 lz4 补丁
         if: inputs.lz4_zstd
-        run: patch -p1 -F3 --batch -f < patches/split/02_lz4.patch
+        run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/02_lz4.patch
         working-directory: work/src
 
       - name: 应用 zstd 补丁
         if: inputs.lz4_zstd
-        run: patch -p1 -F3 --batch -f < patches/split/03_zstd.patch
+        run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/03_zstd.patch
         working-directory: work/src
 
       - name: 应用 LZ4KD 补丁
         if: inputs.lz4kd_enable
-        run: patch -p1 -F3 --batch -f < patches/split/04_lz4kd.patch
+        run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/04_lz4kd.patch
         working-directory: work/src
 
       - name: 应用 Droidspaces 补丁
         if: ${{ inputs.droidspaces != 'false' }}
-        run: patch -p1 -F3 --batch -f < patches/split/05_droidspaces.patch
+        run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/05_droidspaces.patch
         working-directory: work/src
 
       - name: 应用基带保护补丁
         if: inputs.baseband_guard
-        run: patch -p1 -F3 --batch -f < patches/split/06_baseband_guard.patch
+        run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/06_baseband_guard.patch
         working-directory: work/src
 
       - name: 应用 CVE 补丁
         if: inputs.cve_patch
-        run: patch -p1 -F3 --batch -f < patches/split/08_cve.patch
+        run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/08_cve.patch
         working-directory: work/src
 
       # ---------- 复制 extra 新增文件（按功能开关，替代旧 snapshot）----------
@@ -248,7 +248,7 @@ jobs:
         if: ${{ inputs.susfs_enable && inputs.ksu_type != 'none' }}
         run: |
           cd work/src/KernelSU
-          git apply --check ../patches/02_ksu.patch 2>/dev/null && git apply ../patches/02_ksu.patch \
+          git apply --check $GITHUB_WORKSPACE/patches/02_ksu.patch 2>/dev/null && git apply $GITHUB_WORKSPACE/patches/02_ksu.patch \
             || echo "⚠ 02_ksu.patch 未自动应用（KSU 版本可能已变，需人工适配）" >&2
         working-directory: work/src
 
@@ -272,7 +272,7 @@ jobs:
         run: |
           set -e
           cd work/src
-          cp ../config/config_ace6_final.config .config
+          cp $GITHUB_WORKSPACE/config/config_ace6_final.config .config
           # 按开关调整配置
           if [ "${{ inputs.ksu_type }}" = "none" ]; then
             ./scripts/config --file .config -d CONFIG_KSU -d CONFIG_KSU_SUSFS
