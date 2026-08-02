@@ -114,14 +114,26 @@ jobs:
           set -e
           mkdir -p work
           cd work
-          # src: 基线内核（fork 地址，REPO_BASE 可覆盖）
-          git clone "${{ vars.REPO_BASE || 'https://github.com' }}/Ace6-Development/android_kernel_oneplus_sm8750.git" src
-          cd src && git checkout d1ddd249869aa87f876b4edc76f18997e662316d && cd ..
-          # 兄弟目录（内核符号链接指向它们）
-          git clone "${{ vars.REPO_BASE || 'https://github.com' }}/Ace6-Development/android_kernel_oneplus_sm8750-modules.git" sm8750-modules
-          cd sm8750-modules && git checkout 694285bd56d8f299816fae50e6aee18d492da37d && cd ..
-          git clone "${{ vars.REPO_BASE || 'https://github.com' }}/LineageOS/android_kernel_oneplus_sm8750-devicetrees.git" sm8750-devicetrees
-          cd sm8750-devicetrees && git checkout f287404c72b51928184d7abb034148b0e83a25b4 && cd ..
+          # src: 基线内核（浅克隆固定 commit，避免全量 3.4GB）
+          git init src
+          cd src
+          git remote add origin "${{ vars.REPO_BASE || 'https://github.com' }}/GuLingguang/oneplus-sm8750-kernel-pro.git"
+          git fetch --depth 1 origin d1ddd249869aa87f876b4edc76f18997e662316d
+          git checkout FETCH_HEAD
+          cd ..
+          # 兄弟目录（浅克隆固定 commit）
+          git init sm8750-modules
+          cd sm8750-modules
+          git remote add origin "${{ vars.REPO_BASE || 'https://github.com' }}/Ace6-Development/android_kernel_oneplus_sm8750-modules.git"
+          git fetch --depth 1 origin 694285bd56d8f299816fae50e6aee18d492da37d
+          git checkout FETCH_HEAD
+          cd ..
+          git init sm8750-devicetrees
+          cd sm8750-devicetrees
+          git remote add origin "${{ vars.REPO_BASE || 'https://github.com' }}/LineageOS/android_kernel_oneplus_sm8750-devicetrees.git"
+          git fetch --depth 1 origin f287404c72b51928184d7abb034148b0e83a25b4
+          git checkout FETCH_HEAD
+          cd ..
           # 验证符号链接目标
           for t in src/drivers/base/kernelFwUpdate/Kconfig src/arch/arm64/boot/dts/vendor; do
             [ -e "$t" ] || { echo "符号链接目标缺失: $t"; exit 1; }
