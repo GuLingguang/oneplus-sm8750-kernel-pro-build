@@ -64,6 +64,11 @@ on:
         required: false
         type: string
         default: 'GuLingguang'
+      build_host:
+        description: '署名主机（attribution_enable 开启时生效，默认 kernel-builder）'
+        required: false
+        type: string
+        default: 'kernel-builder'
       # ---------- 发布 ----------
       release_enable:
         description: '发布 GitHub Release'
@@ -284,7 +289,7 @@ jobs:
         run: |
           if [ "${{ inputs.attribution_enable }}" = "true" ]; then
             echo "BUILD_USER=${{ inputs.build_user }}" >> "$GITHUB_ENV"
-            echo "BUILD_HOST=kernel-builder" >> "$GITHUB_ENV"
+            echo "BUILD_HOST=${{ inputs.build_host }}" >> "$GITHUB_ENV"
             # KSU 版本串署名（REPO_NAME）
             if [ "${{ inputs.ksu_type }}" != "none" ]; then
               sed -i "s/^REPO_NAME := .*/REPO_NAME := ${{ inputs.build_user }}/" work/src/KernelSU/kernel/Kbuild
