@@ -141,10 +141,10 @@ jobs:
         id: ccache-restore
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ccache-ace6-O2-${{ runner.os }}-${{ github.ref_name }}
+          key: ccache-ace6-O2-FT-${{ runner.os }}-${{ github.ref_name }}
           restore-keys: |
-            ccache-ace6-O2-${{ runner.os }}-
-            ccache-ace6-O2-
+            ccache-ace6-O2-FT-${{ runner.os }}-
+            ccache-ace6-O2-FT-
 
       # ---------- 准备源码: 基线三兄弟 ----------
       - name: 准备源码基线
@@ -343,9 +343,27 @@ jobs:
           export LOCALVERSION=""
           export KBUILD_BUILD_USER="$BUILD_USER"
           export KBUILD_BUILD_HOST="$BUILD_HOST"
+          # faketime 时间劫持（可复现构建 + ccache 命中稳定，cctv18 式）
+          cd $GITHUB_WORKSPACE
+          chmod 777 lib/*.so
+          export FAKESTAT="2025-05-25 12:00:00"
+          export FAKETIME="@2025-05-25 13:00:00"
+          SO_DIR="$GITHUB_WORKSPACE/lib"
+          export PRELOAD_LIBS="$SO_DIR/libfakestat.so $SO_DIR/libfaketimeMT.so"
+          echo '#!/bin/bash' > cc-wrapper
+          echo 'export LD_PRELOAD="'$PRELOAD_LIBS'"' >> cc-wrapper
+          echo 'export FAKESTAT="'$FAKESTAT'"' >> cc-wrapper
+          echo 'export FAKETIME="'$FAKETIME'"' >> cc-wrapper
+          echo 'ccache clang "$@"' >> cc-wrapper
+          echo '#!/bin/bash' > ld-wrapper
+          echo 'export LD_PRELOAD="'$PRELOAD_LIBS'"' >> ld-wrapper
+          echo 'export FAKESTAT="'$FAKESTAT'"' >> ld-wrapper
+          echo 'export FAKETIME="'$FAKETIME'"' >> ld-wrapper
+          echo 'ld.lld "$@"' >> ld-wrapper
+          chmod +x cc-wrapper ld-wrapper
           cd work/src
           set -o pipefail
-          make LLVM=1 LLVM_IAS=1 ARCH=arm64 CC="ccache clang" KCFLAGS+=-O2 -j$(nproc) Image
+          make LLVM=1 LLVM_IAS=1 ARCH=arm64 CC="$GITHUB_WORKSPACE/cc-wrapper" LD="$GITHUB_WORKSPACE/ld-wrapper" HOSTLD=ld.lld KCFLAGS+=-O2 -j$(nproc) Image
           echo "ccache 状态:"
           ccache -s
           [ -f arch/arm64/boot/Image ] || exit 1
@@ -364,7 +382,7 @@ jobs:
         uses: actions/cache/save@v5
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ccache-ace6-O2-${{ runner.os }}-${{ github.ref_name }}
+          key: ccache-ace6-O2-FT-${{ runner.os }}-${{ github.ref_name }}
 
       # ---------- 打包 AK3 ----------
       - name: 打包 AK3
@@ -386,7 +404,8 @@ jobs:
             sed -i "s#kernel.string=.*#kernel.string=Ace6 Kernel#" pack/anykernel.sh
           fi
           STAMP=$(date +%Y%m%d)
-          ZIP="Kernel-Ace6-${{ inputs.build_user }}-$STAMP.zip"
+          KSUVER="${{ steps.ksu_version.outputs.ksuver }}"
+          ZIP="Kernel-Ace6-${{ inputs.build_user }}-ksu${KSUVER}-$STAMP.zip"
           cd pack && zip -r9 "../out/$ZIP" . -x "*.git*" >/dev/null
           echo "ak3name=$ZIP" >> "$GITHUB_OUTPUT"
           ls -lh "../out/$ZIP"
@@ -416,11 +435,31 @@ jobs:
           if [ -z "$TAG" ]; then
             TAG="$(date +%Y%m%d)-ksu${{ needs.build.outputs.ksuver }}"
           fi
-          cat <<'EOF' > release_notes.md
-          - ReSukiSU 管理器: https://github.com/ReSukiSU/ReSukiSU/releases
-          - SukiSU Ultra 管理器: https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases
-          - KernelSU Next 管理器: https://github.com/KernelSU-Next/KernelSU-Next/releases
-          - KSU 原版管理器: https://github.com/tiann/KernelSU/releases
+          cat <<EOF > release_notes.md
+          # Ace6 Kernel Build
+
+          ## 版本信息
+          - 内核: 6.6.139-4k
+          - KernelSU: ${{ needs.build.outputs.ksuver }}
+          - 构建日期: $(date +%Y-%m-%d)
+
+          ## 包含功能
+          - KernelSU: ${{ inputs.ksu_type }}
+          - SUSFS: ${{ inputs.susfs_enable }}
+          - lz4/zstd: ${{ inputs.lz4_zstd }}
+          - LZ4KD: ${{ inputs.lz4kd_enable }}
+          - Droidspaces: ${{ inputs.droidspaces }}
+          - 基带保护: ${{ inputs.baseband_guard }}
+          - CVE 补丁: ${{ inputs.cve_patch }}
+
+          ## 管理器下载
+          - ReSukiSU: https://github.com/ReSukiSU/ReSukiSU/releases
+          - SukiSU Ultra: https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases
+          - KernelSU Next: https://github.com/KernelSU-Next/KernelSU-Next/releases
+          - KSU 原版: https://github.com/tiann/KernelSU/releases
+
+          ## 刷入
+          recovery 刷入 AK3 zip 即可
           EOF
           gh release create "$TAG" \
             --notes-file release_notes.md \
