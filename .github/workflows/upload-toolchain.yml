@@ -11,7 +11,13 @@ jobs:
 
       - name: 下载 AOSP clang r563880c
         run: |
-          curl -sL "https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r563880c.tar.gz" -o clang-r563880c.tar.gz
+          # git clone prebuilts 仓库（main 分支，含 clang-r563880c）
+          git clone --depth 1 --filter=blob:none --sparse https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 clang-prebuilts
+          cd clang-prebuilts
+          git sparse-checkout set clang-r563880c
+          cd ..
+          # 打包工具链
+          tar czf clang-r563880c.tar.gz -C clang-prebuilts/clang-r563880c .
           ls -lh clang-r563880c.tar.gz
 
       - name: 创建 Release
