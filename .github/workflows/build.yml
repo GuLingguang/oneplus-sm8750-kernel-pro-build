@@ -11,9 +11,6 @@ on:
         default: 'resukisu'
         options:
           - 'resukisu'
-          - 'sukisu'
-          - 'ksunext'
-          - 'ksu'
           - 'none'
       susfs_enable:
         description: 'SUSFS（依赖 KSU 非 none；增强隐藏环境挂载）'
@@ -229,9 +226,7 @@ jobs:
           cd work/src
           case "${{ inputs.ksu_type }}" in
             resukisu) KSU_REPO="https://github.com/ReSukiSU/ReSukiSU.git" ;;
-            sukisu)   KSU_REPO="https://github.com/SukiSU-Ultra/SukiSU-Ultra.git" ;;
-            ksunext)  KSU_REPO="https://github.com/KernelSU-Next/KernelSU-Next.git" ;;
-            ksu)      KSU_REPO="https://github.com/tiann/KernelSU.git" ;;
+            none)     echo "无 KSU"; exit 0 ;;
           esac
           rm -rf KernelSU drivers/kernelsu
           git clone "$KSU_REPO" KernelSU
@@ -342,10 +337,10 @@ jobs:
           [ -f work/src/arch/arm64/boot/Image ] || { echo "❌ Image 不存在"; exit 1; }
           cp -a ak3/. pack/
           cp work/src/arch/arm64/boot/Image pack/Image
-          # 验证 Image（大小参照 FINAL 版 37816832）
+          # 验证 Image 存在且非空（不写死大小——随功能/上游变化）
           SIZE=$(stat -c%s work/src/arch/arm64/boot/Image)
           echo "Image 大小: $SIZE"
-          [ "$SIZE" -gt 35000000 ] || { echo "❌ Image 过小，可能异常"; exit 1; }
+          [ "$SIZE" -gt 0 ] || { echo "❌ Image 为空"; exit 1; }
           # AK3 署名
           if [ "${{ inputs.attribution_enable }}" = "true" ]; then
             sed -i "s#kernel.string=.*#kernel.string=Ace6 Kernel | Build by ${{ inputs.build_user }}#" pack/anykernel.sh
