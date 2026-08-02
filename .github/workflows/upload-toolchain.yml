@@ -3,9 +3,6 @@ name: Upload AOSP Clang Toolchain
 on:
   workflow_dispatch:      # 手动触发（一次性：下载 AOSP clang 打包上传 Release）
 
-permissions:
-  contents: write          # 需要创建 Release 的权限
-
 jobs:
   upload:
     runs-on: ubuntu-24.04
