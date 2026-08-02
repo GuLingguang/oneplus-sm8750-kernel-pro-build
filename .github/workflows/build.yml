@@ -247,7 +247,7 @@ jobs:
       - name: 应用 SUSFS KSU 适配补丁
         if: ${{ inputs.susfs_enable && inputs.ksu_type != 'none' }}
         run: |
-          cd work/src/KernelSU
+          cd KernelSU
           git apply --check $GITHUB_WORKSPACE/patches/02_ksu.patch 2>/dev/null && git apply $GITHUB_WORKSPACE/patches/02_ksu.patch \
             || echo "⚠ 02_ksu.patch 未自动应用（KSU 版本可能已变，需人工适配）" >&2
         working-directory: work/src
