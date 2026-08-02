@@ -106,10 +106,22 @@ jobs:
         run: clang --version && clang -print-prog-name=ld.lld
 
       # ---------- ccache 缓存（仿 cctv18）----------
+      - name: 清理 runner 空间（并行）
+        run: |
+          sudo rm -rf /usr/share/dotnet &
+          sudo rm -rf /usr/local/lib/android &
+          sudo rm -rf /opt/ghc &
+          sudo rm -rf /opt/hostedtoolcache/CodeQL &
+          wait
+          df -h | head -4
+
       - name: 配置 ccache
         run: |
           echo "CCACHE_DIR=$HOME/.ccache_ace6" >> "$GITHUB_ENV"
           echo "CCACHE_MAXSIZE=3G" >> "$GITHUB_ENV"
+          # sloppiness：放宽缓存匹配，提升跨构建命中率（cctv18 式）
+          mkdir -p "$HOME/.ccache_ace6"
+          echo "sloppiness = file_stat_matches,include_file_ctime,include_file_mtime,pch_defines,file_macro,time_macros" >> "$HOME/.ccache_ace6/ccache.conf"
           ccache --version | head -1
 
       - name: 载入 ccache 缓存
