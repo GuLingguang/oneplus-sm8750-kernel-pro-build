@@ -1,0 +1,36 @@
+name: Upload AOSP Clang Toolchain
+
+on:
+  workflow_dispatch:      # 手动触发（一次性：下载 AOSP clang 打包上传 Release）
+
+jobs:
+  upload:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: 下载 AOSP clang r563880c
+        run: |
+          curl -sL "https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r563880c.tar.gz" -o clang-r563880c.tar.gz
+          ls -lh clang-r563880c.tar.gz
+
+      - name: 创建 Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat <<'MD' > notes.md
+          # AOSP Clang 21.0.0 (r563880c)
+
+          ## 内容
+          - AOSP 官方预编译工具链（clang/llvm/lld 21.0.0）
+          - 与 OnePlus Ace 6 官方内核编译环境一致（官方 IKCONFIG: r563880c）
+
+          ## 资产
+          | 文件 | 说明 |
+          |---|---|
+          | clang-r563880c.tar.gz | Linux x86_64 完整工具链（解压即用） |
+
+          ## 使用
+          workflow 下载 → 解压 → bin/ 加入 PATH → 编译
+          MD
+          gh release create "AOSP-Clang-21.0.0-r563880c" \
+            --notes-file notes.md \
+            clang-r563880c.tar.gz

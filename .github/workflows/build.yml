@@ -100,16 +100,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # ---------- 工具链: AOSP clang r563880c（官方同款，Actions 外网直下）----------
+      # ---------- 工具链: AOSP clang r563880c（从本仓库 Release 下载）----------
       - name: 安装 AOSP clang 21 + 依赖
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           sudo apt-get update
           sudo apt-get install -y zip zstd patch bc flex bison \
             libssl-dev libncurses-dev libelf-dev dwarves python3 ccache
-          # 下载 AOSP clang r563880c（官方工具链，与官方内核同款）
-          curl -sL "https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r563880c.tar.gz" -o clang.tar.gz
+          # 从 Release 下载官方工具链（AOSP-Clang-21.0.0-r563880c）
+          gh release download "AOSP-Clang-21.0.0-r563880c" -p "clang-r563880c.tar.gz" -R $GITHUB_REPOSITORY
           mkdir -p clang
-          tar xzf clang.tar.gz -C clang
+          tar xzf clang-r563880c.tar.gz -C clang
           echo "$PWD/clang/bin" >> "$GITHUB_PATH"
 
       - name: 验证工具链
