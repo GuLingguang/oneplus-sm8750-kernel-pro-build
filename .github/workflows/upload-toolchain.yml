@@ -29,17 +29,18 @@ jobs:
           cat <<'MD' > notes.md
           # AOSP Clang 21.0.0 (r563880c)
 
-          ## 内容
-          - AOSP 官方预编译工具链（clang/llvm/lld 21.0.0）
-          - 与 OnePlus Ace 6 官方内核编译环境一致（官方 IKCONFIG: r563880c）
+          Official Android prebuilt toolchain (clang/llvm/lld 21.0.0).
+          Matches the exact toolchain used to build the OnePlus Ace 6 official kernel (IKCONFIG: r563880c).
 
-          ## 资产
-          | 文件 | 说明 |
+          ## Asset
+
+          | File | Description |
           |---|---|
-          | clang-r563880c.tar.gz | Linux x86_64 完整工具链（解压即用） |
+          | clang-r563880c.tar.gz | Full Linux x86_64 toolchain (extract & use) |
 
-          ## 使用
-          workflow 下载 → 解压 → bin/ 加入 PATH → 编译
+          ## Usage
+
+          Workflow downloads this asset, extracts it, and adds `bin/` to PATH before building.
           MD
           gh release create "AOSP-Clang-21.0.0-r563880c" \
             --notes-file notes.md \
