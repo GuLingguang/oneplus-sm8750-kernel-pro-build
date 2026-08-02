@@ -1,0 +1,368 @@
+name: Build Ace6 Kernel (TEST)
+
+on:
+  workflow_dispatch:      # 手动触发（主入口）
+    inputs:
+      # ---------- KernelSU ----------
+      ksu_type:
+        description: 'KernelSU 分支（ReSukiSU/SukiSU-Ultra/KernelSU-Next/KSU 原版/无内置）'
+        required: true
+        type: choice
+        default: 'resukisu'
+        options:
+          - 'resukisu'
+          - 'sukisu'
+          - 'ksunext'
+          - 'ksu'
+          - 'none'
+      susfs_enable:
+        description: 'SUSFS（依赖 KSU 非 none；增强隐藏环境挂载）'
+        required: true
+        type: boolean
+        default: 'true'
+      # ---------- 性能 ----------
+      lz4_zstd:
+        description: 'lz4 1.10 + zstd 1.5.7（压缩性能优化）'
+        required: true
+        type: boolean
+        default: 'true'
+      lz4kd_enable:
+        description: 'LZ4KD 算法（推荐与 lz4+zstd 同开）'
+        required: true
+        type: boolean
+        default: 'false'
+      # ---------- 功能 ----------
+      droidspaces:
+        description: 'Droidspaces 容器（standard=容器+ntsync，extend=更多测试项）'
+        required: true
+        type: choice
+        default: 'false'
+        options:
+          - 'false'
+          - 'standard'
+          - 'extend'
+      baseband_guard:
+        description: '内核级基带保护（防格机）'
+        required: true
+        type: boolean
+        default: 'true'
+      cve_patch:
+        description: 'CVE 安全补丁（rtmutex）'
+        required: true
+        type: boolean
+        default: 'true'
+      better_net:
+        description: '网络功能拓展（ipset/iptables 高级支持）'
+        required: true
+        type: boolean
+        default: 'false'
+      # ---------- 署名 ----------
+      attribution_enable:
+        description: '产物署名（编译标签/KSU 版本串/AK3）'
+        required: true
+        type: boolean
+        default: 'true'
+      build_user:
+        description: '署名用户（attribution_enable 开启时生效）'
+        required: false
+        type: string
+        default: 'GuLingguang'
+      # ---------- 发布 ----------
+      release_enable:
+        description: '发布 GitHub Release'
+        required: true
+        type: boolean
+        default: 'false'
+      tag:
+        description: 'Release 标签（留空自动用日期）'
+        required: false
+        type: string
+        default: ''
+
+concurrency:
+  group: build-kernel
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    outputs:
+      ak3name: ${{ steps.package.outputs.ak3name }}
+      ksuver: ${{ steps.ksu_version.outputs.ksuver }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # ---------- 工具链: clang 21（apt.llvm.org 官方源）----------
+      - name: 安装 clang 21 / lld 21
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget ca-certificates
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 21
+          sudo apt-get install -y zip zstd patch bc flex bison \
+            libssl-dev libncurses-dev libelf-dev dwarves python3
+          echo "/usr/lib/llvm-21/bin" >> "$GITHUB_PATH"
+
+      - name: 验证工具链
+        run: clang --version && clang -print-prog-name=ld.lld
+
+      # ---------- 准备源码: 基线三兄弟 ----------
+      - name: 准备源码基线
+        run: |
+          set -e
+          mkdir -p work
+          cd work
+          # src: 基线内核（fork 地址，REPO_BASE 可覆盖）
+          git clone "${{ vars.REPO_BASE || 'https://github.com' }}/Ace6-Development/android_kernel_oneplus_sm8750.git" src
+          cd src && git checkout d1ddd249869aa87f876b4edc76f18997e662316d && cd ..
+          # 兄弟目录（内核符号链接指向它们）
+          git clone "${{ vars.REPO_BASE || 'https://github.com' }}/Ace6-Development/android_kernel_oneplus_sm8750-modules.git" sm8750-modules
+          cd sm8750-modules && git checkout 694285bd56d8f299816fae50e6aee18d492da37d && cd ..
+          git clone "${{ vars.REPO_BASE || 'https://github.com' }}/LineageOS/android_kernel_oneplus_sm8750-devicetrees.git" sm8750-devicetrees
+          cd sm8750-devicetrees && git checkout f287404c72b51928184d7abb034148b0e83a25b4 && cd ..
+          # 验证符号链接目标
+          for t in src/drivers/base/kernelFwUpdate/Kconfig src/arch/arm64/boot/dts/vendor; do
+            [ -e "$t" ] || { echo "符号链接目标缺失: $t"; exit 1; }
+          done
+
+      # ---------- 应用补丁（按功能开关）----------
+      - name: 应用编译修复补丁（必打）
+        run: patch -p1 -F3 --batch -f < patches/split/07_compile_fixes.patch
+        working-directory: work/src
+
+      - name: 应用 KSU 钩子补丁（ksu_type != none 必打）
+        if: ${{ inputs.ksu_type != 'none' }}        run: patch -p1 -F3 --batch -f < patches/split/00_ksu_hooks.patch
+        working-directory: work/src
+
+      - name: 应用 SUSFS 主树补丁
+        if: ${{ inputs.susfs_enable && inputs.ksu_type != 'none' }}
+        run: patch -p1 -F3 --batch -f < patches/split/01_susfs_main.patch
+        working-directory: work/src
+
+      - name: 应用 lz4 补丁
+        if: inputs.lz4_zstd
+        run: patch -p1 -F3 --batch -f < patches/split/02_lz4.patch
+        working-directory: work/src
+
+      - name: 应用 zstd 补丁
+        if: inputs.lz4_zstd
+        run: patch -p1 -F3 --batch -f < patches/split/03_zstd.patch
+        working-directory: work/src
+
+      - name: 应用 LZ4KD 补丁
+        if: inputs.lz4kd_enable
+        run: patch -p1 -F3 --batch -f < patches/split/04_lz4kd.patch
+        working-directory: work/src
+
+      - name: 应用 Droidspaces 补丁
+        if: ${{ inputs.droidspaces != 'false' }}
+        run: patch -p1 -F3 --batch -f < patches/split/05_droidspaces.patch
+        working-directory: work/src
+
+      - name: 应用基带保护补丁
+        if: inputs.baseband_guard
+        run: patch -p1 -F3 --batch -f < patches/split/06_baseband_guard.patch
+        working-directory: work/src
+
+      - name: 应用 CVE 补丁
+        if: inputs.cve_patch
+        run: patch -p1 -F3 --batch -f < patches/split/08_cve.patch
+        working-directory: work/src
+
+      # ---------- 复制 extra 新增文件（按功能开关，替代旧 snapshot）----------
+      - name: 复制 extra 新增文件
+        run: |
+          set -e
+          # SUSFS 新增文件
+          if [ "${{ inputs.susfs_enable }}" = "true" ] && [ "${{ inputs.ksu_type }}" != "none" ]; then
+            cp -r patches/extra/fs/susfs.c work/src/fs/
+            cp -r patches/extra/include/linux/susfs.h patches/extra/include/linux/susfs_def.h work/src/include/linux/
+          fi
+          # LZ4KD 新增文件
+          if [ "${{ inputs.lz4kd_enable }}" = "true" ]; then
+            cp -r patches/extra/crypto/lz4k.c patches/extra/crypto/lz4kd.c work/src/crypto/
+            cp -r patches/extra/include/linux/lz4k.h patches/extra/include/linux/lz4kd.h work/src/include/linux/
+            cp -r patches/extra/lib/lz4k work/src/lib/
+            cp -r patches/extra/lib/lz4kd work/src/lib/
+          fi
+          # Droidspaces 新增文件
+          if [ "${{ inputs.droidspaces }}" != "false" ]; then
+            cp -r patches/extra/drivers/misc/ntsync.c work/src/drivers/misc/
+            cp -r patches/extra/include/uapi/linux/ntsync.h work/src/include/uapi/linux/
+            cp -r patches/extra/drivers/gpu/drm/evdi work/src/drivers/gpu/drm/
+          fi
+          # Baseband-guard 新增文件
+          if [ "${{ inputs.baseband_guard }}" = "true" ]; then
+            cp -r patches/extra/Baseband-guard work/src/
+            ln -sfn ../Baseband-guard work/src/security/baseband-guard
+          fi
+
+      # ---------- KernelSU（按 ksu_type 分支）----------
+      - name: 集成 KernelSU
+        if: ${{ inputs.ksu_type != 'none' }}
+        run: |
+          set -e
+          cd work/src
+          case "${{ inputs.ksu_type }}" in
+            resukisu) KSU_REPO="https://github.com/ReSukiSU/ReSukiSU.git" ;;
+            sukisu)   KSU_REPO="https://github.com/SukiSU-Ultra/SukiSU-Ultra.git" ;;
+            ksunext)  KSU_REPO="https://github.com/KernelSU-Next/KernelSU-Next.git" ;;
+            ksu)      KSU_REPO="https://github.com/tiann/KernelSU.git" ;;
+          esac
+          rm -rf KernelSU drivers/kernelsu
+          git clone "$KSU_REPO" KernelSU
+          ln -sfn ../KernelSU/kernel drivers/kernelsu
+          grep -q "kernelsu" drivers/Makefile || echo 'obj-$(CONFIG_KSU) += kernelsu/' >> drivers/Makefile
+          grep -q "drivers/kernelsu/Kconfig" drivers/Kconfig || \
+            sed -i "/endmenu/i\source \"drivers/kernelsu/Kconfig\"" drivers/Kconfig
+        env:
+          KSU_REPO: ""
+
+      # ---------- KSU 版本号 ----------
+      - name: 计算 KSU 版本号
+        id: ksu_version
+        if: ${{ inputs.ksu_type != 'none' }}
+        run: |
+          COUNT=$(git -C work/src/KernelSU rev-list --count HEAD)
+          VER=$((30000 + COUNT + 700))
+          echo "ksuver=$VER" >> "$GITHUB_OUTPUT"
+          echo "KSU 版本号: $VER ($COUNT 提交)"
+
+      # ---------- SUSFS 的 KSU 内部适配 ----------
+      - name: 应用 SUSFS KSU 适配补丁
+        if: ${{ inputs.susfs_enable && inputs.ksu_type != 'none' }}
+        run: |
+          cd work/src/KernelSU
+          git apply --check ../patches/02_ksu.patch 2>/dev/null && git apply ../patches/02_ksu.patch \
+            || echo "⚠ 02_ksu.patch 未自动应用（KSU 版本可能已变，需人工适配）" >&2
+        working-directory: work/src
+
+      # ---------- 署名 ----------
+      - name: 配置署名
+        run: |
+          if [ "${{ inputs.attribution_enable }}" = "true" ]; then
+            echo "BUILD_USER=${{ inputs.build_user }}" >> "$GITHUB_ENV"
+            echo "BUILD_HOST=${{ inputs.build_user }}" >> "$GITHUB_ENV"
+            # KSU 版本串署名（REPO_NAME）
+            if [ "${{ inputs.ksu_type }}" != "none" ]; then
+              sed -i "s/^REPO_NAME := .*/REPO_NAME := ${{ inputs.build_user }}/" work/src/KernelSU/kernel/Kbuild
+            fi
+          else
+            echo "BUILD_USER=" >> "$GITHUB_ENV"
+            echo "BUILD_HOST=" >> "$GITHUB_ENV"
+          fi
+
+      # ---------- 配置 ----------
+      - name: 部署配置
+        run: |
+          set -e
+          cd work/src
+          cp ../config/config_ace6_final.config .config
+          # 按开关调整配置
+          if [ "${{ inputs.ksu_type }}" = "none" ]; then
+            ./scripts/config --file .config -d CONFIG_KSU -d CONFIG_KSU_SUSFS
+          fi
+          if [ "${{ inputs.susfs_enable }}" != "true" ] || [ "${{ inputs.ksu_type }}" = "none" ]; then
+            ./scripts/config --file .config -d CONFIG_KSU_SUSFS
+          fi
+          if [ "${{ inputs.droidspaces }}" = "false" ]; then
+            ./scripts/config --file .config \
+              -d CONFIG_SYSVIPC -d CONFIG_NTSYNC -d CONFIG_DRM_LINDROID_EVDI
+          fi
+          if [ "${{ inputs.droidspaces }}" != "extend" ]; then
+            ./scripts/config --file .config -d CONFIG_DRM_LINDROID_EVDI
+          fi
+          if [ "${{ inputs.lz4kd_enable }}" != "true" ]; then
+            ./scripts/config --file .config \
+              -d CONFIG_LZ4K_COMPRESS -d CONFIG_LZ4KD_COMPRESS -d CONFIG_CRYPTO_LZ4K -d CONFIG_CRYPTO_LZ4KD
+          fi
+          if [ "${{ inputs.baseband_guard }}" != "true" ]; then
+            ./scripts/config --file .config -d CONFIG_BBG
+          fi
+          if [ "${{ inputs.better_net }}" != "true" ]; then
+            ./scripts/config --file .config -d CONFIG_IP_SET -d CONFIG_BPF_STREAM_PARSER -d CONFIG_IP6_NF_NAT
+          fi
+          export PATH=/usr/lib/llvm-21/bin:$PATH
+          export LLVM=1 LLVM_IAS=1
+          make LLVM=1 LLVM_IAS=1 ARCH=arm64 olddefconfig >/dev/null 2>&1
+          grep -q 'CONFIG_LOCALVERSION="-4k-gdc4c44f3ecc0-dirty"' .config || exit 1
+
+      # ---------- 编译 ----------
+      - name: 编译内核
+        run: |
+          sudo sysctl -w vm.max_map_count=1048576
+          export PATH=/usr/lib/llvm-21/bin:$PATH
+          export LLVM=1 LLVM_IAS=1
+          export LOCALVERSION=""
+          export KBUILD_BUILD_USER="$BUILD_USER"
+          export KBUILD_BUILD_HOST="$BUILD_HOST"
+          cd work/src
+          make LLVM=1 LLVM_IAS=1 ARCH=arm64 -j$(nproc) Image 2>&1 | tail -20
+          [ -f arch/arm64/boot/Image ] || exit 1
+
+      # ---------- 验证 ----------
+      - name: 验证产物
+        run: |
+          cd work/src
+          grep -q '6.6.139-4k-gdc4c44f3ecc0-dirty' include/generated/utsrelease.h || exit 1
+          strings arch/arm64/boot/Image | grep -q "Linux version 6.6.139" || exit 1
+          ls -la arch/arm64/boot/Image
+
+      # ---------- 打包 AK3 ----------
+      - name: 打包 AK3
+        id: package
+        run: |
+          set -e
+          mkdir -p out pack
+          cp -a ak3/. pack/
+          cp work/src/arch/arm64/boot/Image pack/Image
+          # AK3 署名
+          if [ "${{ inputs.attribution_enable }}" = "true" ]; then
+            sed -i "s|kernel.string=.*|kernel.string=Ace6 Kernel | Build by ${{ inputs.build_user }}|" pack/anykernel.sh
+          else
+            sed -i "s|kernel.string=.*|kernel.string=Ace6 Kernel|" pack/anykernel.sh
+          fi
+          STAMP=$(date +%Y%m%d)
+          ZIP="Kernel-Ace6-${{ inputs.build_user }}-$STAMP.zip"
+          cd pack && zip -r9 "../out/$ZIP" . -x "*.git*" >/dev/null
+          echo "ak3name=$ZIP" >> "$GITHUB_OUTPUT"
+          ls -lh "../out/$ZIP"
+
+      # ---------- 上传产物 ----------
+      - name: 上传产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.package.outputs.ak3name }}
+          path: out/*.zip
+          retention-days: 14
+          if-no-files-found: error
+
+  release:
+    needs: build
+    if: ${{ inputs.release_enable }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: 下载产物
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build.outputs.ak3name }}
+          path: release_zips
+      - name: 发布 Release
+        run: |
+          TAG="${{ inputs.tag }}"
+          if [ -z "$TAG" ]; then
+            TAG="$(date +%Y%m%d)-ksu${{ needs.build.outputs.ksuver }}"
+          fi
+          cat <<'EOF' > release_notes.md
+          - ReSukiSU 管理器: https://github.com/ReSukiSU/ReSukiSU/releases
+          - SukiSU Ultra 管理器: https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases
+          - KernelSU Next 管理器: https://github.com/KernelSU-Next/KernelSU-Next/releases
+          - KSU 原版管理器: https://github.com/tiann/KernelSU/releases
+          EOF
+          gh release create "$TAG" \
+            --notes-file release_notes.md \
+            release_zips/*.zip
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
