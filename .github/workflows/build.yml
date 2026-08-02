@@ -133,7 +133,8 @@ jobs:
         working-directory: work/src
 
       - name: 应用 KSU 钩子补丁（ksu_type != none 必打）
-        if: ${{ inputs.ksu_type != 'none' }}        run: patch -p1 -F3 --batch -f < patches/split/00_ksu_hooks.patch
+        if: ${{ inputs.ksu_type != 'none' }}
+        run: patch -p1 -F3 --batch -f < patches/split/00_ksu_hooks.patch
         working-directory: work/src
 
       - name: 应用 SUSFS 主树补丁
