@@ -118,7 +118,7 @@ jobs:
           sudo rm -rf /opt/ghc &
           sudo rm -rf /opt/hostedtoolcache/CodeQL &
           wait
-          df -h | head -4
+          df -h
 
       - name: 配置 ccache
         run: |
@@ -127,7 +127,7 @@ jobs:
           # sloppiness：放宽缓存匹配，提升跨构建命中率（cctv18 式）
           mkdir -p "$HOME/.ccache_ace6"
           echo "sloppiness = file_stat_matches,include_file_ctime,include_file_mtime,pch_defines,file_macro,time_macros" >> "$HOME/.ccache_ace6/ccache.conf"
-          ccache --version | head -1
+          ccache --version
 
       - name: 载入 ccache 缓存
         uses: actions/cache@v5
@@ -331,7 +331,7 @@ jobs:
           fi
           export PATH=/usr/lib/llvm-21/bin:$PATH
           export LLVM=1 LLVM_IAS=1
-          make LLVM=1 LLVM_IAS=1 ARCH=arm64 olddefconfig >/dev/null 2>&1
+          make LLVM=1 LLVM_IAS=1 ARCH=arm64 olddefconfig
           grep -q 'CONFIG_LOCALVERSION="-4k-gdc4c44f3ecc0-dirty"' .config || exit 1
 
       # ---------- 编译 ----------
@@ -347,7 +347,7 @@ jobs:
           set -o pipefail
           make LLVM=1 LLVM_IAS=1 ARCH=arm64 CC="ccache clang" -j$(nproc) Image
           echo "ccache 状态:"
-          ccache -s | head -8
+          ccache -s
           [ -f arch/arm64/boot/Image ] || exit 1
 
       # ---------- 验证 ----------
