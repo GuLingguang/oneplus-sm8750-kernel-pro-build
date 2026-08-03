@@ -146,6 +146,26 @@ jobs:
             ccache-ace6-O2-FT-${{ runner.os }}-
             ccache-ace6-O2-FT-
 
+      - name: 拉取公共 ccache 缓存（Release）
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # actions/cache 命中则跳过
+          if [ -d "${{ env.CCACHE_DIR }}" ] && [ "$(ls -A ${{ env.CCACHE_DIR }} 2>/dev/null)" ]; then
+            echo "本地缓存已命中，跳过公共缓存拉取"
+            exit 0
+          fi
+          # 从 Release 拉取公共缓存（ccache-ace6 资产）
+          echo "未命中本地缓存，尝试拉取公共 ccache ..."
+          mkdir -p ${{ env.CCACHE_DIR }}
+          if gh release download -p "ccache-ace6-O2-FT.tar.zst" -R $GITHUB_REPOSITORY 2>/dev/null; then
+            echo "成功下载公共 ccache，解压中..."
+            tar -I zstd -xf ccache-ace6-O2-FT.tar.zst -C ${{ env.CCACHE_DIR }}
+            echo "公共 ccache 恢复完成！"
+          else
+            echo "公共 ccache 不存在（首次构建），跳过"
+          fi
+
       # ---------- 准备源码: 基线三兄弟 ----------
       - name: 准备源码基线
         run: |
@@ -377,12 +397,26 @@ jobs:
           ls -la arch/arm64/boot/Image
 
       # ---------- 保存 ccache 缓存 ----------
-      - name: 保存 ccache 缓存
+      - name: 保存 ccache 缓存（本地）
         if: ${{ inputs.ccache_update }}
         uses: actions/cache/save@v5
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ccache-ace6-O2-FT-${{ runner.os }}-${{ github.ref_name }}
+
+      - name: 上传公共 ccache 缓存（Release）
+        if: ${{ inputs.ccache_update }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 打包 ccache 并上传到 Release（公共缓存，供他人/下次构建拉取）
+          echo "打包公共 ccache ..."
+          tar -I zstd -cf ccache-ace6-O2-FT.tar.zst -C ${{ env.CCACHE_DIR }} .
+          echo "ccache 大小: $(du -sh ccache-ace6-O2-FT.tar.zst | cut -f1)"
+          # 上传（若 Release 不存在则创建）
+          gh release create "ccache-ace6-O2-FT" ccache-ace6-O2-FT.tar.zst --notes "Public ccache for Ace6 kernel builds" 2>/dev/null \
+            || gh release upload "ccache-ace6-O2-FT" ccache-ace6-O2-FT.tar.zst --clobber
+          echo "公共 ccache 已上传！
 
       # ---------- 打包 AK3 ----------
       - name: 打包 AK3
