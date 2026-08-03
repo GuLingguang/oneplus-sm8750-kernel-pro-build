@@ -161,13 +161,17 @@ jobs:
         run: clang --version && clang -print-prog-name=ld.lld
 
       # ---------- ccache (cctv18-style) ----------
-      - name: 🧹 Clean runner space
+      - name: 🧹 Clean runner space (async, non-blocking)
         run: |
-          sudo rm -rf /usr/share/dotnet &
-          sudo rm -rf /usr/local/lib/android &
-          sudo rm -rf /opt/ghc &
-          sudo rm -rf /opt/hostedtoolcache/CodeQL &
-          wait
+          # Deletes run in the background WITHOUT blocking the build:
+          # - no `wait`: step returns immediately
+          # - stdout/stderr -> /dev/null: releases the runner's pipe so the
+          #   step does not hang waiting for the background processes
+          # - setsid: detach from the job's process group
+          (setsid sudo rm -rf /usr/share/dotnet >/dev/null 2>&1 &)
+          (setsid sudo rm -rf /usr/local/lib/android >/dev/null 2>&1 &)
+          (setsid sudo rm -rf /opt/ghc >/dev/null 2>&1 &)
+          (setsid sudo rm -rf /opt/hostedtoolcache/CodeQL >/dev/null 2>&1 &)
           df -h
 
       - name: 💾 Configure ccache
