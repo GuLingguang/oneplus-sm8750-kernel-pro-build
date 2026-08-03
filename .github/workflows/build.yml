@@ -677,7 +677,6 @@ jobs:
           | Kernel build | ${{ needs.build.outputs.kernelver || 'n/a' }} |
           | KernelSU | ${{ needs.build.outputs.ksuver }} |
           | Build time | $(date +"%Y-%m-%d %H:%M UTC") |
-          | Kernel timestamp | pinned to 2025-05-25 13:00:00 UTC (faketime, reproducible) |
 
           ## ✨ Features
 
@@ -696,7 +695,7 @@ jobs:
           | BBR | ${{ inputs.bbr_enable }} |
           | KPM | ${{ inputs.kpm_enable }} |
           | Re:Kernel | ${{ inputs.rekernel_enable }} |
-          | Suffix | ${{ inputs.kernel_suffix }} |
+          | Suffix | ${{ inputs.kernel_suffix || '-' }} |
 
           ## 📲 Flashing
 
