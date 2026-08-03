@@ -208,7 +208,9 @@ The repo includes a **cross-machine local build script** — `reproduce.sh`:
 
 It auto-detects clang 21 (multiple paths), downloads sources (or uses `KERNEL_SRC`), applies patches by toggle, copies extra files, sets the real commit, and produces an AK3 zip. See `./reproduce.sh --help`.
 
-**Requirements**: clang 21 (Arch: `pacman -S clang21 lld21 llvm21`; Ubuntu: apt.llvm.org), git, patch, unzip, zip, curl, make.
+**Requirements**: clang 21 (Arch: `pacman -S clang21 lld21 llvm21`; Ubuntu: apt.llvm.org; Fedora: `dnf install clang lld`), git, patch, unzip, zip, curl, make. The script detects your distro from `/etc/os-release` and prints the right install command if clang 21 is missing.
+
+**Directory hygiene**: all intermediates (sources, patched tree, AK3 pack dir) live in `work/`; only the final flashable zip is written to `out/`. `./reproduce.sh --clean` wipes `work/` for a fresh rebuild. Nothing is scattered in the repo root.
 
 ---
 

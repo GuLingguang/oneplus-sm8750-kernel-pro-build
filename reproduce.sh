@@ -24,6 +24,7 @@
 #   --no-attribution        disable attribution
 #   --time "<str>"          custom build time
 #   --out <dir>             output dir (default: out/)
+#   --clean                 wipe the work dir before building (fresh downloads)
 #
 # Env vars:
 #   REPO_BASE=...           repo base (default https://github.com)
@@ -41,7 +42,7 @@ ATTRIBUTION=1
 BUILD_TIME=""
 KSU="none"
 SUSFS=0; LZ4=0; LZ4KD=0; DROIDSPACES="false"; BBG=0; CVE=0; BBR=0; KPM=0; REKERNEL=0
-SUFFIX=""
+SUFFIX=""; CLEAN=0
 
 # ---- Parse args ----
 while [ $# -gt 0 ]; do
@@ -62,30 +63,76 @@ while [ $# -gt 0 ]; do
     --no-attribution) ATTRIBUTION=0; shift ;;
     --time) BUILD_TIME="$2"; shift 2 ;;
     --out) OUT_DIR="$2"; shift 2 ;;
+    --clean) CLEAN=1; shift ;;
     -h|--help) grep "^#" "$0" | head -35; exit 0 ;;
     *) echo "未知参数: $1"; exit 1 ;;
   esac
 done
 
+# Absolutize work/out (the script cd's around later — relative paths would silently break)
+case "$WORK_DIR" in
+  /*) : ;;
+  *) WORK_DIR="$(pwd)/$WORK_DIR" ;;
+esac
+case "$OUT_DIR" in
+  /*) : ;;
+  *) OUT_DIR="$(pwd)/$OUT_DIR" ;;
+esac
+
 log() { echo -e "\033[1;34m===\033[0m $*"; }
 die() { echo -e "\033[1;31m错误:\033[0m $*" >&2; exit 1; }
 
-# ---- [0] Dependency check ----
-log "[0] 依赖检查"
-need_cmd() { command -v "$1" >/dev/null 2>&1 || die "missing command: $1"; }
+# ---- Clean mode ----
+if [ "$CLEAN" = "1" ]; then
+  if [ -n "${KERNEL_SRC:-}" ]; then
+    echo "warning: KERNEL_SRC is set — skipping work-dir cleanup (would delete your source)"
+  elif [ -d "$WORK_DIR" ]; then
+    rm -rf "$WORK_DIR"
+    echo "Cleaned work dir: $WORK_DIR"
+  else
+    echo "work dir already clean: $WORK_DIR"
+  fi
+fi
+
+# ---- [0] Dependency check (cross-distro) ----
+log "[0] Dependency check"
+
+# Detect distro for correct package names
+DISTRO="unknown"
+if [ -f /etc/os-release ]; then
+  . /etc/os-release
+  DISTRO="$ID"
+fi
+
+# Per-distro clang package hints
+install_hint() {
+  case "$DISTRO" in
+    arch) echo "  Arch:      sudo pacman -S clang21 lld21 llvm21" ;;
+    ubuntu|debian) echo "  Ubuntu:   wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 21" ;;
+    fedora) echo "  Fedora:   sudo dnf install clang lld" ;;
+    *) echo "  clang 21 + lld required (see your distro docs)" ;;
+  esac
+}
+
+need_cmd() { command -v "$1" >/dev/null 2>&1 || die "missing command: $1 (install it)"; }
 need_cmd git; need_cmd patch; need_cmd unzip; need_cmd zip; need_cmd curl; need_cmd make
 
-# Detect clang 21 (multi-path, cross-machine)
+# Detect clang 21 (multi-path for Arch/Ubuntu/Fedora/macOS-style layouts)
 CLANG_FOUND=""
-for c in clang clang-21 /usr/lib/llvm21/bin/clang /usr/lib/llvm-21/bin/clang; do
+for c in clang clang-21 /usr/lib/llvm21/bin/clang /usr/lib/llvm-21/bin/clang /usr/lib64/llvm21/bin/clang /usr/local/opt/llvm/bin/clang; do
   if command -v "$c" >/dev/null 2>&1 && "$c" --version 2>/dev/null | grep -q "clang version 2[01]"; then
     CLANG_FOUND="$c"; break
   fi
 done
-[ -z "$CLANG_FOUND" ] && die "clang 21 required (Arch: pacman -S clang21 lld21 llvm21; Ubuntu: apt.llvm.org)"
+if [ -z "$CLANG_FOUND" ]; then
+  echo "clang 21 not found. Install it:"
+  install_hint
+  die "clang 21 required (see hint above)"
+fi
 CLANG_BIN="$(dirname "$(command -v "$CLANG_FOUND")")"
 export PATH="$CLANG_BIN:$PATH"
 export LLVM=1 LLVM_IAS=1
+echo "distro: $DISTRO"
 echo "clang: $("$CLANG_FOUND" --version | head -1)"
 
 # ---- [1] Prepare sources (3 repos) ----
@@ -210,3 +257,4 @@ ZIP="Kernel-Ace6-$BUILD_USER-$STAMP.zip"
 (cd "$WORK_DIR/pack" && zip -r9 "$OUT_DIR/$ZIP" . -x "*.git*" >/dev/null)
 echo "Done: $OUT_DIR/$ZIP"
 ls -lh "$OUT_DIR/$ZIP"
+echo "tip: intermediates live in $WORK_DIR (wipe with --clean); only the zip is written to $OUT_DIR"
