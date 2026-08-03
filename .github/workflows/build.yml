@@ -1,7 +1,7 @@
 name: Build Ace6 Kernel
 
 on:
-  workflow_dispatch:      # 手动触发（主入口）
+  workflow_dispatch:      # Manual trigger (main entry)
     inputs:
       # ---------- KernelSU ----------
       ksu_type:
@@ -13,24 +13,24 @@ on:
           - 'resukisu'
           - 'none'
       susfs_enable:
-        description: '🛡️ SUSFS 增强隐藏（依赖 KSU 非 none）'
+        description: 'SUSFS enhanced hiding (requires KSU != none)'
         required: true
         type: boolean
         default: 'false'
-      # ---------- 性能 ----------
+      # ---------- Performance ----------
       lz4_zstd:
-        description: '⚡ lz4 1.10 + zstd 1.5.7 压缩优化'
+        description: 'lz4 1.10 + zstd 1.5.7 compression optimization'
         required: true
         type: boolean
         default: 'false'
       lz4kd_enable:
-        description: '⚡ LZ4KD 算法（推荐与 lz4+zstd 同开）'
+        description: 'LZ4KD algorithm (recommended with lz4+zstd)'
         required: true
         type: boolean
         default: 'false'
-      # ---------- 功能 ----------
+      # ---------- Features ----------
       droidspaces:
-        description: '📦 Droidspaces 容器（standard=容器+ntsync，extend=更多测试项）'
+        description: 'Droidspaces container (standard = +ntsync, extend = more)'
         required: true
         type: choice
         default: 'false'
@@ -39,64 +39,64 @@ on:
           - 'standard'
           - 'extend'
       baseband_guard:
-        description: '🛡️ 内核级基带保护（防格机）'
+        description: 'Kernel-level Baseband Guard (anti-format)'
         required: true
         type: boolean
         default: 'false'
       cve_patch:
-        description: '🔒 CVE 安全补丁（rtmutex）'
+        description: 'CVE security patches (GhostLock)'
         required: true
         type: boolean
         default: 'false'
       better_net:
-        description: '🌐 网络功能拓展（ipset/iptables）'
+        description: 'Better network (ipset/iptables)'
         required: true
         type: boolean
         default: 'false'
       bbr_enable:
-        description: '🚀 BBR 拥塞控制（false=不启用，true=启用）'
+        description: 'BBR TCP congestion control'
         required: true
         type: boolean
         default: 'false'
       kpm_enable:
-        description: '🧩 KPM/KPN 支持（KpatchNext；⚠ 与 ReSukiSU 内置 kpm 可能冲突）'
+        description: 'KPM/KPN support (KpatchNext; may conflict with ReSukiSU built-in kpm)'
         required: true
         type: boolean
         default: 'false'
       rekernel_enable:
-        description: '🔗 Re:Kernel 支持（Freezer/NoActive 冻结通知，binder 钩子）'
+        description: 'Re:Kernel support (Freezer/NoActive binder hooks)'
         required: true
         type: boolean
         default: 'false'
       kernel_suffix:
-        description: '🏷️ 内核版本后缀（如 perf → 6.6.139-4k-perf；留空用真实 commit）'
+        description: 'Kernel version suffix (e.g. perf; empty = real commit)'
         required: false
         type: string
         default: ''
-      # ---------- 署名 ----------
+      # ---------- Attribution ----------
       attribution_enable:
-        description: '✍️ 产物署名（编译标签/KSU 版本串/AK3）'
+        description: 'Attribution (build tags/KSU version/AK3)'
         required: true
         type: boolean
         default: 'true'
       build_user:
-        description: '✍️ 署名用户（attribution_enable 开启时生效）'
+        description: 'Attribution user'
         required: false
         type: string
         default: 'Lingguang'
       build_host:
-        description: '✍️ 署名主机（attribution_enable 开启时生效）'
+        description: 'Attribution host'
         required: false
         type: string
         default: 'kernel-builder'
-      # ---------- 发布 ----------
+      # ---------- Release ----------
       release_enable:
-        description: '📤 发布 GitHub Release'
+        description: 'Create GitHub Release'
         required: true
         type: boolean
         default: 'false'
       artifact_mode:
-        description: '📦 上传产物（ak3=仅刷机包，all=刷机包+Image+boot.img）'
+        description: 'Upload artifacts (ak3 or all: +Image+boot.img)'
         required: true
         type: choice
         default: 'ak3'
@@ -104,22 +104,22 @@ on:
           - 'ak3'
           - 'all'
       ccache_update:
-        description: '💾 更新公共 ccache 缓存（上传到 Release）'
+        description: 'Update public ccache (upload to Release)'
         required: true
         type: boolean
         default: 'false'
       ccache_debug:
-        description: '🔍 上传 ccache 调试日志'
+        description: 'Upload ccache debug logs'
         required: true
         type: boolean
         default: 'false'
       tag:
-        description: '🏷️ Release 标签（留空自动用日期）'
+        description: 'Release tag (empty = auto date)'
         required: false
         type: string
         default: ''
       build_time:
-        description: '🕐 自定义构建时间（如 Sun Dec 01 08:10:00 UTC 2024；留空或 N=当前 UTC）'
+        description: 'Custom build time (e.g. Sun Dec 01 08:10:00 UTC 2024; empty/N = current UTC)'
         required: false
         type: string
         default: ''
@@ -138,25 +138,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # ---------- 工具链: AOSP clang r563880c（从本仓库 Release 下载）----------
-      - name: 🔧 安装 AOSP Clang 21 (r563880c) + 依赖
+      # ---------- Toolchain: AOSP clang r563880c (from Release) ----------
+      - name: 🔧 Install AOSP Clang 21 (r563880c) + deps
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           sudo apt-get update
           sudo apt-get install -y zip zstd patch bc flex bison \
             libssl-dev libncurses-dev libelf-dev dwarves python3 ccache mkbootimg
-          # 从 Release 下载官方工具链（AOSP-Clang-21.0.0-r563880c）
+          # Download official toolchain from Release
           gh release download "AOSP-Clang-21.0.0-r563880c" -p "clang-r563880c.tar.gz" -R $GITHUB_REPOSITORY
           mkdir -p clang
           tar xzf clang-r563880c.tar.gz -C clang
           echo "$PWD/clang/bin" >> "$GITHUB_PATH"
 
-      - name: ✅ 验证工具链
+      - name: ✅ Verify toolchain
         run: clang --version && clang -print-prog-name=ld.lld
 
-      # ---------- ccache 缓存（仿 cctv18）----------
-      - name: 🧹 清理 runner 空间
+      # ---------- ccache (cctv18-style) ----------
+      - name: 🧹 Clean runner space
         run: |
           sudo rm -rf /usr/share/dotnet &
           sudo rm -rf /usr/local/lib/android &
@@ -165,20 +165,20 @@ jobs:
           wait
           df -h
 
-      - name: 💾 配置 ccache
+      - name: 💾 Configure ccache
         run: |
-          # 使用 ccache-ECS（特化内核编译缓存，cctv18 式）
+          # Use ccache-ECS (specialized kernel cache)
           sudo cp -f $GITHUB_WORKSPACE/lib/ccache-ecs /usr/local/bin/ccache
           sudo chmod +x /usr/local/bin/ccache
           echo "CCACHE_DIR=$HOME/.ccache_ace6" >> "$GITHUB_ENV"
           echo "CCACHE_MAXSIZE=3G" >> "$GITHUB_ENV"
           echo "CCACHE_IS_KERNEL_COMPILING=true" >> "$GITHUB_ENV"
-          # sloppiness：放宽缓存匹配，提升跨构建命中率（cctv18 式）
+          # sloppiness: relax cache matching for cross-build hits
           mkdir -p "$HOME/.ccache_ace6"
           echo "sloppiness = file_stat_matches,include_file_ctime,include_file_mtime,pch_defines,file_macro,time_macros" >> "$HOME/.ccache_ace6/ccache.conf"
           ccache --version
 
-      - name: 💾 载入 ccache 缓存
+      - name: 💾 Load ccache cache
         uses: actions/cache@v5
         id: ccache-restore
         with:
@@ -188,16 +188,16 @@ jobs:
             ccache-ace6-O2-FT-${{ runner.os }}-
             ccache-ace6-O2-FT-
 
-      - name: 💾 拉取公共 ccache 缓存
+      - name: 💾 Pull public ccache
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # actions/cache 命中则跳过
+          # Skip if local cache hit
           if [ -d "${{ env.CCACHE_DIR }}" ] && [ "$(ls -A ${{ env.CCACHE_DIR }} 2>/dev/null)" ]; then
             echo "本地缓存已命中，跳过公共缓存拉取"
             exit 0
           fi
-          # 从 Release 拉取公共缓存（ccache-ace6 资产）
+          # Pull public cache from Release
           echo "未命中本地缓存，尝试拉取公共 ccache ..."
           mkdir -p ${{ env.CCACHE_DIR }}
           if gh release download -p "ccache-ace6-O2-FT.tar.zst" -R $GITHUB_REPOSITORY 2>/dev/null; then
@@ -208,18 +208,18 @@ jobs:
             echo "公共 ccache 不存在（首次构建），跳过"
           fi
 
-      # ---------- 准备源码: 基线三兄弟 ----------
-      - name: 📥 准备源码基线
+      # ---------- Prepare sources (3 repos) ----------
+      - name: 📥 Prepare kernel sources
         run: |
           set -e
           mkdir -p work
           cd work
-          # 获取分支真实 commit（zip 无 .git，需手动注入 LOCALVERSION）
+          # Get real branch commit (zip has no .git)
           SRC_COMMIT=$(curl -sL "${{ vars.REPO_BASE || 'https://api.github.com' }}/repos/GuLingguang/oneplus-sm8750-kernel-pro/commits/lineage-23.2" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" | grep -oE '"sha": "[0-9a-f]{40}"' | head -1 | grep -oE '[0-9a-f]{40}' || true)
           echo "SRC_COMMIT=$SRC_COMMIT" >> "$GITHUB_ENV"
           echo "源码 commit: $SRC_COMMIT"
           [ -n "$SRC_COMMIT" ] || { echo "⚠ 获取 commit 失败，用 4k 无 commit 后缀"; SRC_COMMIT=""; }
-          # 源码用 zip 下载分支头（cctv18 式，三仓并行下载）
+          # Download sources via zip (parallel)
           curl -sL "${{ vars.REPO_BASE || 'https://github.com' }}/GuLingguang/oneplus-sm8750-kernel-pro/archive/refs/heads/lineage-23.2.zip" -o src.zip &
           curl -sL "${{ vars.REPO_BASE || 'https://github.com' }}/Ace6-Development/android_kernel_oneplus_sm8750-modules/archive/refs/heads/lineage-23.2.zip" -o modules.zip &
           curl -sL "${{ vars.REPO_BASE || 'https://github.com' }}/LineageOS/android_kernel_oneplus_sm8750-devicetrees/archive/refs/heads/lineage-23.2.zip" -o dt.zip &
@@ -228,95 +228,95 @@ jobs:
           unzip -q modules.zip && mv android_kernel_oneplus_sm8750-modules-lineage-23.2 sm8750-modules
           unzip -q dt.zip && mv android_kernel_oneplus_sm8750-devicetrees-lineage-23.2 sm8750-devicetrees
           rm -f src.zip modules.zip dt.zip
-          # 验证符号链接目标
+          # Verify symlink targets
           for t in src/drivers/base/kernelFwUpdate/Kconfig src/arch/arm64/boot/dts/vendor; do
             [ -e "$t" ] || { echo "符号链接目标缺失: $t"; exit 1; }
           done
 
-      # ---------- 应用补丁（按功能开关）----------
-      - name: 🔧 应用编译修复补丁
+      # ---------- Apply patches (by toggle) ----------
+      - name: 🔧 Apply compile fixes
         run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/07_compile_fixes.patch
         working-directory: work/src
 
-      - name: 🔧 应用 KSU 钩子补丁
+      - name: 🔧 Apply KSU hooks
         if: ${{ inputs.ksu_type != 'none' }}
         run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/00_ksu_hooks.patch
         working-directory: work/src
 
-      - name: 🔧 应用 SUSFS 主树补丁
+      - name: 🔧 Apply SUSFS main patch
         if: ${{ inputs.susfs_enable && inputs.ksu_type != 'none' }}
         run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/01_susfs_main.patch
         working-directory: work/src
 
-      - name: 🔧 应用 lz4 补丁
+      - name: 🔧 Apply lz4 patch
         if: inputs.lz4_zstd
         run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/02_lz4.patch
         working-directory: work/src
 
-      - name: 🔧 应用 zstd 补丁
+      - name: 🔧 Apply zstd patch
         if: inputs.lz4_zstd
         run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/03_zstd.patch
         working-directory: work/src
 
-      - name: 🔧 应用 LZ4KD 补丁
+      - name: 🔧 Apply LZ4KD patch
         if: inputs.lz4kd_enable
         run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/04_lz4kd.patch
         working-directory: work/src
 
-      - name: 🔧 应用 Droidspaces 补丁
+      - name: 🔧 Apply Droidspaces patch
         if: ${{ inputs.droidspaces != 'false' }}
         run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/05_droidspaces.patch
         working-directory: work/src
 
-      - name: 🔧 应用基带保护补丁
+      - name: 🔧 Apply Baseband Guard patch
         if: inputs.baseband_guard
         run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/06_baseband_guard.patch
         working-directory: work/src
 
-      - name: 🔧 应用 CVE 补丁
+      - name: 🔧 Apply CVE patch
         if: inputs.cve_patch
         run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/08_cve.patch
         working-directory: work/src
 
-      # ---------- 复制 extra 新增文件（按功能开关，替代旧 snapshot）----------
-      - name: 📄 复制 extra 新增文件
+      # ---------- Copy extra files (new files) ----------
+      - name: 📄 Copy extra files
         run: |
           set -e
-          # SUSFS 新增文件
+          # SUSFS new files
           if [ "${{ inputs.susfs_enable }}" = "true" ] && [ "${{ inputs.ksu_type }}" != "none" ]; then
             cp -r patches/extra/fs/susfs.c work/src/fs/
             cp -r patches/extra/include/linux/susfs.h patches/extra/include/linux/susfs_def.h work/src/include/linux/
           fi
-          # lz4 1.10 新库文件
+          # lz4 1.10 new lib files
           if [ "${{ inputs.lz4_zstd }}" = "true" ]; then
             cp -r patches/extra/lib/lz4 work/src/lib/
           fi
-          # zstd 1.5.7 新库文件
+          # zstd 1.5.7 new lib files
           if [ "${{ inputs.lz4_zstd }}" = "true" ]; then
             cp -r patches/extra/lib/zstd/common/allocations.h patches/extra/lib/zstd/common/bits.h work/src/lib/zstd/common/
             cp -r patches/extra/lib/zstd/compress/zstd_preSplit.c patches/extra/lib/zstd/compress/zstd_preSplit.h work/src/lib/zstd/compress/
           fi
-          # LZ4KD 新增文件
+          # LZ4KD new files
           if [ "${{ inputs.lz4kd_enable }}" = "true" ]; then
             cp -r patches/extra/crypto/lz4k.c patches/extra/crypto/lz4kd.c work/src/crypto/
             cp -r patches/extra/include/linux/lz4k.h patches/extra/include/linux/lz4kd.h work/src/include/linux/
             cp -r patches/extra/lib/lz4k work/src/lib/
             cp -r patches/extra/lib/lz4kd work/src/lib/
           fi
-          # Droidspaces 新增文件
+          # Droidspaces new files
           if [ "${{ inputs.droidspaces }}" != "false" ]; then
             cp -r patches/extra/drivers/misc/ntsync.c work/src/drivers/misc/
             cp -r patches/extra/include/uapi/linux/ntsync.h work/src/include/uapi/linux/
             cp -r patches/extra/drivers/gpu/drm/evdi work/src/drivers/gpu/drm/
           fi
-          # Baseband-guard 新增文件
+          # Baseband-guard new files
           if [ "${{ inputs.baseband_guard }}" = "true" ]; then
             cp -r patches/extra/Baseband-guard work/src/
             ln -sfn ../Baseband-guard work/src/security/baseband-guard
           fi
 
-      # ---------- KernelSU（按 ksu_type 分支）----------
-      - name: 🔗 集成 KernelSU
+      # ---------- KernelSU (by ksu_type) ----------
+      - name: 🔗 Integrate KernelSU
         if: ${{ inputs.ksu_type != 'none' }}
         run: |
           set -e
@@ -334,8 +334,8 @@ jobs:
         env:
           KSU_REPO: ""
 
-      # ---------- KSU 版本号 ----------
-      - name: 🔢 计算 KSU 版本号
+      # ---------- KSU version ----------
+      - name: 🔢 Compute KSU version
         id: ksu_version
         if: ${{ inputs.ksu_type != 'none' }}
         run: |
@@ -344,8 +344,8 @@ jobs:
           echo "ksuver=$VER" >> "$GITHUB_OUTPUT"
           echo "KSU 版本号: $VER ($COUNT 提交)"
 
-      # ---------- SUSFS 的 KSU 内部适配 ----------
-      - name: 🔧 应用 SUSFS KSU 适配补丁
+      # ---------- SUSFS KSU adaptation ----------
+      - name: 🔧 Apply SUSFS KSU adaptation
         if: ${{ inputs.susfs_enable && inputs.ksu_type != 'none' }}
         run: |
           cd KernelSU
@@ -353,13 +353,13 @@ jobs:
             || echo "⚠ 02_ksu.patch 未自动应用（KSU 版本可能已变，需人工适配）" >&2
         working-directory: work/src
 
-      # ---------- 署名 ----------
-      - name: ✍️ 配置署名
+      # ---------- Attribution ----------
+      - name: ✍️ Configure attribution
         run: |
           if [ "${{ inputs.attribution_enable }}" = "true" ]; then
             echo "BUILD_USER=${{ inputs.build_user }}" >> "$GITHUB_ENV"
             echo "BUILD_HOST=${{ inputs.build_host }}" >> "$GITHUB_ENV"
-            # KSU 版本串署名（REPO_NAME）
+            # KSU version attribution (REPO_NAME)
             if [ "${{ inputs.ksu_type }}" != "none" ]; then
               sed -i "s/^REPO_NAME := .*/REPO_NAME := ${{ inputs.build_user }}/" work/src/KernelSU/kernel/Kbuild
             fi
@@ -368,20 +368,20 @@ jobs:
             echo "BUILD_HOST=" >> "$GITHUB_ENV"
           fi
 
-      # ---------- 配置 ----------
-      - name: ⚙️ 部署配置
+      # ---------- Config ----------
+      - name: ⚙️ Deploy config
         run: |
           set -e
           cd work/src
           cp $GITHUB_WORKSPACE/config/config_ace6_final.config .config
-          # LOCALVERSION：有自定义后缀用后缀，否则用真实 commit（vermagic 不再伪装）
+          # LOCALVERSION: custom suffix or real commit
           if [ -n "${{ inputs.kernel_suffix }}" ]; then
             ./scripts/config --file .config --set-str CONFIG_LOCALVERSION "-4k-${{ inputs.kernel_suffix }}"
           else
             ./scripts/config --file .config --set-str CONFIG_LOCALVERSION "-4k-g${SRC_COMMIT:0:12}"
           fi
           ./scripts/config --file .config -d CONFIG_LOCALVERSION_AUTO
-          # 按开关调整配置
+          # Adjust config by toggles
           if [ "${{ inputs.ksu_type }}" = "none" ]; then
             ./scripts/config --file .config -d CONFIG_KSU -d CONFIG_KSU_SUSFS
           fi
@@ -405,11 +405,11 @@ jobs:
           if [ "${{ inputs.better_net }}" != "true" ]; then
             ./scripts/config --file .config -d CONFIG_IP_SET -d CONFIG_BPF_STREAM_PARSER -d CONFIG_IP6_NF_NAT
           fi
-          # BBR 拥塞控制（false/true）
+          # BBR congestion control
           if [ "${{ inputs.bbr_enable }}" = "true" ]; then
             ./scripts/config --file .config -e CONFIG_TCP_CONG_ADVANCED -e CONFIG_TCP_CONG_BBR
           fi
-          # Re:Kernel（binder 钩子）
+          # Re:Kernel (binder hooks)
           if [ "${{ inputs.rekernel_enable }}" = "true" ]; then
             ./scripts/config --file .config -e CONFIG_REKERNEL
           fi
@@ -417,8 +417,8 @@ jobs:
           make LLVM=1 LLVM_IAS=1 ARCH=arm64 olddefconfig
           grep -qE 'CONFIG_LOCALVERSION="-4k-(g[0-9a-f]{12}|[^"]+)"' .config || exit 1
 
-      # ---------- 编译 ----------
-      - name: 🛠️ 编译内核
+      # ---------- Build ----------
+      - name: 🛠️ Build kernel
         run: |
           sudo sysctl -w vm.max_map_count=1048576
           export LLVM=1 LLVM_IAS=1
@@ -427,12 +427,12 @@ jobs:
             export CCACHE_LOGFILE="$GITHUB_WORKSPACE/ccache.log"
           fi
           export KBUILD_BUILD_HOST="$BUILD_HOST"
-          # 自定义构建时间（KBUILD_BUILD_TIMESTAMP，留空=当前 UTC）
+          # Custom build time (KBUILD_BUILD_TIMESTAMP)
           if [[ -n "${{ inputs.build_time }}" && "${{ inputs.build_time }}" != "N" && "${{ inputs.build_time }}" != "n" ]]; then
             export KBUILD_BUILD_TIMESTAMP="${{ inputs.build_time }}"
             echo "构建时间: ${{ inputs.build_time }}"
           fi
-          # faketime 时间劫持（可复现构建 + ccache 命中稳定，cctv18 式）
+          # faketime time-fixing (reproducible builds)
           cd $GITHUB_WORKSPACE
           chmod 777 lib/*.so
           export FAKESTAT="2025-05-25 12:00:00"
@@ -457,20 +457,20 @@ jobs:
           ccache -s
           [ -f arch/arm64/boot/Image ] || exit 1
 
-      # ---------- 验证 ----------
-      - name: ✅ 验证产物
+      # ---------- Verify ----------
+      - name: ✅ Verify artifacts
         run: |
           cd work/src
           strings arch/arm64/boot/Image | grep -q "Linux version 6.6.139" || exit 1
           ls -la arch/arm64/boot/Image
 
-      # ---------- KPM/KPN 修补（可选）----------
-      - name: 🔧 应用 Re:Kernel 补丁
+      # ---------- KPM/KPN patch (optional) ----------
+      - name: 🔧 Apply Re:Kernel patch
         if: ${{ inputs.rekernel_enable }}
         run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/09_rekernel.patch
         working-directory: work/src
 
-      - name: 🧩 应用 KPM 修补
+      - name: 🧩 Apply KPM patch
         if: ${{ inputs.kpm_enable }}
         run: |
           cd work/src/arch/arm64/boot
@@ -482,29 +482,29 @@ jobs:
           mv oImage Image
           echo "KPM 修补完成"
 
-      # ---------- 保存 ccache 缓存 ----------
-      - name: 💾 保存 ccache 缓存
+      # ---------- Save ccache ----------
+      - name: 💾 Save ccache
         if: ${{ inputs.ccache_update }}
         uses: actions/cache/save@v5
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ccache-ace6-O2-FT-${{ runner.os }}-${{ github.ref_name }}
 
-      - name: 📤 上传公共 ccache 缓存
+      - name: 📤 Upload public ccache
         if: ${{ inputs.ccache_update }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # 打包 ccache 并上传到 Release（公共缓存，供他人/下次构建拉取）
+          # Package ccache and upload to Release
           echo "打包公共 ccache ..."
           tar -I zstd -cf ccache-ace6-O2-FT.tar.zst -C ${{ env.CCACHE_DIR }} .
           echo "ccache 大小: $(du -sh ccache-ace6-O2-FT.tar.zst | cut -f1)"
-          # 上传（若 Release 不存在则创建）
+          # Upload (create Release if missing)
           gh release create "ccache-ace6-O2-FT" ccache-ace6-O2-FT.tar.zst --notes "Public ccache for Ace6 kernel builds" 2>/dev/null \
             || gh release upload "ccache-ace6-O2-FT" ccache-ace6-O2-FT.tar.zst --clobber
           echo "公共 ccache 已上传！
 
-      - name: 🔍 上传 ccache 调试日志
+      - name: 🔍 Upload ccache debug log
         if: ${{ inputs.ccache_debug }}
         uses: actions/upload-artifact@v4
         with:
@@ -512,8 +512,8 @@ jobs:
           path: ccache.log
           if-no-files-found: ignore
 
-      # ---------- 打包 AK3 ----------
-      - name: 📦 打包 AK3
+      # ---------- Package AK3 ----------
+      - name: 📦 Package AK3
         id: package
         run: |
           set -e
@@ -521,11 +521,11 @@ jobs:
           [ -f work/src/arch/arm64/boot/Image ] || { echo "❌ Image 不存在"; exit 1; }
           cp -a ak3/. pack/
           cp work/src/arch/arm64/boot/Image pack/Image
-          # 验证 Image 存在且非空（不写死大小——随功能/上游变化）
+          # Verify Image exists and non-empty
           SIZE=$(stat -c%s work/src/arch/arm64/boot/Image)
           echo "Image 大小: $SIZE"
           [ "$SIZE" -gt 0 ] || { echo "❌ Image 为空"; exit 1; }
-          # AK3 署名
+          # AK3 attribution
           if [ "${{ inputs.attribution_enable }}" = "true" ]; then
             sed -i "s#kernel.string=.*#kernel.string=Ace6 Kernel | Build by ${{ inputs.build_user }}#" pack/anykernel.sh
           else
@@ -537,18 +537,18 @@ jobs:
           cd pack && zip -r9 "../out/$ZIP" . -x "*.git*" >/dev/null
           echo "ak3name=$ZIP" >> "$GITHUB_OUTPUT"
           ls -lh "../out/$ZIP"
-          # all 模式：额外生成 Image + boot.img
+          # all mode: also generate Image + boot.img
           if [ "${{ inputs.artifact_mode }}" = "all" ]; then
             cp $GITHUB_WORKSPACE/work/src/arch/arm64/boot/Image ../out/Image
-            # boot.img（官方参数：header v4）
+            # boot.img (official params: header v4)
             mkbootimg --kernel $GITHUB_WORKSPACE/work/src/arch/arm64/boot/Image \
               --header_version 4 --os_version 16.0.0 --os_patch_level 2026-07 \
               --pagesize 4096 --base 0x80000000 -o ../out/boot.img
             echo "all 模式：Image + boot.img 已生成"
           fi
 
-      # ---------- 上传产物 ----------
-      - name: 📤 上传产物
+      # ---------- Upload artifacts ----------
+      - name: 📤 Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.package.outputs.ak3name }}
@@ -561,12 +561,12 @@ jobs:
     if: ${{ inputs.release_enable }}
     runs-on: ubuntu-latest
     steps:
-      - name: 下载产物
+      - name: 📥 Download artifacts
         uses: actions/download-artifact@v4
         with:
           name: ${{ needs.build.outputs.ak3name }}
           path: release_zips
-      - name: 🚀 发布 Release
+      - name: 🚀 Publish Release
         run: |
           TAG="${{ inputs.tag }}"
           if [ -z "$TAG" ]; then
@@ -575,12 +575,12 @@ jobs:
           cat <<EOF > release_notes.md
           # Ace6 Kernel Build
 
-          ## 版本信息
+          ## Version
           - 内核: 6.6.139-4k
           - KernelSU: ${{ needs.build.outputs.ksuver }}
           - 构建日期: $(date +%Y-%m-%d)
 
-          ## 包含功能
+          ## Features
           - KernelSU: ${{ inputs.ksu_type }}
           - SUSFS: ${{ inputs.susfs_enable }}
           - lz4/zstd: ${{ inputs.lz4_zstd }}
@@ -589,13 +589,13 @@ jobs:
           - 基带保护: ${{ inputs.baseband_guard }}
           - CVE 补丁: ${{ inputs.cve_patch }}
 
-          ## 管理器下载
+          ## Manager downloads
           - ReSukiSU: https://github.com/ReSukiSU/ReSukiSU/releases
           - SukiSU Ultra: https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases
           - KernelSU Next: https://github.com/KernelSU-Next/KernelSU-Next/releases
           - KSU 原版: https://github.com/tiann/KernelSU/releases
 
-          ## 刷入
+          ## Flashing
           recovery 刷入 AK3 zip 即可
           EOF
           gh release create "$TAG" \

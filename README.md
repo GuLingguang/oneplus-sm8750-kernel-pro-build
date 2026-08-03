@@ -4,6 +4,7 @@
 
 ![GitHub Release](https://img.shields.io/github/v/release/GuLingguang/oneplus-sm8750-kernel-pro-build)
 ![GitHub License](https://img.shields.io/github/license/GuLingguang/oneplus-sm8750-kernel-pro-build)
+![Workflow Status](https://img.shields.io/github/actions/workflow/status/GuLingguang/oneplus-sm8750-kernel-pro-build/build.yml?label=build&logo=githubactions)
 
 ---
 
@@ -84,7 +85,7 @@ The kernel is built from the **official Ace6 kernel source** (lineage-23.2 branc
 
 - **Source integration** (not LKM): netlink server + binder hooks (reply/transaction/free_buffer_full) + signal hooks
 - All wrapped in `#ifdef CONFIG_REKERNEL` — zero impact when disabled
-- Adapted for the lineage-6.6.139 tree: `proc_ops` API, different `binder_alloc`/`signal.c` signatures
+- Adapted for the `lineage-23.2` tree (6.6.139): `proc_ops` API, different `binder_alloc`/`signal.c` signatures
 
 ### 🛡️ Baseband Guard
 
@@ -127,7 +128,7 @@ Both vulnerabilities are covered:
 
 ## Adaptations & compromises
 
-This project adapts patches from several sources to the **Ace6 lineage-6.6.139 tree**, which differs from the original targets. Key differences:
+This project adapts patches from several sources to the **Ace6 kernel tree** (branch `lineage-23.2`, kernel 6.6.139), which differs from the original targets of those patches. Key differences:
 
 ### vs. [cctv18/oppo_oplus_realme_sm8750](https://github.com/cctv18/oppo_oplus_realme_sm8750)
 
