@@ -153,6 +153,7 @@ jobs:
     outputs:
       ak3name: ${{ steps.package.outputs.ak3name }}
       ksuver: ${{ steps.ksu_version.outputs.ksuver }}
+      kernelrel: ${{ steps.verify.outputs.kernelrel }}
       kernelver: ${{ steps.verify.outputs.kernelver }}
     steps:
       - uses: actions/checkout@v4
@@ -545,14 +546,14 @@ jobs:
         run: |
           cd work/src
           strings arch/arm64/boot/Image | grep -q "Linux version 6.6.139" || exit 1
-          # real kernel identity straight from the built Image, formatted like
-          # `uname -a`: Linux <host> <release> <#version> <machine>
+          # real kernel identity straight from the built Image: the kernel
+          # name (release) and the #N SMP build info are separate outputs
           KV=$(strings arch/arm64/boot/Image | grep -m1 "^Linux version " || true)
           REL=$(echo "$KV" | awk '{print $3}')
           VER=$(echo "$KV" | grep -oE '#[0-9]+ SMP.*' || true)
-          UNAME_A="Linux $(hostname) $REL $VER aarch64"
-          echo "kernelver=$UNAME_A" >> "$GITHUB_OUTPUT"
-          echo "Real kernel (uname -a style): $UNAME_A"
+          echo "kernelrel=$REL" >> "$GITHUB_OUTPUT"
+          echo "kernelver=$VER" >> "$GITHUB_OUTPUT"
+          echo "Kernel: $REL | $VER"
           ls -la arch/arm64/boot/Image
 
       # ---------- KPM/KPN patch (post-build, binary) ----------
@@ -672,7 +673,8 @@ jobs:
 
           | Item | Value |
           |---|---|
-          | Kernel | ${{ needs.build.outputs.kernelver || 'n/a' }} |
+          | Kernel | ${{ needs.build.outputs.kernelrel || 'n/a' }} |
+          | Kernel build | ${{ needs.build.outputs.kernelver || 'n/a' }} |
           | KernelSU | ${{ needs.build.outputs.ksuver }} |
           | Build time | $(date +"%Y-%m-%d %H:%M UTC") |
           | Kernel timestamp | pinned to 2025-05-25 13:00:00 UTC (faketime, reproducible) |
