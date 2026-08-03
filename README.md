@@ -105,7 +105,7 @@ This project targets the **SM8750 (Snapdragon 8 Elite) platform** — the kernel
 | 🏷️ **Kernel suffix** | empty | Custom version suffix (e.g. `perf` → `6.6.139-4k-perf`) |
 | ✍️ **Attribution** | on | Build tags (user/host/REPO_NAME/AK3) |
 | 📦 **Artifacts** | ak3 | `ak3` (flashable zip) or `all` (ak3 + Image + boot.img) |
-| 🕐 **Build time** | empty | Custom build timestamp (`KBUILD_BUILD_TIMESTAMP`), empty = current UTC |
+| 🕐 **Build time** | empty | Custom build timestamp (`KBUILD_BUILD_TIMESTAMP`). On CI all build timestamps are fixed to `2025-05-25` via faketime for reproducibility — a custom value overrides the kernel-embedded one. Locally (reproduce.sh) empty = current UTC |
 | 💾 **Public ccache** | off | Upload build cache to Release for fast rebuilds |
 | 🔍 **ccache debug** | off | Upload ccache logs |
 
@@ -180,7 +180,7 @@ Both vulnerabilities are covered:
 
 This project adapts patches from several sources (primarily the [cctv18/oppo_oplus_realme_sm8750](https://github.com/cctv18/oppo_oplus_realme_sm8750) project, which targets the OnePlus official OKI tree) to the **Ace6 kernel tree** (`lineage-23.2`, kernel 6.6.139). Key adaptations:
 
-- **Patches** are split into 10 independent toggles (`patches/split/00-09`), each mapped to a workflow feature
+- **Patches** are split into independent toggles (`patches/split/00-09`): `07_compile_fixes.patch` applies unconditionally, the rest are gated by workflow features (KSU/SUSFS/lz4/LZ4KD/Droidspaces/BBG/CVE/Re:Kernel)
 - **New files** (that patches can't create) live in `patches/extra/` — lz4/zstd libs, susfs.c, evdi, ntsync, Baseband-guard
 - **Re:Kernel** uses source hooks (netlink + binder/signal) adapted to the lineage-6.6.139 API
 - **Modules** come from the ROM's official prebuilt `vendor_dlkm` — no need to rebuild the module tree

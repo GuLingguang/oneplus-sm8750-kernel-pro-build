@@ -133,6 +133,9 @@ concurrency:
   group: build-kernel
   cancel-in-progress: false
 
+permissions:
+  contents: write         # gh release create/upload for ccache + kernel releases
+
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -214,7 +217,7 @@ jobs:
           # filenames are content hashes, so overlapping files are identical
           # and merging is always safe).
           mkdir -p ${{ env.CCACHE_DIR }}
-          if gh release download -p "ccache-ace6-O2-FT.tar.zst" -R $GITHUB_REPOSITORY 2>/dev/null; then
+          if gh release download "ccache-ace6-O2-FT" -p "ccache-ace6-O2-FT.tar.zst" -R $GITHUB_REPOSITORY 2>/dev/null; then
             echo "Public ccache downloaded, extracting (merge)..."
             tar -I zstd -xf ccache-ace6-O2-FT.tar.zst -C ${{ env.CCACHE_DIR }}
             echo "Public ccache merged!"
@@ -290,6 +293,14 @@ jobs:
       - name: 🔧 Apply CVE patch
         if: inputs.cve_patch
         run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/08_cve.patch
+        working-directory: work/src
+
+      - name: 🔧 Apply Re:Kernel patch
+        if: ${{ inputs.rekernel_enable }}
+        # source patch (binder/signal/netlink hooks, #ifdef CONFIG_REKERNEL)
+        # MUST run before the build - was previously applied after Build
+        # kernel, which silently shipped kernels without Re:Kernel
+        run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/09_rekernel.patch
         working-directory: work/src
 
       # ---------- Copy extra files (new files) ----------
@@ -487,14 +498,9 @@ jobs:
           strings arch/arm64/boot/Image | grep -q "Linux version 6.6.139" || exit 1
           ls -la arch/arm64/boot/Image
 
-      # ---------- KPM/KPN patch (optional) ----------
-      - name: 🔧 Apply Re:Kernel patch
-        if: ${{ inputs.rekernel_enable }}
-        run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/09_rekernel.patch
-        working-directory: work/src
-
+      # ---------- KPM/KPN patch (post-build, binary) ----------
       - name: 🧩 Apply KPM patch
-        if: ${{ inputs.kpm_enable }}
+        if: ${{ inputs.kpm_enable && !inputs.debug_skip_build }}
         run: |
           cd work/src/arch/arm64/boot
           wget -q https://github.com/KernelSU-Next/KPatch-Next/releases/latest/download/kptools-linux
@@ -577,7 +583,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.package.outputs.ak3name }}
-          path: out/*.zip
+          path: out/*
           retention-days: 14
           if-no-files-found: error
 
@@ -595,7 +601,7 @@ jobs:
         run: |
           TAG="${{ inputs.tag }}"
           if [ -z "$TAG" ]; then
-            TAG="kernel-$(date +%Y%m%d)-ksu${{ needs.build.outputs.ksuver }}"
+            TAG="kernel-$(date +%Y%m%d-%H%M%S)-ksu${{ needs.build.outputs.ksuver }}"
           fi
           cat <<EOF > release_notes.md
           # ⚡ Ace6 Kernel Build

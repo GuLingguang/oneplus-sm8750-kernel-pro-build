@@ -12,9 +12,10 @@
 #   --susfs                 SUSFS (requires --ksu resukisu)
 #   --lz4                   lz4+zstd
 #   --lz4kd                 LZ4KD
-#   --droidspaces <std|ext> Droidspaces
+#   --droidspaces <standard|extend|false> Droidspaces
 #   --bbg                   Baseband Guard
 #   --cve                   CVE patches
+#   --better-net            ipset/iptables advanced network support
 #   --bbr                   BBR
 #   --kpm                   KPM
 #   --rekernel              Re:Kernel
@@ -41,28 +42,29 @@ BUILD_HOST="kernel-builder"
 ATTRIBUTION=1
 BUILD_TIME=""
 KSU="none"
-SUSFS=0; LZ4=0; LZ4KD=0; DROIDSPACES="false"; BBG=0; CVE=0; BBR=0; KPM=0; REKERNEL=0
+SUSFS=0; LZ4=0; LZ4KD=0; DROIDSPACES="false"; BBG=0; CVE=0; BETTERNET=0; BBR=0; KPM=0; REKERNEL=0
 SUFFIX=""; CLEAN=0
 
 # ---- Parse args ----
 while [ $# -gt 0 ]; do
   case "$1" in
-    --ksu) KSU="$2"; shift 2 ;;
+    --ksu) KSU="${2:?--ksu requires a value}"; shift 2 ;;
     --susfs) SUSFS=1; shift ;;
     --lz4) LZ4=1; shift ;;
     --lz4kd) LZ4KD=1; shift ;;
-    --droidspaces) DROIDSPACES="$2"; shift 2 ;;
+    --droidspaces) DROIDSPACES="${2:?--droidspaces requires a value}"; shift 2 ;;
     --bbg) BBG=1; shift ;;
     --cve) CVE=1; shift ;;
+    --better-net) BETTERNET=1; shift ;;
     --bbr) BBR=1; shift ;;
     --kpm) KPM=1; shift ;;
     --rekernel) REKERNEL=1; shift ;;
-    --suffix) SUFFIX="$2"; shift 2 ;;
-    --user) BUILD_USER="$2"; shift 2 ;;
-    --host) BUILD_HOST="$2"; shift 2 ;;
+    --suffix) SUFFIX="${2:?--suffix requires a value}"; shift 2 ;;
+    --user) BUILD_USER="${2:?--user requires a value}"; shift 2 ;;
+    --host) BUILD_HOST="${2:?--host requires a value}"; shift 2 ;;
     --no-attribution) ATTRIBUTION=0; shift ;;
-    --time) BUILD_TIME="$2"; shift 2 ;;
-    --out) OUT_DIR="$2"; shift 2 ;;
+    --time) BUILD_TIME="${2:?--time requires a value}"; shift 2 ;;
+    --out) OUT_DIR="${2:?--out requires a value}"; shift 2 ;;
     --clean) CLEAN=1; shift ;;
     -h|--help) grep "^#" "$0" | head -35; exit 0 ;;
     *) echo "未知参数: $1"; exit 1 ;;
@@ -116,20 +118,22 @@ install_hint() {
 
 need_cmd() { command -v "$1" >/dev/null 2>&1 || die "missing command: $1 (install it)"; }
 need_cmd git; need_cmd patch; need_cmd unzip; need_cmd zip; need_cmd curl; need_cmd make
+need_cmd flex; need_cmd bison; need_cmd bc; need_cmd python3; need_cmd strings
 
 # Detect clang 21 (multi-path for Arch/Ubuntu/Fedora/macOS-style layouts)
 CLANG_FOUND=""
 for c in clang clang-21 /usr/lib/llvm21/bin/clang /usr/lib/llvm-21/bin/clang /usr/lib64/llvm21/bin/clang /usr/local/opt/llvm/bin/clang; do
-  if command -v "$c" >/dev/null 2>&1 && "$c" --version 2>/dev/null | grep -q "clang version 2[01]"; then
+  if command -v "$c" >/dev/null 2>&1 && "$c" --version 2>/dev/null | grep -q "clang version 2[1-9]"; then
     CLANG_FOUND="$c"; break
   fi
 done
 if [ -z "$CLANG_FOUND" ]; then
-  echo "clang 21 not found. Install it:"
+  echo "clang 21+ not found. Install it:"
   install_hint
   die "clang 21 required (see hint above)"
 fi
 CLANG_BIN="$(dirname "$(command -v "$CLANG_FOUND")")"
+[ -x "$CLANG_BIN/ld.lld" ] || die "ld.lld not found next to clang (install lld/llvm-lld)"
 export PATH="$CLANG_BIN:$PATH"
 export LLVM=1 LLVM_IAS=1
 echo "distro: $DISTRO"
@@ -158,8 +162,9 @@ else
   SRC_DIR="$KERNEL_SRC"
 fi
 cd "$SRC_DIR"
-# Get real commit (zip has no .git)
-SRC_COMMIT=$(curl -sL "$REPO_BASE/GuLingguang/oneplus-sm8750-kernel-pro/commits/lineage-23.2" | grep -oE '"sha": "[0-9a-f]{40}"' | head -1 | grep -oE '[0-9a-f]{40}' || true)
+# Real commit via the GitHub REST API (the HTML page no longer embeds "sha":
+# it uses "oid" now; the API is the stable source)
+SRC_COMMIT=$(curl -sL "https://api.github.com/repos/GuLingguang/oneplus-sm8750-kernel-pro/commits/lineage-23.2" | grep -oE '"(sha|oid)": "[0-9a-f]{40}"' | head -1 | grep -oE '[0-9a-f]{40}' || true)
 echo "  Source commit: ${SRC_COMMIT:-unknown}"
 
 # ---- [2] Apply patches (by toggle) ----
@@ -204,7 +209,7 @@ log "[3] 复制 extra 文件"
 # ---- [4] KernelSU ----
 if [ "$KSU" != "none" ]; then
   log "[4] 集成 KernelSU ($KSU)"
-  [ -d KernelSU ] || git clone "$REPO_BASE/ReSukiSU/ReSukiSU.git" KernelSU
+  [ -d KernelSU ] && git -C KernelSU pull --ff-only -q || git clone "$REPO_BASE/ReSukiSU/ReSukiSU.git" KernelSU
   ln -sfn ../KernelSU/kernel drivers/kernelsu
   grep -q "kernelsu" drivers/Makefile || echo 'obj-$(CONFIG_KSU) += kernelsu/' >> drivers/Makefile
   grep -q "drivers/kernelsu/Kconfig" drivers/Kconfig || sed -i "/endmenu/i\source \"drivers/kernelsu/Kconfig\"" drivers/Kconfig
@@ -227,6 +232,7 @@ fi
 [ "$DROIDSPACES" = "false" ] && ./scripts/config --file .config -d CONFIG_SYSVIPC -d CONFIG_NTSYNC -d CONFIG_DRM_LINDROID_EVDI
 [ "$DROIDSPACES" != "extend" ] && ./scripts/config --file .config -d CONFIG_DRM_LINDROID_EVDI
 [ "$BBG" != "1" ] && ./scripts/config --file .config -d CONFIG_BBG
+[ "$BETTERNET" != "1" ] && ./scripts/config --file .config -d CONFIG_IP_SET -d CONFIG_BPF_STREAM_PARSER -d CONFIG_IP6_NF_NAT
 [ "$REKERNEL" = "1" ] && ./scripts/config --file .config -e CONFIG_REKERNEL
 [ "$BBR" = "1" ] && ./scripts/config --file .config -e CONFIG_TCP_CONG_ADVANCED -e CONFIG_TCP_CONG_BBR
 make LLVM=1 LLVM_IAS=1 ARCH=arm64 olddefconfig >/dev/null 2>&1
@@ -246,14 +252,36 @@ make LLVM=1 LLVM_IAS=1 ARCH=arm64 -j$(nproc) Image
 log "[7] 验证产物"
 strings arch/arm64/boot/Image | grep -q "Linux version 6.6.139" || die "version string abnormal"
 
+# ---- [7.5] KPM (KernelPatch, post-build binary patch) ----
+if [ "$KPM" = "1" ]; then
+  log "[7.5] KPM patch"
+  cd "$SRC_DIR/arch/arm64/boot"
+  curl -sL "https://github.com/KernelSU-Next/KPatch-Next/releases/latest/download/kptools-linux" -o kptools-linux
+  curl -sL "https://github.com/KernelSU-Next/KPatch-Next/releases/latest/download/kpimg-linux" -o kpimg-linux
+  chmod +x kptools-linux
+  ./kptools-linux -p -i ./Image -k ./kpimg-linux -o ./oImage || die "kptools failed on Image"
+  rm -f Image
+  mv oImage Image
+  echo "KPM patched"
+  cd "$SRC_DIR"
+fi
+
 # ---- [8] Package AK3 ----
 log "[8] Package AK3"
 mkdir -p "$OUT_DIR" "$WORK_DIR/pack"
 rm -rf "$WORK_DIR/pack"/*
 cp -a "$REPO_DIR/ak3/." "$WORK_DIR/pack/"
 cp arch/arm64/boot/Image "$WORK_DIR/pack/Image"
+# AK3 attribution (mirror the workflow)
+[ "$ATTRIBUTION" = "1" ] && sed -i "s/^kernel.string=.*/kernel.string=Build by $BUILD_USER/" "$WORK_DIR/pack/anykernel.sh"
 STAMP=$(date +%Y%m%d)
-ZIP="Kernel-Ace6-$BUILD_USER-$STAMP.zip"
+if [ "$KSU" != "none" ]; then
+  KSU_COUNT=$(git -C "$SRC_DIR/KernelSU" rev-list --count HEAD 2>/dev/null || echo 0)
+  KSU_VER=$((30000 + KSU_COUNT + 700))
+  ZIP="Kernel-Ace6-$BUILD_USER-ksu$KSU_VER-$STAMP.zip"
+else
+  ZIP="Kernel-Ace6-$BUILD_USER-$STAMP.zip"
+fi
 (cd "$WORK_DIR/pack" && zip -r9 "$OUT_DIR/$ZIP" . -x "*.git*" >/dev/null)
 echo "Done: $OUT_DIR/$ZIP"
 ls -lh "$OUT_DIR/$ZIP"
