@@ -19,17 +19,17 @@ on:
         default: 'false'
       # ---------- Performance ----------
       lz4_zstd:
-        description: 'lz4 1.10 + zstd 1.5.7 compression optimization'
+        description: 'Update kernel compression libs to lz4 1.10 + zstd 1.5.7 (ARM64 NEON, better ratio) - replaces in-tree lz4/zstd'
         required: true
         type: boolean
         default: 'false'
       lz4kd_enable:
-        description: 'LZ4KD algorithm (recommended with lz4+zstd)'
+        description: 'Add LZ4KD zram compressor (independent lz4 variant) - shows up in comp_algorithm, swappable via sysfs'
         required: true
         type: boolean
         default: 'false'
       show_all_algos:
-        description: 'Enable ALL zram compression algorithms (lz4hc/842 too)'
+        description: 'Compile in every zram compressor (lz4hc/842 included) - comp_algorithm then lists all available algorithms'
         required: true
         type: boolean
         default: 'false'
@@ -696,6 +696,9 @@ jobs:
           | KPM | ${{ inputs.kpm_enable }} |
           | Re:Kernel | ${{ inputs.rekernel_enable }} |
           | Suffix | ${{ inputs.kernel_suffix || '-' }} |
+          | Attribution | ${{ inputs.attribution_enable }} |
+          | Artifact mode | ${{ inputs.artifact_mode }} |
+          | Public ccache | ${{ inputs.ccache_update }} |
 
           ## 📲 Flashing
 
