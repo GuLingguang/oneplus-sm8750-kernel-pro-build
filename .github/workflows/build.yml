@@ -169,6 +169,10 @@ jobs:
           mkdir -p clang
           tar xzf clang-r563880c.tar.gz -C clang
           echo "$PWD/clang/bin" >> "$GITHUB_PATH"
+          # mkbootimg (AOSP) imports the 'gki' python module (GKI signing) which
+          # ubuntu's package omits at runtime -> pull it from AOSP kernel/build
+          git clone --depth 1 https://android.googlesource.com/kernel/build /tmp/kernel-build
+          echo "PYTHONPATH=/tmp/kernel-build" >> "$GITHUB_ENV"
 
       - name: ✅ Verify toolchain
         run: clang --version && clang -print-prog-name=ld.lld
