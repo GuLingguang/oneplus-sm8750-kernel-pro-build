@@ -162,6 +162,7 @@ jobs:
           sudo chmod +x /usr/local/bin/ccache
           echo "CCACHE_DIR=$HOME/.ccache_ace6" >> "$GITHUB_ENV"
           echo "CCACHE_MAXSIZE=3G" >> "$GITHUB_ENV"
+          echo "CCACHE_IS_KERNEL_COMPILING=true" >> "$GITHUB_ENV"
           # sloppiness：放宽缓存匹配，提升跨构建命中率（cctv18 式）
           mkdir -p "$HOME/.ccache_ace6"
           echo "sloppiness = file_stat_matches,include_file_ctime,include_file_mtime,pch_defines,file_macro,time_macros" >> "$HOME/.ccache_ace6/ccache.conf"
@@ -432,7 +433,7 @@ jobs:
           chmod +x cc-wrapper ld-wrapper
           cd work/src
           set -o pipefail
-          make LLVM=1 LLVM_IAS=1 ARCH=arm64 CC="$GITHUB_WORKSPACE/cc-wrapper" LD="$GITHUB_WORKSPACE/ld-wrapper" HOSTLD=ld.lld KCFLAGS+=-O2 -j$(nproc) Image
+          make LLVM=1 LLVM_IAS=1 ARCH=arm64 CC="$GITHUB_WORKSPACE/cc-wrapper" LD="$GITHUB_WORKSPACE/ld-wrapper" HOSTLD=ld.lld KCFLAGS+=-O2 -j$(nproc --all) Image
           echo "ccache 状态:"
           ccache -s
           [ -f arch/arm64/boot/Image ] || exit 1
