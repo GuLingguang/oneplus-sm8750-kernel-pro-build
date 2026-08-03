@@ -179,21 +179,27 @@ jobs:
           # Use ccache-ECS (specialized kernel cache)
           sudo cp -f $GITHUB_WORKSPACE/lib/ccache-ecs /usr/local/bin/ccache
           sudo chmod +x /usr/local/bin/ccache
-          echo "CCACHE_DIR=$HOME/.ccache_ace6" >> "$GITHUB_ENV"
+          # CCACHE_DIR inside the workspace: actions/cache handles workspace-relative
+          # paths correctly on restore (an absolute $HOME path can restore to the
+          # wrong location, silently nuking every build's cache hit rate)
+          echo "CCACHE_DIR=$GITHUB_WORKSPACE/.ccache_ace6" >> "$GITHUB_ENV"
           echo "CCACHE_MAXSIZE=3G" >> "$GITHUB_ENV"
           echo "CCACHE_IS_KERNEL_COMPILING=true" >> "$GITHUB_ENV"
           # sloppiness: relax cache matching for cross-build hits
-          mkdir -p "$HOME/.ccache_ace6"
-          echo "sloppiness = file_stat_matches,include_file_ctime,include_file_mtime,pch_defines,file_macro,time_macros" >> "$HOME/.ccache_ace6/ccache.conf"
+          mkdir -p "$GITHUB_WORKSPACE/.ccache_ace6"
+          echo "sloppiness = file_stat_matches,include_file_ctime,include_file_mtime,pch_defines,file_macro,time_macros" >> "$GITHUB_WORKSPACE/.ccache_ace6/ccache.conf"
           ccache --version
 
       - name: 💾 Load ccache cache
-        uses: actions/cache@v5
+        uses: actions/cache/restore@v5
         id: ccache-restore
         with:
-          path: ${{ env.CCACHE_DIR }}
-          key: ccache-ace6-O2-FT-${{ runner.os }}-${{ github.ref_name }}
+          path: .ccache_ace6
+          # run_id in the key keeps every save unique (see Save step); restore
+          # falls back to the newest matching cache via restore-keys
+          key: ccache-ace6-O2-FT-${{ runner.os }}-${{ github.ref_name }}-${{ github.run_id }}
           restore-keys: |
+            ccache-ace6-O2-FT-${{ runner.os }}-${{ github.ref_name }}-
             ccache-ace6-O2-FT-${{ runner.os }}-
             ccache-ace6-O2-FT-
 
@@ -201,16 +207,15 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Skip if local cache hit
-          if [ -d "${{ env.CCACHE_DIR }}" ] && [ "$(ls -A ${{ env.CCACHE_DIR }} 2>/dev/null)" ]; then
-            echo "Local cache hit, skip public pull"
-            exit 0
-          fi
-          # Pull public cache from Release
-          echo "Cache miss, trying public ccache ..."
+          # Always pull the authoritative cache from Release. Do NOT trust a
+          # "local cache hit" here: a non-empty CCACHE_DIR is not proof the cache
+          # is usable (e.g. only ccache.conf present, or restore landed elsewhere).
+          # The Release archive extracts relative to CCACHE_DIR, which is correct.
           mkdir -p ${{ env.CCACHE_DIR }}
           if gh release download -p "ccache-ace6-O2-FT.tar.zst" -R $GITHUB_REPOSITORY 2>/dev/null; then
             echo "Public ccache downloaded, extracting..."
+            # wipe stale local cache first (keep ccache.conf from Configure step)
+            rm -rf ${{ env.CCACHE_DIR }}/*
             tar -I zstd -xf ccache-ace6-O2-FT.tar.zst -C ${{ env.CCACHE_DIR }}
             echo "Public ccache restored!"
           else
@@ -505,8 +510,10 @@ jobs:
         if: ${{ inputs.ccache_update }}
         uses: actions/cache/save@v5
         with:
-          path: ${{ env.CCACHE_DIR }}
-          key: ccache-ace6-O2-FT-${{ runner.os }}-${{ github.ref_name }}
+          # workspace-relative path (see Load step); run_id keeps the key unique
+          # per run so the save is never skipped by "cache hit on primary key"
+          path: .ccache_ace6
+          key: ccache-ace6-O2-FT-${{ runner.os }}-${{ github.ref_name }}-${{ github.run_id }}
 
       - name: 📤 Upload public ccache
         if: ${{ inputs.ccache_update }}
@@ -590,10 +597,10 @@ jobs:
           if [ -z "$TAG" ]; then
             TAG="kernel-$(date +%Y%m%d)-ksu${{ needs.build.outputs.ksuver }}"
           fi
-                    cat <<EOF > release_notes.md
+          cat <<EOF > release_notes.md
           # ⚡ Ace6 Kernel Build
 
-          🏷️ **Category**: `kernel` | `${{ inputs.ksu_type }}` | ksu${{ needs.build.outputs.ksuver }}
+          🏷️ **Category**: \`kernel\` | \`${{ inputs.ksu_type }}\` | ksu${{ needs.build.outputs.ksuver }}
 
           ---
 
@@ -630,7 +637,7 @@ jobs:
 
           Flash the AK3 zip via recovery (TWRP/OrangeFox/OFRP).
           EOF
-          gh release create "$TAG" \
+          gh release create "$TAG" -R $GITHUB_REPOSITORY \
             --title "Ace6 Kernel ${{ inputs.ksu_type }} (ksu${{ needs.build.outputs.ksuver }})" \
             --notes-file release_notes.md \
             release_zips/*.zip
