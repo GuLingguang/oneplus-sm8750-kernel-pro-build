@@ -40,6 +40,36 @@ The kernel is built from the **official Ace6 kernel source** (lineage-23.2 branc
 
 ---
 
+## ⚠️ Flashing disclaimer
+
+> [!WARNING]
+> This kernel was tested on **one device with one ROM** — please read before flashing.
+
+### Compatibility
+
+| ROM | Status |
+|---|---|
+| **Project Infinity X** (v3.12, Android 16) | ✅ Tested & working (OnePlus Ace 6 / 15R `ktm`) |
+| **LineageOS** (Ace6 builds) | 🤔 Probably works — the kernel/modules/devicetrees are stock LineageOS with only non-destructive Ace6 additions (MPC7022 gauge, TMS NFC), but **not yet confirmed on a real device** |
+| **ColorOS / OxygenOS** | ❌ **Not supported** — likely won't boot (different vendor integration) |
+| Anything else | 🏴☠️ Unknown territory |
+
+### Before you flash
+
+1. **Back up your boot partition** — you will thank yourself later
+2. **This kernel touches the `boot` partition only** — do not flash anything else (the device is already fused; messing with other partitions can brick it)
+3. **Your device must run a LineageOS-based ROM** (like Infinity X) — this won't work on stock ColorOS/OxygenOS
+4. This is a **community project** — there's no warranty, no support hotline, and no refunds
+
+### If it bootloops
+
+- Stay calm (or don't, we don't judge)
+- Restore your stock boot image (that's why you backed up!)
+- The stock `boot.img` is also extractable from the original ROM zip (`payload.bin`)
+
+> [!CAUTION]
+> **Only tested on Project Infinity X.** LineageOS is *probably* fine, ColorOS/OxygenOS is *probably* not. If in doubt, back up first and flash at your own risk.
+
 ## Features
 
 | Feature | Default | Description |
@@ -172,31 +202,6 @@ Plus `patches/extra/` — **new files** that patches can't create (lz4/zstd new 
 - **KPM/KPN** — available as option, but noted as potentially conflicting with ReSukiSU's built-in kpm
 
 ---
-
-## ⚠️ Flashing disclaimer (read this or regret it)
-
-> **This kernel was tested on ONE device, with ONE ROM, and it worked ONCE (okay, a few times).**
-> Everything else is **uncharted territory**. You have been warned. 🏴☠️
-
-- ✅ **Tested on**: OnePlus Ace 6 / 15R (`ktm`) with **Project Infinity X** (v3.12, Android 16, LineageOS-based)
-- ❌ **NOT tested, NOT supported**: OnePlus **ColorOS** / **OxygenOS** (the official ones with all the bloat)
-- ❓ **Probably works, unverified**: **LineageOS** (Ace6 builds) — the kernel/modules/devicetree trees are stock LineageOS with only non-destructive Ace6 additions (MPC7022 gauge, TMS NFC), so it *should* work, but nobody has confirmed it on a real device yet
-- ❌ **Everything else**: your device, your funeral. If it explodes, implodes, or turns into a paperweight, that's between you and your warranty (which is now void, by the way)
-
-### 🚨 Before flashing
-
-1. **Back up your boot partition** (and your will)
-2. **This kernel is for the `boot` partition only** — do NOT touch other partitions (the device is already fused; downgrading or messing with other partitions = brick city)
-3. **You must be on Project Infinity X** (or a compatible LineageOS-based ROM) — flashing on ColorOS/OxygenOS will likely **not boot**, or worse
-4. **No guarantee, no refunds, no tech support from the ROM team** — this is a community project, proceed at your own risk
-
-### 🧪 If it bootloops
-
-- Don't panic (okay, panic a little)
-- Flash back your stock boot image (that's why you backed up, right?)
-- If you didn't back up, the stock boot.img is in the original ROM zip (extract it from `payload.bin`)
-
-> **TL;DR**: Tested on Infinity X. Probably fine on LOS. Don't try ColorOS. Backup first. Don't blame us. 😎
 
 ## Reproducibility
 
