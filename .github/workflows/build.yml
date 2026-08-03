@@ -700,6 +700,18 @@ jobs:
           | Artifact mode | ${{ inputs.artifact_mode }} |
           | Public ccache | ${{ inputs.ccache_update }} |
 
+          ## ⚙️ Build & Release
+
+          | Option | Value |
+          |---|---|
+          | Build user | ${{ inputs.build_user }} |
+          | Build host | ${{ inputs.build_host }} |
+          | Release enabled | ${{ inputs.release_enable }} |
+          | Custom build time | ${{ inputs.build_time || '-' }} |
+          | Release tag | ${{ inputs.tag || '-' }} |
+          | ccache debug | ${{ inputs.ccache_debug }} |
+          | Debug skip build | ${{ inputs.debug_skip_build }} |
+
           ## 📲 Flashing
 
           Flash the AK3 zip via recovery (TWRP/OrangeFox/AOSP recovery), or
