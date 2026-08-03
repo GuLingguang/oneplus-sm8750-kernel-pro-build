@@ -169,10 +169,13 @@ jobs:
           mkdir -p clang
           tar xzf clang-r563880c.tar.gz -C clang
           echo "$PWD/clang/bin" >> "$GITHUB_PATH"
-          # mkbootimg (AOSP) imports the 'gki' python module (GKI signing) which
-          # ubuntu's package omits at runtime -> pull it from AOSP kernel/build
-          git clone --depth 1 https://android.googlesource.com/kernel/build /tmp/kernel-build
-          echo "PYTHONPATH=/tmp/kernel-build" >> "$GITHUB_ENV"
+          # mkbootimg imports gki.generate_gki_certificate (AOSP GKI signing
+          # module); kernel/build main has removed it. Provide a stub: the
+          # function is only invoked when --gki_signing_key is passed, which
+          # this workflow never does.
+          mkdir -p /tmp/gki
+          printf 'def generate_gki_certificate(*args, **kwargs):\n    raise SystemExit("GKI signing not supported (stub)")\n' > /tmp/gki/generate_gki_certificate.py
+          echo "PYTHONPATH=/tmp" >> "$GITHUB_ENV"
 
       - name: ✅ Verify toolchain
         run: clang --version && clang -print-prog-name=ld.lld
