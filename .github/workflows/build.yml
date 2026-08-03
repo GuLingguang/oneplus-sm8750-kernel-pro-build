@@ -147,7 +147,7 @@ jobs:
           sudo apt-get install -y zip zstd patch bc flex bison \
             libssl-dev libncurses-dev libelf-dev dwarves python3 ccache mkbootimg
           # Download official toolchain from Release
-          gh release download "AOSP-Clang-21.0.0-r563880c" -p "clang-r563880c.tar.gz" -R $GITHUB_REPOSITORY
+          gh release download "toolchain-AOSP-Clang-21.0.0-r563880c" -p "clang-r563880c.tar.gz" -R $GITHUB_REPOSITORY
           mkdir -p clang
           tar xzf clang-r563880c.tar.gz -C clang
           echo "$PWD/clang/bin" >> "$GITHUB_PATH"
@@ -500,7 +500,7 @@ jobs:
           tar -I zstd -cf ccache-ace6-O2-FT.tar.zst -C ${{ env.CCACHE_DIR }} .
           echo "ccache 大小: $(du -sh ccache-ace6-O2-FT.tar.zst | cut -f1)"
           # Upload (create Release if missing)
-          gh release create "ccache-ace6-O2-FT" ccache-ace6-O2-FT.tar.zst --notes "Public ccache for Ace6 kernel builds" 2>/dev/null \
+          gh release create "ccache-ace6-O2-FT" ccache-ace6-O2-FT.tar.zst --notes "🏷️ **Category**: \`ccache\` \| ace6-O2-FT\n\nPublic ccache for Ace6 kernel builds" 2>/dev/null \
             || gh release upload "ccache-ace6-O2-FT" ccache-ace6-O2-FT.tar.zst --clobber
           echo "公共 ccache 已上传！
 
@@ -570,10 +570,13 @@ jobs:
         run: |
           TAG="${{ inputs.tag }}"
           if [ -z "$TAG" ]; then
-            TAG="$(date +%Y%m%d)-ksu${{ needs.build.outputs.ksuver }}"
+            TAG="kernel-$(date +%Y%m%d)-ksu${{ needs.build.outputs.ksuver }}"
           fi
           cat <<EOF > release_notes.md
           # Ace6 Kernel Build
+
+          🏷️ **Category**: \`kernel\` \| \`${{ inputs.ksu_type }}\` \| ksu${{ needs.build.outputs.ksuver }}
+
 
           ## Version
           - 内核: 6.6.139-4k
@@ -599,6 +602,7 @@ jobs:
           recovery 刷入 AK3 zip 即可
           EOF
           gh release create "$TAG" \
+            --title "Ace6 Kernel ${{ inputs.ksu_type }} (ksu${{ needs.build.outputs.ksuver }})" \
             --notes-file release_notes.md \
             release_zips/*.zip
         env:

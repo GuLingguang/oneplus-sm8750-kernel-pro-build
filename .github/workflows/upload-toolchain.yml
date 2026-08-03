@@ -29,6 +29,9 @@ jobs:
           cat <<'MD' > notes.md
           # AOSP Clang 21.0.0 (r563880c)
 
+          🏷️ **Category**: \`toolchain\` \| \`clang\` \| r563880c
+
+
           Official Android prebuilt toolchain (clang/llvm/lld 21.0.0).
           Matches the exact toolchain used to build the OnePlus Ace 6 official kernel (IKCONFIG: r563880c).
 
@@ -42,6 +45,6 @@ jobs:
 
           Workflow downloads this asset, extracts it, and adds `bin/` to PATH before building.
           MD
-          gh release create "AOSP-Clang-21.0.0-r563880c" \
+          gh release create "toolchain-AOSP-Clang-21.0.0-r563880c" \
             --notes-file notes.md \
             clang-r563880c.tar.gz
