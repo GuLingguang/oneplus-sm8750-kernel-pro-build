@@ -53,6 +53,25 @@ on:
         required: true
         type: boolean
         default: 'false'
+      bbr_enable:
+        description: 'BBR 拥塞控制（false=不加，true=加入，default=设为默认）'
+        required: true
+        type: choice
+        default: 'false'
+        options:
+          - 'false'
+          - 'true'
+          - 'default'
+      kpm_enable:
+        description: 'KPM/KPN 支持（KpatchNext 独立内核补丁；⚠ 与 ReSukiSU 内置 kpm 可能冲突，需实测）'
+        required: true
+        type: boolean
+        default: 'false'
+      kernel_suffix:
+        description: '内核版本后缀（如 perf，会显示为 6.6.139-4k-perf；留空用真实 commit）'
+        required: false
+        type: string
+        default: ''
       # ---------- 署名 ----------
       attribution_enable:
         description: '产物署名（编译标签/KSU 版本串/AK3）'
@@ -63,7 +82,7 @@ on:
         description: '署名用户（attribution_enable 开启时生效）'
         required: false
         type: string
-        default: 'GuLingguang'
+        default: 'Lingguang'
       build_host:
         description: '署名主机（attribution_enable 开启时生效，默认 kernel-builder）'
         required: false
@@ -75,8 +94,21 @@ on:
         required: true
         type: boolean
         default: 'false'
+      artifact_mode:
+        description: '上传产物（ak3=仅刷机包，all=刷机包+Image+boot.img）'
+        required: true
+        type: choice
+        default: 'ak3'
+        options:
+          - 'ak3'
+          - 'all'
       ccache_update:
         description: '更新公共 ccache 缓存（构建完成后上传到 public_ccache 仓库）'
+        required: true
+        type: boolean
+        default: 'false'
+      ccache_debug:
+        description: '上传 ccache 调试日志（排查缓存问题用）'
         required: true
         type: boolean
         default: 'false'
@@ -107,7 +139,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y zip zstd patch bc flex bison \
-            libssl-dev libncurses-dev libelf-dev dwarves python3 ccache
+            libssl-dev libncurses-dev libelf-dev dwarves python3 ccache mkbootimg
           # 从 Release 下载官方工具链（AOSP-Clang-21.0.0-r563880c）
           gh release download "AOSP-Clang-21.0.0-r563880c" -p "clang-r563880c.tar.gz" -R $GITHUB_REPOSITORY
           mkdir -p clang
@@ -175,6 +207,10 @@ jobs:
           set -e
           mkdir -p work
           cd work
+          # 获取分支真实 commit（zip 无 .git，需手动注入 LOCALVERSION）
+          SRC_COMMIT=$(curl -sL "${{ vars.REPO_BASE || 'https://github.com' }}/GuLingguang/oneplus-sm8750-kernel-pro/commits/lineage-23.2" | grep -oE '"sha": "[0-9a-f]{40}"' | head -1 | grep -oE '[0-9a-f]{40}')
+          echo "SRC_COMMIT=$SRC_COMMIT" >> "$GITHUB_ENV"
+          echo "源码 commit: $SRC_COMMIT"
           # 源码用 zip 下载分支头（cctv18 式，三仓并行下载）
           curl -sL "${{ vars.REPO_BASE || 'https://github.com' }}/GuLingguang/oneplus-sm8750-kernel-pro/archive/refs/heads/lineage-23.2.zip" -o src.zip &
           curl -sL "${{ vars.REPO_BASE || 'https://github.com' }}/Ace6-Development/android_kernel_oneplus_sm8750-modules/archive/refs/heads/lineage-23.2.zip" -o modules.zip &
@@ -330,6 +366,13 @@ jobs:
           set -e
           cd work/src
           cp $GITHUB_WORKSPACE/config/config_ace6_final.config .config
+          # LOCALVERSION：有自定义后缀用后缀，否则用真实 commit（vermagic 不再伪装）
+          if [ -n "${{ inputs.kernel_suffix }}" ]; then
+            ./scripts/config --file .config --set-str CONFIG_LOCALVERSION "-4k-${{ inputs.kernel_suffix }}"
+          else
+            ./scripts/config --file .config --set-str CONFIG_LOCALVERSION "-4k-g${SRC_COMMIT:0:12}"
+          fi
+          ./scripts/config --file .config -d CONFIG_LOCALVERSION_AUTO
           # 按开关调整配置
           if [ "${{ inputs.ksu_type }}" = "none" ]; then
             ./scripts/config --file .config -d CONFIG_KSU -d CONFIG_KSU_SUSFS
@@ -354,17 +397,26 @@ jobs:
           if [ "${{ inputs.better_net }}" != "true" ]; then
             ./scripts/config --file .config -d CONFIG_IP_SET -d CONFIG_BPF_STREAM_PARSER -d CONFIG_IP6_NF_NAT
           fi
+          # BBR 拥塞控制（false/true/default）
+          if [ "${{ inputs.bbr_enable }}" != "false" ]; then
+            ./scripts/config --file .config -e CONFIG_TCP_CONG_ADVANCED -e CONFIG_TCP_CONG_BBR
+            if [ "${{ inputs.bbr_enable }}" = "default" ]; then
+              ./scripts/config --file .config --set-str CONFIG_DEFAULT_TCP_CONG "bbr"
+            fi
+          fi
           export LLVM=1 LLVM_IAS=1
           make LLVM=1 LLVM_IAS=1 ARCH=arm64 olddefconfig
-          grep -q 'CONFIG_LOCALVERSION="-4k-gdc4c44f3ecc0-dirty"' .config || exit 1
+          grep -qE 'CONFIG_LOCALVERSION="-4k-(g[0-9a-f]{12}|[^"]+)"' .config || exit 1
 
       # ---------- 编译 ----------
       - name: 编译内核
         run: |
           sudo sysctl -w vm.max_map_count=1048576
           export LLVM=1 LLVM_IAS=1
-          export LOCALVERSION=""
           export KBUILD_BUILD_USER="$BUILD_USER"
+          if [ "${{ inputs.ccache_debug }}" = "true" ]; then
+            export CCACHE_LOGFILE="$GITHUB_WORKSPACE/ccache.log"
+          fi
           export KBUILD_BUILD_HOST="$BUILD_HOST"
           # faketime 时间劫持（可复现构建 + ccache 命中稳定，cctv18 式）
           cd $GITHUB_WORKSPACE
@@ -395,9 +447,21 @@ jobs:
       - name: 验证产物
         run: |
           cd work/src
-          grep -q '6.6.139-4k-gdc4c44f3ecc0-dirty' include/generated/utsrelease.h || exit 1
           strings arch/arm64/boot/Image | grep -q "Linux version 6.6.139" || exit 1
           ls -la arch/arm64/boot/Image
+
+      # ---------- KPM/KPN 修补（可选）----------
+      - name: 应用 KPM 修补
+        if: ${{ inputs.kpm_enable }}
+        run: |
+          cd work/src/arch/arm64/boot
+          wget -q https://github.com/KernelSU-Next/KPatch-Next/releases/latest/download/kptools-linux
+          wget -q https://github.com/KernelSU-Next/KPatch-Next/releases/latest/download/kpimg-linux
+          chmod +x kptools-linux
+          ./kptools-linux -p -i ./Image -k ./kpimg-linux -o ./oImage
+          rm -f Image
+          mv oImage Image
+          echo "KPM 修补完成"
 
       # ---------- 保存 ccache 缓存 ----------
       - name: 保存 ccache 缓存（本地）
@@ -420,6 +484,14 @@ jobs:
           gh release create "ccache-ace6-O2-FT" ccache-ace6-O2-FT.tar.zst --notes "Public ccache for Ace6 kernel builds" 2>/dev/null \
             || gh release upload "ccache-ace6-O2-FT" ccache-ace6-O2-FT.tar.zst --clobber
           echo "公共 ccache 已上传！
+
+      - name: 上传 ccache 调试日志
+        if: ${{ inputs.ccache_debug }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ccache-debug-log
+          path: ccache.log
+          if-no-files-found: ignore
 
       # ---------- 打包 AK3 ----------
       - name: 打包 AK3
@@ -446,6 +518,15 @@ jobs:
           cd pack && zip -r9 "../out/$ZIP" . -x "*.git*" >/dev/null
           echo "ak3name=$ZIP" >> "$GITHUB_OUTPUT"
           ls -lh "../out/$ZIP"
+          # all 模式：额外生成 Image + boot.img
+          if [ "${{ inputs.artifact_mode }}" = "all" ]; then
+            cp $GITHUB_WORKSPACE/work/src/arch/arm64/boot/Image ../out/Image
+            # boot.img（官方参数：header v4）
+            mkbootimg --kernel $GITHUB_WORKSPACE/work/src/arch/arm64/boot/Image \
+              --header_version 4 --os_version 16.0.0 --os_patch_level 2026-07 \
+              --pagesize 4096 --base 0x80000000 -o ../out/boot.img
+            echo "all 模式：Image + boot.img 已生成"
+          fi
 
       # ---------- 上传产物 ----------
       - name: 上传产物
