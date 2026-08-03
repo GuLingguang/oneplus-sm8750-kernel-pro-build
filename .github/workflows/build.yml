@@ -123,6 +123,11 @@ on:
         required: false
         type: string
         default: ''
+      debug_skip_build:
+        description: '🐞 Debug: skip kernel build, test packaging/upload only (creates dummy Image)'
+        required: true
+        type: boolean
+        default: 'false'
 
 concurrency:
   group: build-kernel
@@ -194,18 +199,18 @@ jobs:
         run: |
           # Skip if local cache hit
           if [ -d "${{ env.CCACHE_DIR }}" ] && [ "$(ls -A ${{ env.CCACHE_DIR }} 2>/dev/null)" ]; then
-            echo "本地缓存已命中，跳过公共缓存拉取"
+            echo "Local cache hit, skip public pull"
             exit 0
           fi
           # Pull public cache from Release
-          echo "未命中本地缓存，尝试拉取公共 ccache ..."
+          echo "Cache miss, trying public ccache ..."
           mkdir -p ${{ env.CCACHE_DIR }}
           if gh release download -p "ccache-ace6-O2-FT.tar.zst" -R $GITHUB_REPOSITORY 2>/dev/null; then
-            echo "成功下载公共 ccache，解压中..."
+            echo "Public ccache downloaded, extracting..."
             tar -I zstd -xf ccache-ace6-O2-FT.tar.zst -C ${{ env.CCACHE_DIR }}
-            echo "公共 ccache 恢复完成！"
+            echo "Public ccache restored!"
           else
-            echo "公共 ccache 不存在（首次构建），跳过"
+            echo "Public ccache absent (first build), skip"
           fi
 
       # ---------- Prepare sources (3 repos) ----------
@@ -419,6 +424,7 @@ jobs:
 
       # ---------- Build ----------
       - name: 🛠️ Build kernel
+        if: ${{ !inputs.debug_skip_build }}
         run: |
           sudo sysctl -w vm.max_map_count=1048576
           export LLVM=1 LLVM_IAS=1
@@ -458,7 +464,15 @@ jobs:
           [ -f arch/arm64/boot/Image ] || exit 1
 
       # ---------- Verify ----------
+      - name: Debug - create dummy Image (skip build)
+        if: ${{ inputs.debug_skip_build }}
+        run: |
+          mkdir -p work/src/arch/arm64/boot
+          echo "DEBUG DUMMY IMAGE" > work/src/arch/arm64/boot/Image
+          echo "Dummy Image created (debug mode)"
+
       - name: ✅ Verify artifacts
+        if: ${{ !inputs.debug_skip_build }}
         run: |
           cd work/src
           strings arch/arm64/boot/Image | grep -q "Linux version 6.6.139" || exit 1
@@ -496,13 +510,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Package ccache and upload to Release
-          echo "打包公共 ccache ..."
+          echo "Packaging public ccache ..."
           tar -I zstd -cf ccache-ace6-O2-FT.tar.zst -C ${{ env.CCACHE_DIR }} .
-          echo "ccache 大小: $(du -sh ccache-ace6-O2-FT.tar.zst | cut -f1)"
+          echo "ccache size: $(du -sh ccache-ace6-O2-FT.tar.zst | cut -f1)"
           # Upload (create Release if missing)
           gh release create "ccache-ace6-O2-FT" ccache-ace6-O2-FT.tar.zst --notes '🏷️ Category: ccache | ace6-O2-FT — Public ccache for Ace6 kernel builds' 2>/dev/null \
             || gh release upload "ccache-ace6-O2-FT" ccache-ace6-O2-FT.tar.zst --clobber
-          echo "公共 ccache 已上传！
+          echo "Public ccache uploaded!"
 
       - name: 🔍 Upload ccache debug log
         if: ${{ inputs.ccache_debug }}
