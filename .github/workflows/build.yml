@@ -118,6 +118,11 @@ on:
         required: false
         type: string
         default: ''
+      build_time:
+        description: '🕐 自定义构建时间（如 Sun Dec 01 08:10:00 UTC 2024；留空或 N=当前 UTC）'
+        required: false
+        type: string
+        default: ''
 
 concurrency:
   group: build-kernel
@@ -422,6 +427,11 @@ jobs:
             export CCACHE_LOGFILE="$GITHUB_WORKSPACE/ccache.log"
           fi
           export KBUILD_BUILD_HOST="$BUILD_HOST"
+          # 自定义构建时间（KBUILD_BUILD_TIMESTAMP，留空=当前 UTC）
+          if [[ -n "${{ inputs.build_time }}" && "${{ inputs.build_time }}" != "N" && "${{ inputs.build_time }}" != "n" ]]; then
+            export KBUILD_BUILD_TIMESTAMP="${{ inputs.build_time }}"
+            echo "构建时间: ${{ inputs.build_time }}"
+          fi
           # faketime 时间劫持（可复现构建 + ccache 命中稳定，cctv18 式）
           cd $GITHUB_WORKSPACE
           chmod 777 lib/*.so
