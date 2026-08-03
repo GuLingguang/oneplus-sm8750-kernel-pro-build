@@ -29,7 +29,7 @@ on:
         type: boolean
         default: 'false'
       show_all_algos:
-        description: 'Enable ALL zram compression algorithms (lz4hc/842 too) - useful for container/Droidspaces scenarios'
+        description: 'Enable ALL zram compression algorithms (lz4hc/842 too)'
         required: true
         type: boolean
         default: 'false'
