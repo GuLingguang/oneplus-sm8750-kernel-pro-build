@@ -273,8 +273,8 @@ This project builds upon the work of many projects and developers. Thank you!
 
 ### 🙏 Special thanks
 
-- **cctv18** (酷安) — the entire build pipeline concept, patch integration, and ccache optimization approach
-- **NullCode1337** — the Project Infinity X ROM and Ace6 kernel development
+- [**@cctv18**](https://github.com/cctv18) — the entire build pipeline concept, patch integration, and ccache optimization approach
+- [**@NullCode1337**](https://github.com/NullCode1337) — the Project Infinity X ROM and Ace6 kernel development
 - **All upstream kernel/Android projects** that make custom kernels possible
 
 ---
