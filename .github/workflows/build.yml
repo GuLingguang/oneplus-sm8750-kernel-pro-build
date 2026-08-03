@@ -572,34 +572,45 @@ jobs:
           if [ -z "$TAG" ]; then
             TAG="kernel-$(date +%Y%m%d)-ksu${{ needs.build.outputs.ksuver }}"
           fi
-          cat <<EOF > release_notes.md
-          # Ace6 Kernel Build
+                    cat <<EOF > release_notes.md
+          # ⚡ Ace6 Kernel Build
 
           🏷️ **Category**: \`kernel\` \| \`${{ inputs.ksu_type }}\` \| ksu${{ needs.build.outputs.ksuver }}
 
+          ---
 
-          ## Version
-          - 内核: 6.6.139-4k
-          - KernelSU: ${{ needs.build.outputs.ksuver }}
-          - 构建日期: $(date +%Y-%m-%d)
+          ## 📋 Version
 
-          ## Features
-          - KernelSU: ${{ inputs.ksu_type }}
-          - SUSFS: ${{ inputs.susfs_enable }}
-          - lz4/zstd: ${{ inputs.lz4_zstd }}
-          - LZ4KD: ${{ inputs.lz4kd_enable }}
-          - Droidspaces: ${{ inputs.droidspaces }}
-          - 基带保护: ${{ inputs.baseband_guard }}
-          - CVE 补丁: ${{ inputs.cve_patch }}
+          | Item | Value |
+          |---|---|
+          | Kernel | 6.6.139-4k |
+          | KernelSU | ${{ needs.build.outputs.ksuver }} |
+          | Build date | $(date +%Y-%m-%d) |
 
-          ## Manager downloads
-          - ReSukiSU: https://github.com/ReSukiSU/ReSukiSU/releases
-          - SukiSU Ultra: https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases
-          - KernelSU Next: https://github.com/KernelSU-Next/KernelSU-Next/releases
-          - KSU 原版: https://github.com/tiann/KernelSU/releases
+          ## ✨ Features
 
-          ## Flashing
-          recovery 刷入 AK3 zip 即可
+          | Feature | State |
+          |---|---|
+          | KernelSU | ${{ inputs.ksu_type }} |
+          | SUSFS | ${{ inputs.susfs_enable }} |
+          | lz4/zstd | ${{ inputs.lz4_zstd }} |
+          | LZ4KD | ${{ inputs.lz4kd_enable }} |
+          | Droidspaces | ${{ inputs.droidspaces }} |
+          | Baseband Guard | ${{ inputs.baseband_guard }} |
+          | CVE | ${{ inputs.cve_patch }} |
+          | BBR | ${{ inputs.bbr_enable }} |
+          | Re:Kernel | ${{ inputs.rekernel_enable }} |
+
+          ## 📥 Manager downloads
+
+          - [ReSukiSU](https://github.com/ReSukiSU/ReSukiSU/releases)
+          - [SukiSU Ultra](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases)
+          - [KernelSU Next](https://github.com/KernelSU-Next/KernelSU-Next/releases)
+          - [KSU (original)](https://github.com/tiann/KernelSU/releases)
+
+          ## 📲 Flashing
+
+          Flash the AK3 zip via recovery (TWRP/OrangeFox/OFRP).
           EOF
           gh release create "$TAG" \
             --title "Ace6 Kernel ${{ inputs.ksu_type }} (ksu${{ needs.build.outputs.ksuver }})" \
