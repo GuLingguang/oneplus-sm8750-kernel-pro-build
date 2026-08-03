@@ -546,11 +546,11 @@ jobs:
         run: |
           cd work/src
           strings arch/arm64/boot/Image | grep -q "Linux version 6.6.139" || exit 1
-          # real kernel identity straight from the built Image: the kernel
-          # name (release) and the #N SMP build info are separate outputs
-          KV=$(strings arch/arm64/boot/Image | grep -m1 "^Linux version " || true)
-          REL=$(echo "$KV" | awk '{print $3}')
-          VER=$(echo "$KV" | grep -oE '#[0-9]+ SMP.*' || true)
+          # real kernel identity from the build artifacts (utsrelease +
+          # compile.h): the Image banner string can be truncated by strings
+          # at the clang URL, so don't parse the banner
+          REL=$(cat include/config/kernel.release 2>/dev/null || true)
+          VER=$(grep -oE '#[0-9]+ SMP[^"]*' include/generated/compile.h 2>/dev/null | head -1 || true)
           echo "kernelrel=$REL" >> "$GITHUB_OUTPUT"
           echo "kernelver=$VER" >> "$GITHUB_OUTPUT"
           echo "Kernel: $REL | $VER"
