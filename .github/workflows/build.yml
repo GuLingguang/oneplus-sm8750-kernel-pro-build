@@ -5,7 +5,7 @@ on:
     inputs:
       # ---------- KernelSU ----------
       ksu_type:
-        description: 'KernelSU 分支（ReSukiSU=内置 KSU，none=无 KSU）'
+        description: 'KernelSU variant (resukisu = built-in KSU, none = no KSU)'
         required: true
         type: choice
         default: 'none'
@@ -124,7 +124,7 @@ on:
         type: string
         default: ''
       debug_skip_build:
-        description: '🐞 Debug: skip kernel build, test packaging/upload only (creates dummy Image)'
+        description: 'Debug: skip kernel build, test packaging/upload only (creates dummy Image)'
         required: true
         type: boolean
         default: 'false'
@@ -222,8 +222,8 @@ jobs:
           # Get real branch commit (zip has no .git)
           SRC_COMMIT=$(curl -sL "${{ vars.REPO_BASE || 'https://api.github.com' }}/repos/GuLingguang/oneplus-sm8750-kernel-pro/commits/lineage-23.2" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" | grep -oE '"sha": "[0-9a-f]{40}"' | head -1 | grep -oE '[0-9a-f]{40}' || true)
           echo "SRC_COMMIT=$SRC_COMMIT" >> "$GITHUB_ENV"
-          echo "源码 commit: $SRC_COMMIT"
-          [ -n "$SRC_COMMIT" ] || { echo "⚠ 获取 commit 失败，用 4k 无 commit 后缀"; SRC_COMMIT=""; }
+          echo "Source commit: $SRC_COMMIT"
+          [ -n "$SRC_COMMIT" ] || { echo "WARN: failed to get commit, using plain -4k"; SRC_COMMIT=""; }
           # Download sources via zip (parallel)
           curl -sL "${{ vars.REPO_BASE || 'https://github.com' }}/GuLingguang/oneplus-sm8750-kernel-pro/archive/refs/heads/lineage-23.2.zip" -o src.zip &
           curl -sL "${{ vars.REPO_BASE || 'https://github.com' }}/Ace6-Development/android_kernel_oneplus_sm8750-modules/archive/refs/heads/lineage-23.2.zip" -o modules.zip &
@@ -235,7 +235,7 @@ jobs:
           rm -f src.zip modules.zip dt.zip
           # Verify symlink targets
           for t in src/drivers/base/kernelFwUpdate/Kconfig src/arch/arm64/boot/dts/vendor; do
-            [ -e "$t" ] || { echo "符号链接目标缺失: $t"; exit 1; }
+            [ -e "$t" ] || { echo "missing symlink target: $t"; exit 1; }
           done
 
       # ---------- Apply patches (by toggle) ----------
@@ -328,7 +328,7 @@ jobs:
           cd work/src
           case "${{ inputs.ksu_type }}" in
             resukisu) KSU_REPO="https://github.com/ReSukiSU/ReSukiSU.git" ;;
-            none)     echo "无 KSU"; exit 0 ;;
+            none)     echo "no KSU"; exit 0 ;;
           esac
           rm -rf KernelSU drivers/kernelsu
           git clone "$KSU_REPO" KernelSU
@@ -347,7 +347,7 @@ jobs:
           COUNT=$(git -C work/src/KernelSU rev-list --count HEAD)
           VER=$((30000 + COUNT + 700))
           echo "ksuver=$VER" >> "$GITHUB_OUTPUT"
-          echo "KSU 版本号: $VER ($COUNT 提交)"
+          echo "KSU version: $VER ($COUNT commits)"
 
       # ---------- SUSFS KSU adaptation ----------
       - name: 🔧 Apply SUSFS KSU adaptation
@@ -355,7 +355,7 @@ jobs:
         run: |
           cd KernelSU
           git apply --check $GITHUB_WORKSPACE/patches/02_ksu.patch 2>/dev/null && git apply $GITHUB_WORKSPACE/patches/02_ksu.patch \
-            || echo "⚠ 02_ksu.patch 未自动应用（KSU 版本可能已变，需人工适配）" >&2
+            || echo "WARN: 02_ksu.patch not applied automatically (KSU version may have changed)" >&2
         working-directory: work/src
 
       # ---------- Attribution ----------
@@ -436,7 +436,7 @@ jobs:
           # Custom build time (KBUILD_BUILD_TIMESTAMP)
           if [[ -n "${{ inputs.build_time }}" && "${{ inputs.build_time }}" != "N" && "${{ inputs.build_time }}" != "n" ]]; then
             export KBUILD_BUILD_TIMESTAMP="${{ inputs.build_time }}"
-            echo "构建时间: ${{ inputs.build_time }}"
+            echo "Build time: ${{ inputs.build_time }}"
           fi
           # faketime time-fixing (reproducible builds)
           cd $GITHUB_WORKSPACE
@@ -459,7 +459,7 @@ jobs:
           cd work/src
           set -o pipefail
           make LLVM=1 LLVM_IAS=1 ARCH=arm64 CC="$GITHUB_WORKSPACE/cc-wrapper" LD="$GITHUB_WORKSPACE/ld-wrapper" HOSTLD=ld.lld KCFLAGS+=-O2 -j$(nproc --all) Image
-          echo "ccache 状态:"
+          echo "ccache status:"
           ccache -s
           [ -f arch/arm64/boot/Image ] || exit 1
 
@@ -494,7 +494,7 @@ jobs:
           ./kptools-linux -p -i ./Image -k ./kpimg-linux -o ./oImage
           rm -f Image
           mv oImage Image
-          echo "KPM 修补完成"
+          echo "KPM patched"
 
       # ---------- Save ccache ----------
       - name: 💾 Save ccache
@@ -532,13 +532,13 @@ jobs:
         run: |
           set -e
           mkdir -p out pack
-          [ -f work/src/arch/arm64/boot/Image ] || { echo "❌ Image 不存在"; exit 1; }
+          [ -f work/src/arch/arm64/boot/Image ] || { echo "ERROR: Image not found"; exit 1; }
           cp -a ak3/. pack/
           cp work/src/arch/arm64/boot/Image pack/Image
           # Verify Image exists and non-empty
           SIZE=$(stat -c%s work/src/arch/arm64/boot/Image)
-          echo "Image 大小: $SIZE"
-          [ "$SIZE" -gt 0 ] || { echo "❌ Image 为空"; exit 1; }
+          echo "Image size: $SIZE"
+          [ "$SIZE" -gt 0 ] || { echo "ERROR: Image is empty"; exit 1; }
           # AK3 attribution
           if [ "${{ inputs.attribution_enable }}" = "true" ]; then
             sed -i "s#kernel.string=.*#kernel.string=Ace6 Kernel | Build by ${{ inputs.build_user }}#" pack/anykernel.sh
@@ -558,7 +558,7 @@ jobs:
             mkbootimg --kernel $GITHUB_WORKSPACE/work/src/arch/arm64/boot/Image \
               --header_version 4 --os_version 16.0.0 --os_patch_level 2026-07 \
               --pagesize 4096 --base 0x80000000 -o ../out/boot.img
-            echo "all 模式：Image + boot.img 已生成"
+            echo "all mode: Image + boot.img generated"
           fi
 
       # ---------- Upload artifacts ----------

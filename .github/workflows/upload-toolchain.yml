@@ -1,7 +1,7 @@
 name: Upload AOSP Clang Toolchain
 
 on:
-  workflow_dispatch:      # 手动触发（一次性：下载 AOSP clang 打包上传 Release）
+  workflow_dispatch:      # One-time: download AOSP clang, package, upload to Release
 
 jobs:
   upload:
@@ -9,20 +9,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: 下载 AOSP clang r563880c
+      - name: Download AOSP clang r563880c
         run: |
-          # git clone prebuilts 仓库 + checkout 指定 commit（r563880c 在 f8439f06）
+          # sparse-clone prebuilts repo and checkout the r563880c commit (f8439f06)
           git clone --depth 1 --filter=blob:none --sparse https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 clang-prebuilts
           cd clang-prebuilts
           git fetch --depth 1 origin f8439f0628d799092dd07df440a6334cab28939c
           git checkout FETCH_HEAD
           git sparse-checkout set clang-r563880c
           cd ..
-          # 打包工具链
+          # package the toolchain
           tar czf clang-r563880c.tar.gz -C clang-prebuilts/clang-r563880c .
           ls -lh clang-r563880c.tar.gz
 
-      - name: 创建 Release
+      - name: Create Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
