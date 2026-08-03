@@ -545,10 +545,14 @@ jobs:
         run: |
           cd work/src
           strings arch/arm64/boot/Image | grep -q "Linux version 6.6.139" || exit 1
-          # real kernel version straight from the built Image (no guessing/assembling)
-          KERNEL_VER=$(strings arch/arm64/boot/Image | grep -m1 "^Linux version " || true)
-          echo "kernelver=$KERNEL_VER" >> "$GITHUB_OUTPUT"
-          echo "Real kernel version: $KERNEL_VER"
+          # real kernel identity straight from the built Image, formatted like
+          # `uname -a`: Linux <host> <release> <#version> <machine>
+          KV=$(strings arch/arm64/boot/Image | grep -m1 "^Linux version " || true)
+          REL=$(echo "$KV" | awk '{print $3}')
+          VER=$(echo "$KV" | grep -oE '#[0-9]+ SMP.*' || true)
+          UNAME_A="Linux $(hostname) $REL $VER aarch64"
+          echo "kernelver=$UNAME_A" >> "$GITHUB_OUTPUT"
+          echo "Real kernel (uname -a style): $UNAME_A"
           ls -la arch/arm64/boot/Image
 
       # ---------- KPM/KPN patch (post-build, binary) ----------
