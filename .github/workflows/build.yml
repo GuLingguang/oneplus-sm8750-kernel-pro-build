@@ -33,6 +33,11 @@ on:
         required: true
         type: boolean
         default: 'false'
+      zram_writeback:
+        description: 'ZRAM writeback support (idle/incompressible pages -> backing device; needs runtime backing_dev config)'
+        required: true
+        type: boolean
+        default: 'false'
       # ---------- Features ----------
       droidspaces:
         description: 'Droidspaces container (standard = +ntsync, extend = more)'
@@ -440,6 +445,10 @@ jobs:
           # 04_lz4kd.patch + the base config)
           if [ "${{ inputs.show_all_algos }}" = "true" ]; then
             ./scripts/config --file .config -e CONFIG_CRYPTO_LZ4HC -e CONFIG_CRYPTO_842
+          fi
+          # ZRAM writeback (idle/incompressible pages to a backing device)
+          if [ "${{ inputs.zram_writeback }}" != "true" ]; then
+            ./scripts/config --file .config -d CONFIG_ZRAM_WRITEBACK -d CONFIG_ZRAM_MEMORY_TRACKING
           fi
           # BBR congestion control
           if [ "${{ inputs.bbr_enable }}" = "true" ]; then

@@ -96,6 +96,7 @@ This project targets the **SM8750 (Snapdragon 8 Elite) platform** — the kernel
 | ⚡ **lz4 1.10 + zstd 1.5.7** | off | Compression performance (newer algorithms, ARM64 NEON) |
 | ⚡ **LZ4KD** | off | Additional lz4 variant for zram |
 | 🧪 **All zram algorithms** | off | Enable every zram compressor in `comp_algorithm` (lz4hc/842 too; handy for container/Droidspaces scenarios) |
+| 🛡️ **ZRAM writeback** | off | Write idle/incompressible zram pages to a backing device (needs runtime `backing_dev` config) |
 | 📦 **Droidspaces** | off | Lightweight Linux container support (standard/extend) |
 | 🛡️ **Baseband Guard** | off | Kernel-level anti-format protection |
 | 🔒 **CVE patches** | off | GhostLock (CVE-2026-43499 + CVE-2026-53163) |
