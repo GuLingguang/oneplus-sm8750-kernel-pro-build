@@ -14,6 +14,7 @@
 - [Features](#features)
 - [Feature details](#feature-details)
 - [How to use](#how-to-use)
+- [Flashing disclaimer](#flashing-disclaimer-read-this-or-regret-it)
 - [Adaptations & compromises](#adaptations--compromises)
 - [Reproducibility](#reproducibility)
 - [Local build](#local-build)
@@ -26,6 +27,8 @@
 ## Overview
 
 Builds a custom kernel for **OnePlus Ace 6 / 15R** (codename `ktm`, SM8750 / Snapdragon 8 Elite), running **Project Infinity X** (LineageOS-based, Android 16, kernel 6.6.139).
+
+> ⚠️ **Only tested on Project Infinity X** — NOT for ColorOS/OxygenOS. Probably works on LineageOS (Ace6). See the [disclaimer](#flashing-disclaimer-read-this-or-regret-it).
 
 Every feature is an **optional toggle** in GitHub Actions — build exactly what you need, nothing more.
 
@@ -169,6 +172,31 @@ Plus `patches/extra/` — **new files** that patches can't create (lz4/zstd new 
 - **KPM/KPN** — available as option, but noted as potentially conflicting with ReSukiSU's built-in kpm
 
 ---
+
+## ⚠️ Flashing disclaimer (read this or regret it)
+
+> **This kernel was tested on ONE device, with ONE ROM, and it worked ONCE (okay, a few times).**
+> Everything else is **uncharted territory**. You have been warned. 🏴☠️
+
+- ✅ **Tested on**: OnePlus Ace 6 / 15R (`ktm`) with **Project Infinity X** (v3.12, Android 16, LineageOS-based)
+- ❌ **NOT tested, NOT supported**: OnePlus **ColorOS** / **OxygenOS** (the official ones with all the bloat)
+- ❓ **Probably works, unverified**: **LineageOS** (Ace6 builds) — the kernel/modules/devicetree trees are stock LineageOS with only non-destructive Ace6 additions (MPC7022 gauge, TMS NFC), so it *should* work, but nobody has confirmed it on a real device yet
+- ❌ **Everything else**: your device, your funeral. If it explodes, implodes, or turns into a paperweight, that's between you and your warranty (which is now void, by the way)
+
+### 🚨 Before flashing
+
+1. **Back up your boot partition** (and your will)
+2. **This kernel is for the `boot` partition only** — do NOT touch other partitions (the device is already fused; downgrading or messing with other partitions = brick city)
+3. **You must be on Project Infinity X** (or a compatible LineageOS-based ROM) — flashing on ColorOS/OxygenOS will likely **not boot**, or worse
+4. **No guarantee, no refunds, no tech support from the ROM team** — this is a community project, proceed at your own risk
+
+### 🧪 If it bootloops
+
+- Don't panic (okay, panic a little)
+- Flash back your stock boot image (that's why you backed up, right?)
+- If you didn't back up, the stock boot.img is in the original ROM zip (extract it from `payload.bin`)
+
+> **TL;DR**: Tested on Infinity X. Probably fine on LOS. Don't try ColorOS. Backup first. Don't blame us. 😎
 
 ## Reproducibility
 
