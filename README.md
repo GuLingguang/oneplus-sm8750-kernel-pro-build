@@ -95,6 +95,7 @@ This project targets the **SM8750 (Snapdragon 8 Elite) platform** — the kernel
 | 🛡️ **SUSFS** | off | Enhanced mount/root hiding (needs KSU) |
 | ⚡ **lz4 1.10 + zstd 1.5.7** | off | Compression performance (newer algorithms, ARM64 NEON) |
 | ⚡ **LZ4KD** | off | Additional lz4 variant for zram |
+| 🧪 **All zram algorithms** | off | Enable every zram compressor in `comp_algorithm` (lz4hc/842 too; handy for container/Droidspaces scenarios) |
 | 📦 **Droidspaces** | off | Lightweight Linux container support (standard/extend) |
 | 🛡️ **Baseband Guard** | off | Kernel-level anti-format protection |
 | 🔒 **CVE patches** | off | GhostLock (CVE-2026-43499 + CVE-2026-53163) |

@@ -12,6 +12,7 @@
 #   --susfs                 SUSFS (requires --ksu resukisu)
 #   --lz4                   lz4+zstd
 #   --lz4kd                 LZ4KD
+#   --show-all-algos        enable ALL zram algorithms (lz4hc/842 too)
 #   --droidspaces <standard|extend|false> Droidspaces
 #   --bbg                   Baseband Guard
 #   --cve                   CVE patches
@@ -42,7 +43,7 @@ BUILD_HOST="kernel-builder"
 ATTRIBUTION=1
 BUILD_TIME=""
 KSU="none"
-SUSFS=0; LZ4=0; LZ4KD=0; DROIDSPACES="false"; BBG=0; CVE=0; BETTERNET=0; BBR=0; KPM=0; REKERNEL=0
+SUSFS=0; LZ4=0; LZ4KD=0; SHOWALL=0; DROIDSPACES="false"; BBG=0; CVE=0; BETTERNET=0; BBR=0; KPM=0; REKERNEL=0
 SUFFIX=""; CLEAN=0
 
 # ---- Parse args ----
@@ -52,6 +53,7 @@ while [ $# -gt 0 ]; do
     --susfs) SUSFS=1; shift ;;
     --lz4) LZ4=1; shift ;;
     --lz4kd) LZ4KD=1; shift ;;
+    --show-all-algos) SHOWALL=1; shift ;;
     --droidspaces) DROIDSPACES="${2:?--droidspaces requires a value}"; shift 2 ;;
     --bbg) BBG=1; shift ;;
     --cve) CVE=1; shift ;;
@@ -229,6 +231,7 @@ else
 fi
 ./scripts/config --file .config -d CONFIG_LOCALVERSION_AUTO
 [ "$LZ4KD" != "1" ] && ./scripts/config --file .config -d CONFIG_LZ4K_COMPRESS -d CONFIG_LZ4KD_COMPRESS -d CONFIG_CRYPTO_LZ4K -d CONFIG_CRYPTO_LZ4KD
+[ "$SHOWALL" = "1" ] && ./scripts/config --file .config -e CONFIG_CRYPTO_LZ4HC -e CONFIG_CRYPTO_842
 [ "$DROIDSPACES" = "false" ] && ./scripts/config --file .config -d CONFIG_SYSVIPC -d CONFIG_NTSYNC -d CONFIG_DRM_LINDROID_EVDI
 [ "$DROIDSPACES" != "extend" ] && ./scripts/config --file .config -d CONFIG_DRM_LINDROID_EVDI
 [ "$BBG" != "1" ] && ./scripts/config --file .config -d CONFIG_BBG

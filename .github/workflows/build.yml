@@ -28,6 +28,11 @@ on:
         required: true
         type: boolean
         default: 'false'
+      show_all_algos:
+        description: 'Enable ALL zram compression algorithms (lz4hc/842 too) - useful for container/Droidspaces scenarios'
+        required: true
+        type: boolean
+        default: 'false'
       # ---------- Features ----------
       droidspaces:
         description: 'Droidspaces container (standard = +ntsync, extend = more)'
@@ -429,6 +434,12 @@ jobs:
           fi
           if [ "${{ inputs.better_net }}" != "true" ]; then
             ./scripts/config --file .config -d CONFIG_IP_SET -d CONFIG_BPF_STREAM_PARSER -d CONFIG_IP6_NF_NAT
+          fi
+          # All zram algorithms: enable lz4hc/842 (backends entries exist natively,
+          # they just need their crypto CONFIGs; lz4k/lz4kd/deflate come from
+          # 04_lz4kd.patch + the base config)
+          if [ "${{ inputs.show_all_algos }}" = "true" ]; then
+            ./scripts/config --file .config -e CONFIG_CRYPTO_LZ4HC -e CONFIG_CRYPTO_842
           fi
           # BBR congestion control
           if [ "${{ inputs.bbr_enable }}" = "true" ]; then
