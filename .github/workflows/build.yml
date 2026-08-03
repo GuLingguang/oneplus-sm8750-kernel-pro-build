@@ -63,6 +63,11 @@ on:
         required: true
         type: boolean
         default: 'false'
+      rekernel_enable:
+        description: '🔗 Re:Kernel 支持（Freezer/NoActive 冻结通知，binder 钩子）'
+        required: true
+        type: boolean
+        default: 'false'
       kernel_suffix:
         description: '🏷️ 内核版本后缀（如 perf → 6.6.139-4k-perf；留空用真实 commit）'
         required: false
@@ -399,6 +404,10 @@ jobs:
           if [ "${{ inputs.bbr_enable }}" = "true" ]; then
             ./scripts/config --file .config -e CONFIG_TCP_CONG_ADVANCED -e CONFIG_TCP_CONG_BBR
           fi
+          # Re:Kernel（binder 钩子）
+          if [ "${{ inputs.rekernel_enable }}" = "true" ]; then
+            ./scripts/config --file .config -e CONFIG_REKERNEL
+          fi
           export LLVM=1 LLVM_IAS=1
           make LLVM=1 LLVM_IAS=1 ARCH=arm64 olddefconfig
           grep -qE 'CONFIG_LOCALVERSION="-4k-(g[0-9a-f]{12}|[^"]+)"' .config || exit 1
@@ -446,6 +455,11 @@ jobs:
           ls -la arch/arm64/boot/Image
 
       # ---------- KPM/KPN 修补（可选）----------
+      - name: 🔧 应用 Re:Kernel 补丁
+        if: ${{ inputs.rekernel_enable }}
+        run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/09_rekernel.patch
+        working-directory: work/src
+
       - name: 🧩 应用 KPM 修补
         if: ${{ inputs.kpm_enable }}
         run: |
