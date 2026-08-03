@@ -31,7 +31,7 @@ NO_MAGISK_CHECK=1
 # import functions/variables and setup patching - see for reference (DO NOT REMOVE)
 . tools/ak3-core.sh
 
-ui_print "内核构建者: Lingguang"
+ui_print "内核构建者: GuLingguang@GitHub"
 
 # Resolving occasional file system I/O latency issues which may cause binary execution exceptions
 sync
