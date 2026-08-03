@@ -204,9 +204,10 @@ jobs:
           mkdir -p work
           cd work
           # 获取分支真实 commit（zip 无 .git，需手动注入 LOCALVERSION）
-          SRC_COMMIT=$(curl -sL "${{ vars.REPO_BASE || 'https://github.com' }}/GuLingguang/oneplus-sm8750-kernel-pro/commits/lineage-23.2" | grep -oE '"sha": "[0-9a-f]{40}"' | head -1 | grep -oE '[0-9a-f]{40}')
+          SRC_COMMIT=$(curl -sL "${{ vars.REPO_BASE || 'https://api.github.com' }}/repos/GuLingguang/oneplus-sm8750-kernel-pro/commits/lineage-23.2" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" | grep -oE '"sha": "[0-9a-f]{40}"' | head -1 | grep -oE '[0-9a-f]{40}' || true)
           echo "SRC_COMMIT=$SRC_COMMIT" >> "$GITHUB_ENV"
           echo "源码 commit: $SRC_COMMIT"
+          [ -n "$SRC_COMMIT" ] || { echo "⚠ 获取 commit 失败，用 4k 无 commit 后缀"; SRC_COMMIT=""; }
           # 源码用 zip 下载分支头（cctv18 式，三仓并行下载）
           curl -sL "${{ vars.REPO_BASE || 'https://github.com' }}/GuLingguang/oneplus-sm8750-kernel-pro/archive/refs/heads/lineage-23.2.zip" -o src.zip &
           curl -sL "${{ vars.REPO_BASE || 'https://github.com' }}/Ace6-Development/android_kernel_oneplus_sm8750-modules/archive/refs/heads/lineage-23.2.zip" -o modules.zip &
