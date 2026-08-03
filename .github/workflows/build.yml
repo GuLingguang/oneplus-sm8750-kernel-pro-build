@@ -1,4 +1,4 @@
-name: Build Ace6 Kernel (TEST)
+name: Build Ace6 Kernel
 
 on:
   workflow_dispatch:      # 手动触发（主入口）
