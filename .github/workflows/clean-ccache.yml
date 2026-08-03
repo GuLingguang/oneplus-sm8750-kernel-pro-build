@@ -1,0 +1,59 @@
+name: Clean ccache
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: 'release = ccache asset on the Release, gh = GitHub Actions caches, both = everything'
+        required: true
+        type: choice
+        default: 'release'
+        options:
+          - 'release'
+          - 'gh'
+          - 'both'
+
+permissions:
+  contents: write
+
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🧹 Clean ccache
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          REPO=$GITHUB_REPOSITORY
+          echo "scope: ${{ inputs.scope }}"
+
+          if [ "${{ inputs.scope }}" = "release" ] || [ "${{ inputs.scope }}" = "both" ]; then
+            echo "--- Release asset ---"
+            if gh release view "ccache-ace6-O2-FT" -R "$REPO" >/dev/null 2>&1; then
+              ASSET=$(gh api "repos/$REPO/releases/tags/ccache-ace6-O2-FT" --jq '.assets[] | select(.name == "ccache-ace6-O2-FT.tar.zst") | .id')
+              if [ -n "$ASSET" ]; then
+                gh api -X DELETE "repos/$REPO/releases/assets/$ASSET"
+                echo "Deleted ccache-ace6-O2-FT.tar.zst from Release"
+              else
+                echo "No ccache asset on the release"
+              fi
+            else
+              echo "Release ccache-ace6-O2-FT does not exist"
+            fi
+          fi
+
+          if [ "${{ inputs.scope }}" = "gh" ] || [ "${{ inputs.scope }}" = "both" ]; then
+            echo "--- GitHub Actions caches ---"
+            CACHES=$(gh api "repos/$REPO/actions/caches" --paginate --jq '.actions_caches[] | .id' 2>/dev/null || true)
+            if [ -z "$CACHES" ]; then
+              echo "No GitHub Actions caches"
+            else
+              for id in $CACHES; do
+                gh api -X DELETE "repos/$REPO/actions/caches/$id" >/dev/null
+                echo "Deleted GitHub Actions cache $id"
+              done
+            fi
+          fi
+
+          echo "Done."
