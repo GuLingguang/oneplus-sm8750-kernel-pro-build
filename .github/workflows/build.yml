@@ -500,7 +500,7 @@ jobs:
           tar -I zstd -cf ccache-ace6-O2-FT.tar.zst -C ${{ env.CCACHE_DIR }} .
           echo "ccache 大小: $(du -sh ccache-ace6-O2-FT.tar.zst | cut -f1)"
           # Upload (create Release if missing)
-          gh release create "ccache-ace6-O2-FT" ccache-ace6-O2-FT.tar.zst --notes "🏷️ **Category**: \`ccache\` \| ace6-O2-FT\n\nPublic ccache for Ace6 kernel builds" 2>/dev/null \
+          gh release create "ccache-ace6-O2-FT" ccache-ace6-O2-FT.tar.zst --notes '🏷️ Category: ccache | ace6-O2-FT — Public ccache for Ace6 kernel builds' 2>/dev/null \
             || gh release upload "ccache-ace6-O2-FT" ccache-ace6-O2-FT.tar.zst --clobber
           echo "公共 ccache 已上传！
 
@@ -575,7 +575,7 @@ jobs:
                     cat <<EOF > release_notes.md
           # ⚡ Ace6 Kernel Build
 
-          🏷️ **Category**: \`kernel\` \| \`${{ inputs.ksu_type }}\` \| ksu${{ needs.build.outputs.ksuver }}
+          🏷️ **Category**: `kernel` \| `${{ inputs.ksu_type }}` \| ksu${{ needs.build.outputs.ksuver }}
 
           ---
 
