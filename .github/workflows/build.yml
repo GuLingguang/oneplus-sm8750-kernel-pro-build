@@ -670,7 +670,8 @@ jobs:
           |---|---|
           | Kernel | ${{ needs.build.outputs.kernelver || 'n/a' }} |
           | KernelSU | ${{ needs.build.outputs.ksuver }} |
-          | Build date | $(date +%Y-%m-%d) |
+          | Build time | $(date +"%Y-%m-%d %H:%M UTC") |
+          | Kernel timestamp | pinned to 2025-05-25 13:00:00 UTC (faketime, reproducible) |
 
           ## ✨ Features
 
@@ -680,15 +681,21 @@ jobs:
           | SUSFS | ${{ inputs.susfs_enable }} |
           | lz4/zstd | ${{ inputs.lz4_zstd }} |
           | LZ4KD | ${{ inputs.lz4kd_enable }} |
+          | Show all algos | ${{ inputs.show_all_algos }} |
+          | ZRAM writeback | ${{ inputs.zram_writeback }} |
           | Droidspaces | ${{ inputs.droidspaces }} |
           | Baseband Guard | ${{ inputs.baseband_guard }} |
           | CVE | ${{ inputs.cve_patch }} |
+          | Better network | ${{ inputs.better_net }} |
           | BBR | ${{ inputs.bbr_enable }} |
+          | KPM | ${{ inputs.kpm_enable }} |
           | Re:Kernel | ${{ inputs.rekernel_enable }} |
+          | Suffix | ${{ inputs.kernel_suffix }} |
 
           ## 📲 Flashing
 
-          Flash the AK3 zip via recovery (TWRP/OrangeFox).
+          Flash the AK3 zip via recovery (TWRP/OrangeFox/AOSP recovery), or
+          install directly through the built-in KernelSU manager.
           EOF
           gh release create "$TAG" -R $GITHUB_REPOSITORY \
             --title "Ace6 Kernel ${{ inputs.ksu_type }} (ksu${{ needs.build.outputs.ksuver }})" \
