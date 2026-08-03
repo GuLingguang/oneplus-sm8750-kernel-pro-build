@@ -15,7 +15,8 @@
 - [Feature details](#feature-details)
 - [How to use](#how-to-use)
 - [Flashing disclaimer](#flashing-disclaimer-read-this-or-regret-it)
-- [Adaptations & compromises](#adaptations--compromises)
+- [Platform compatibility](#platform-compatibility)
+- [Adaptations](#adaptations)
 - [Reproducibility](#reproducibility)
 - [Local build](#local-build)
 - [Repository layout](#repository-layout)
@@ -26,7 +27,7 @@
 
 ## Overview
 
-Builds a custom kernel for **OnePlus Ace 6 / 15R** (codename `ktm`, SM8750 / Snapdragon 8 Elite), running **Project Infinity X** (LineageOS-based, Android 16, kernel 6.6.139).
+Builds a custom kernel for the **SM8750 (Snapdragon 8 Elite) platform** — primarily **OnePlus Ace 6 / 15R** (codename `ktm`), running **Project Infinity X** (LineageOS-based, Android 16, kernel 6.6.139).
 
 > ⚠️ **Only tested on Project Infinity X** — NOT for ColorOS/OxygenOS. Probably works on LineageOS (Ace6). See the [disclaimer](#flashing-disclaimer-read-this-or-regret-it).
 
@@ -69,6 +70,22 @@ The kernel is built from the **official Ace6 kernel source** (lineage-23.2 branc
 
 > [!CAUTION]
 > **Only tested on Project Infinity X.** LineageOS is *probably* fine, ColorOS/OxygenOS is *probably* not. If in doubt, back up first and flash at your own risk.
+
+## Platform compatibility
+
+### SM8750 platform
+
+This project targets the **SM8750 (Snapdragon 8 Elite) platform** — the kernel, modules, and devicetree sources are all stock lineage-23.2 trees for the platform.
+
+| Device / ROM | Status |
+|---|---|
+| **OnePlus Ace 6 / 15R (`ktm`)** + **Project Infinity X** (v3.12, A16) | ✅ Tested & working |
+| **Ace6** + **LineageOS** (official build) | 🤔 Likely works — same kernel/module/dtb trees, but not yet confirmed |
+| **Other OnePlus SM8750 devices** + LOS/InfinityX (if they use this tree family) | 🧪 Probably works, **completely unverified** — the `lineage-23.2` SM8750 tree is shared across the family, but each device has its own vendor integration |
+| **ColorOS / OxygenOS** (stock) | ❌ Not supported — different vendor integration, likely won't boot |
+
+> [!NOTE]
+> If your device uses the **Ace6/SM8750 lineage-23.2 kernel tree family**, this builder may work for you too — but **no guarantees**. Test at your own risk, back up first.
 
 ## Features
 
@@ -159,49 +176,15 @@ Both vulnerabilities are covered:
 
 ---
 
-## Adaptations & compromises
+## Adaptations
 
-This project adapts patches from several sources to the **Ace6 kernel tree** (branch `lineage-23.2`, kernel 6.6.139), which differs from the original targets of those patches. Key differences:
+This project adapts patches from several sources (primarily the [cctv18/oppo_oplus_realme_sm8750](https://github.com/cctv18/oppo_oplus_realme_sm8750) project, which targets the OnePlus official OKI tree) to the **Ace6 kernel tree** (`lineage-23.2`, kernel 6.6.139). Key adaptations:
 
-### vs. [cctv18/oppo_oplus_realme_sm8750](https://github.com/cctv18/oppo_oplus_realme_sm8750)
-
-| Aspect | cctv18 | This project |
-|---|---|---|
-| Kernel base | OnePlus official OKI (6.6.89) | **Ace6 lineage-23.2 (6.6.139)** |
-| Modules | Built from source | **Official prebuilt vendor_dlkm** (from ROM) |
-| vermagic | Faked to match | **Real commit** (verified working without matching) |
-| 风驰 scx governor | Yes (official tree) | **Not ported** (needs official OKI tree) |
-| ADIOS IO scheduler | Yes (official tree) | **Not ported** (source in official tree only) |
-| Re:Kernel | LKM approach | **Source integration** (adapted) |
-| KSU variants | 5 (ReSukiSU/SukiSU-Ultra/KSU-Next/KSU/none) | **ReSukiSU/none** (the others untested on this device) |
-
-### Patch structure
-
-The original monolithic patch is **split into 10 independent patches** (`patches/split/00-09`), each tied to one feature toggle:
-
-```
-00_ksu_hooks.patch      KSU manual hooks (mandatory when KSU enabled)
-01_susfs_main.patch     SUSFS main tree
-02_lz4.patch            lz4 1.10
-03_zstd.patch           zstd 1.5.7
-04_lz4kd.patch          LZ4KD
-05_droidspaces.patch    Droidspaces
-06_baseband_guard.patch Baseband Guard
-07_compile_fixes.patch  Compile fixes (always applied)
-08_cve.patch            GhostLock CVE
-09_rekernel.patch       Re:Kernel
-```
-
-Plus `patches/extra/` — **new files** that patches can't create (lz4/zstd new libs, susfs.c, evdi driver, ntsync, Baseband-guard source, LZ4KD source).
-
-### Things we deliberately did NOT adopt
-
-- **`-Wno-error`** (cctv18 uses it) — we prefer errors to be visible (they caught real bugs in adaptation)
-- **`O=out`** separate output dir — no benefit for our one-shot builds (we use fresh source zips each time)
-- **`kernel_suffix` as version replacement** — we keep the real commit, suffix is optional addition
-- **KPM/KPN** — available as option, but noted as potentially conflicting with ReSukiSU's built-in kpm
-
----
+- **Patches** are split into 10 independent toggles (`patches/split/00-09`), each mapped to a workflow feature
+- **New files** (that patches can't create) live in `patches/extra/` — lz4/zstd libs, susfs.c, evdi, ntsync, Baseband-guard
+- **Re:Kernel** uses source hooks (netlink + binder/signal) adapted to the lineage-6.6.139 API
+- **Modules** come from the ROM's official prebuilt `vendor_dlkm` — no need to rebuild the module tree
+- Some OnePlus-official-only features (风驰 scx governor, ADIOS IO scheduler) are **not ported** — their source exists only in the official OKI tree
 
 ## Reproducibility
 
