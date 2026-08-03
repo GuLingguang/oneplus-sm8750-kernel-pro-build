@@ -210,14 +210,27 @@ jobs:
           echo "sloppiness = file_stat_matches,include_file_ctime,include_file_mtime,pch_defines,file_macro,time_macros" >> "$GITHUB_WORKSPACE/.ccache_ace6/ccache.conf"
           ccache --version
 
+      - name: 🔑 Compute ccache fingerprint
+        id: ccache-fp
+        run: |
+          # Everything that changes the kernel .config (feature toggles, suffix,
+          # source commit) must change the cache key, otherwise a restore-keys
+          # match on stale parameters would skip the Release pull and force a
+          # full rebuild. build_time is intentionally excluded: it only touches
+          # the timestamp files (sloppiness time_macros covers the rest).
+          SRC=$(curl -sL "${{ vars.REPO_BASE || 'https://api.github.com' }}/repos/GuLingguang/oneplus-sm8750-kernel-pro/commits/lineage-23.2" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" | grep -oE '"sha": "[0-9a-f]{40}"' | head -1 | grep -oE '[0-9a-f]{40}' || echo unknown)
+          FP=$(printf '%s' "${{ inputs.ksu_type }}|${{ inputs.susfs_enable }}|${{ inputs.lz4_zstd }}|${{ inputs.lz4kd_enable }}|${{ inputs.show_all_algos }}|${{ inputs.zram_writeback }}|${{ inputs.droidspaces }}|${{ inputs.baseband_guard }}|${{ inputs.cve_patch }}|${{ inputs.better_net }}|${{ inputs.bbr_enable }}|${{ inputs.kpm_enable }}|${{ inputs.rekernel_enable }}|${{ inputs.kernel_suffix }}|$SRC" | md5sum | cut -d' ' -f1)
+          echo "CCACHE_FP=$FP" >> "$GITHUB_ENV"
+          echo "ccache fingerprint: $FP (src $SRC)"
+
       - name: 💾 Load ccache cache
         uses: actions/cache/restore@v5
         id: ccache-restore
         with:
           path: .ccache_ace6
-          # run_id in the key keeps every save unique (see Save step); restore
-          # falls back to the newest matching cache via restore-keys
-          key: ccache-ace6-O2-FT-${{ runner.os }}-${{ github.ref_name }}-${{ github.run_id }}
+          # fingerprint key: exact hit means identical parameters, so the
+          # Release pull can be skipped; restore-keys only as stale fallback
+          key: ccache-ace6-O2-FT-${{ runner.os }}-${{ github.ref_name }}-${{ env.CCACHE_FP }}
           restore-keys: |
             ccache-ace6-O2-FT-${{ runner.os }}-${{ github.ref_name }}-
             ccache-ace6-O2-FT-${{ runner.os }}-
@@ -233,6 +246,10 @@ jobs:
           # Load may contain entries the Release archive lacks (ccache entry
           # filenames are content hashes, so overlapping files are identical
           # and merging is always safe).
+          if [ "${{ steps.ccache-restore.outputs.cache-hit }}" = "true" ]; then
+            echo "GitHub cache hit (fingerprint match), skip public pull"
+            exit 0
+          fi
           mkdir -p ${{ env.CCACHE_DIR }}
           if gh release download "ccache-ace6-O2-FT" -p "ccache-ace6-O2-FT.tar.zst" -R $GITHUB_REPOSITORY 2>/dev/null; then
             echo "Public ccache downloaded, extracting (merge)..."
@@ -543,10 +560,11 @@ jobs:
         if: ${{ inputs.ccache_update }}
         uses: actions/cache/save@v5
         with:
-          # workspace-relative path (see Load step); run_id keeps the key unique
-          # per run so the save is never skipped by "cache hit on primary key"
+          # workspace-relative path (see Load step); fingerprint key: same
+          # parameters -> same key -> GitHub skips the re-upload (identical
+          # cache), new parameters -> fresh save
           path: .ccache_ace6
-          key: ccache-ace6-O2-FT-${{ runner.os }}-${{ github.ref_name }}-${{ github.run_id }}
+          key: ccache-ace6-O2-FT-${{ runner.os }}-${{ github.ref_name }}-${{ env.CCACHE_FP }}
 
       - name: 📤 Upload public ccache
         if: ${{ inputs.ccache_update }}
