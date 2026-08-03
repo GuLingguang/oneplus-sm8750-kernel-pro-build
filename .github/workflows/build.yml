@@ -218,7 +218,10 @@ jobs:
           # match on stale parameters would skip the Release pull and force a
           # full rebuild. build_time is intentionally excluded: it only touches
           # the timestamp files (sloppiness time_macros covers the rest).
-          SRC=$(curl -sL "${{ vars.REPO_BASE || 'https://api.github.com' }}/repos/GuLingguang/oneplus-sm8750-kernel-pro/commits/lineage-23.2" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" | grep -oE '"sha": "[0-9a-f]{40}"' | head -1 | grep -oE '[0-9a-f]{40}' || echo unknown)
+          SRC=$(curl -sL "${{ vars.REPO_BASE || 'https://api.github.com' }}/repos/GuLingguang/oneplus-sm8750-kernel-pro/commits/lineage-23.2" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" | grep -oE '"sha": "[0-9a-f]{40}"' | head -1 | grep -oE '[0-9a-f]{40}' || true)
+          # single source of truth for Prepare kernel sources (one query, and
+          # the fingerprint is guaranteed to match the LOCALVERSION actually used)
+          echo "SRC_COMMIT=$SRC" >> "$GITHUB_ENV"
           FP=$(printf '%s' "${{ inputs.ksu_type }}|${{ inputs.susfs_enable }}|${{ inputs.lz4_zstd }}|${{ inputs.lz4kd_enable }}|${{ inputs.show_all_algos }}|${{ inputs.zram_writeback }}|${{ inputs.droidspaces }}|${{ inputs.baseband_guard }}|${{ inputs.cve_patch }}|${{ inputs.better_net }}|${{ inputs.bbr_enable }}|${{ inputs.kpm_enable }}|${{ inputs.rekernel_enable }}|${{ inputs.kernel_suffix }}|$SRC" | md5sum | cut -d' ' -f1)
           echo "CCACHE_FP=$FP" >> "$GITHUB_ENV"
           echo "ccache fingerprint: $FP (src $SRC)"
@@ -265,8 +268,8 @@ jobs:
           set -e
           mkdir -p work
           cd work
-          # Get real branch commit (zip has no .git)
-          SRC_COMMIT=$(curl -sL "${{ vars.REPO_BASE || 'https://api.github.com' }}/repos/GuLingguang/oneplus-sm8750-kernel-pro/commits/lineage-23.2" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" | grep -oE '"sha": "[0-9a-f]{40}"' | head -1 | grep -oE '[0-9a-f]{40}' || true)
+          # Source commit already fetched by Compute ccache fingerprint
+          SRC_COMMIT="${SRC_COMMIT:-}"
           echo "SRC_COMMIT=$SRC_COMMIT" >> "$GITHUB_ENV"
           echo "Source commit: $SRC_COMMIT"
           [ -n "$SRC_COMMIT" ] || { echo "WARN: failed to get commit, using plain -4k"; SRC_COMMIT=""; }
