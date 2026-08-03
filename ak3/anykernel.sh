@@ -1,10 +1,10 @@
 ### AnyKernel3 Ramdisk Mod Script
-## osm0sis @ xda-developers & GitHub @ Xiaomichael&cctv18
+## osm0sis @ xda-developers & GitHub @ Lingguang
 
 ### AnyKernel setup
 # global properties
 properties() { '
-kernel.string=AnyKernel3 by KernelSU Developers | Build by cctv18
+kernel.string=Ace6 Kernel | Build by Lingguang
 do.devicecheck=0
 do.modules=0
 do.systemless=0
@@ -31,7 +31,7 @@ NO_MAGISK_CHECK=1
 # import functions/variables and setup patching - see for reference (DO NOT REMOVE)
 . tools/ak3-core.sh
 
-ui_print "内核构建者: Coolapk@cctv18"
+ui_print "内核构建者: Lingguang"
 
 # Resolving occasional file system I/O latency issues which may cause binary execution exceptions
 sync
