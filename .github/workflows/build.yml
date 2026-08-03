@@ -129,6 +129,9 @@ jobs:
 
       - name: 配置 ccache
         run: |
+          # 使用 ccache-ECS（特化内核编译缓存，cctv18 式）
+          sudo cp -f $GITHUB_WORKSPACE/lib/ccache-ecs /usr/local/bin/ccache
+          sudo chmod +x /usr/local/bin/ccache
           echo "CCACHE_DIR=$HOME/.ccache_ace6" >> "$GITHUB_ENV"
           echo "CCACHE_MAXSIZE=3G" >> "$GITHUB_ENV"
           # sloppiness：放宽缓存匹配，提升跨构建命中率（cctv18 式）
