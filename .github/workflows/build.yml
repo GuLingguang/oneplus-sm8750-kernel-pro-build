@@ -575,7 +575,7 @@ jobs:
                     cat <<EOF > release_notes.md
           # ⚡ Ace6 Kernel Build
 
-          🏷️ **Category**: `kernel` \| `${{ inputs.ksu_type }}` \| ksu${{ needs.build.outputs.ksuver }}
+          🏷️ **Category**: `kernel` | `${{ inputs.ksu_type }}` | ksu${{ needs.build.outputs.ksuver }}
 
           ---
 
