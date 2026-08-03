@@ -707,4 +707,6 @@ jobs:
             --notes-file release_notes.md \
             release_zips/*.zip
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # PAT (fine-grained, this repo only) publishes as the user so the
+          # release shows a human author instead of github-actions[bot]
+          GH_TOKEN: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
