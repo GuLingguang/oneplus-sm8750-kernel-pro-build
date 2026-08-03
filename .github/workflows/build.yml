@@ -153,6 +153,7 @@ jobs:
     outputs:
       ak3name: ${{ steps.package.outputs.ak3name }}
       ksuver: ${{ steps.ksu_version.outputs.ksuver }}
+      kernelver: ${{ steps.verify.outputs.kernelver }}
     steps:
       - uses: actions/checkout@v4
 
@@ -539,10 +540,15 @@ jobs:
           echo "Dummy Image created (debug mode)"
 
       - name: ✅ Verify artifacts
+        id: verify
         if: ${{ !inputs.debug_skip_build }}
         run: |
           cd work/src
           strings arch/arm64/boot/Image | grep -q "Linux version 6.6.139" || exit 1
+          # real kernel version straight from the built Image (no guessing/assembling)
+          KERNEL_VER=$(strings arch/arm64/boot/Image | grep -m1 "^Linux version " || true)
+          echo "kernelver=$KERNEL_VER" >> "$GITHUB_OUTPUT"
+          echo "Real kernel version: $KERNEL_VER"
           ls -la arch/arm64/boot/Image
 
       # ---------- KPM/KPN patch (post-build, binary) ----------
@@ -662,7 +668,7 @@ jobs:
 
           | Item | Value |
           |---|---|
-          | Kernel | 6.6.139-4k |
+          | Kernel | ${{ needs.build.outputs.kernelver || 'n/a' }} |
           | KernelSU | ${{ needs.build.outputs.ksuver }} |
           | Build date | $(date +%Y-%m-%d) |
 
@@ -680,16 +686,9 @@ jobs:
           | BBR | ${{ inputs.bbr_enable }} |
           | Re:Kernel | ${{ inputs.rekernel_enable }} |
 
-          ## 📥 Manager downloads
-
-          - [ReSukiSU](https://github.com/ReSukiSU/ReSukiSU/releases)
-          - [SukiSU Ultra](https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases)
-          - [KernelSU Next](https://github.com/KernelSU-Next/KernelSU-Next/releases)
-          - [KSU (original)](https://github.com/tiann/KernelSU/releases)
-
           ## 📲 Flashing
 
-          Flash the AK3 zip via recovery (TWRP/OrangeFox/OFRP).
+          Flash the AK3 zip via recovery (TWRP/OrangeFox).
           EOF
           gh release create "$TAG" -R $GITHUB_REPOSITORY \
             --title "Ace6 Kernel ${{ inputs.ksu_type }} (ksu${{ needs.build.outputs.ksuver }})" \
