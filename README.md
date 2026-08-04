@@ -186,7 +186,7 @@ This project adapts patches from several sources (primarily the [cctv18/oppo_opl
 - **New files** (that patches can't create) live in `patches/extra/` — lz4/zstd libs, susfs.c, evdi, ntsync, Baseband-guard
 - **Re:Kernel** uses source hooks (netlink + binder/signal) adapted to the lineage-6.6.139 API
 - **Modules** come from the ROM's official prebuilt `vendor_dlkm` — no need to rebuild the module tree
-- Some OnePlus-official-only features (风驰 scx governor, ADIOS IO scheduler) are **not ported** — their source exists only in the official OKI tree
+- Some OnePlus-official-only features (Fengchi scx governor, ADIOS IO scheduler) are **not ported** — their source exists only in the official OKI tree
 
 ## Reproducibility
 

@@ -31,7 +31,7 @@ NO_MAGISK_CHECK=1
 # import functions/variables and setup patching - see for reference (DO NOT REMOVE)
 . tools/ak3-core.sh
 
-ui_print "内核构建者: GuLingguang@GitHub"
+ui_print "Kernel Builder: GuLingguang@GitHub"
 
 # Resolving occasional file system I/O latency issues which may cause binary execution exceptions
 sync
@@ -47,7 +47,7 @@ else
     flash_boot
 fi
 ## end boot install
-# 优先选择模块路径
+# Prefer module paths first
 if [ -f "$AKHOME/zram.zip" ]; then
     MODULE_PATH="$AKHOME/zram.zip"
     KSUD_PATH="/data/adb/ksud"

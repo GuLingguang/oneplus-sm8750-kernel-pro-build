@@ -71,7 +71,7 @@ while [ $# -gt 0 ]; do
     --out) OUT_DIR="${2:?--out requires a value}"; shift 2 ;;
     --clean) CLEAN=1; shift ;;
     -h|--help) grep "^#" "$0" | head -35; exit 0 ;;
-    *) echo "未知参数: $1"; exit 1 ;;
+    *) echo "Unknown option: $1"; exit 1 ;;
   esac
 done
 
@@ -86,7 +86,7 @@ case "$OUT_DIR" in
 esac
 
 log() { echo -e "\033[1;34m===\033[0m $*"; }
-die() { echo -e "\033[1;31m错误:\033[0m $*" >&2; exit 1; }
+die() { echo -e "\033[1;31mError:\033[0m $*" >&2; exit 1; }
 
 # ---- Clean mode ----
 if [ "$CLEAN" = "1" ]; then
@@ -144,7 +144,7 @@ echo "distro: $DISTRO"
 echo "clang: $("$CLANG_FOUND" --version | head -1)"
 
 # ---- [1] Prepare sources (3 repos) ----
-log "[1] 准备源码"
+log "[1] Preparing sources"
 mkdir -p "$WORK_DIR"
 cd "$WORK_DIR"
 if [ -z "${KERNEL_SRC:-}" ]; then
@@ -172,7 +172,7 @@ SRC_COMMIT=$(curl -sL "https://api.github.com/repos/GuLingguang/oneplus-sm8750-k
 echo "  Source commit: ${SRC_COMMIT:-unknown}"
 
 # ---- [2] Apply patches (by toggle) ----
-log "[2] 应用补丁"
+log "[2] Applying patches"
 apply() { patch -p1 -F3 --batch -f < "$REPO_DIR/patches/split/$1" || die "patch $1 failed"; }
 apply 07_compile_fixes.patch
 [ "$KSU" != "none" ] && apply 00_ksu_hooks.patch
@@ -185,7 +185,7 @@ apply 07_compile_fixes.patch
 [ "$REKERNEL" = "1" ] && apply 09_rekernel.patch
 
 # ---- [3] Copy extra files ----
-log "[3] 复制 extra 文件"
+log "[3] Copying extra files"
 [ "$SUSFS" = "1" ] && [ "$KSU" != "none" ] && {
   cp -r "$REPO_DIR/patches/extra/fs/susfs.c" fs/
   cp -r "$REPO_DIR/patches/extra/include/linux/susfs.h" "$REPO_DIR/patches/extra/include/linux/susfs_def.h" include/linux/
@@ -212,7 +212,7 @@ log "[3] 复制 extra 文件"
 
 # ---- [4] KernelSU ----
 if [ "$KSU" != "none" ]; then
-  log "[4] 集成 KernelSU ($KSU)"
+  log "[4] Integrating KernelSU ($KSU)"
   [ -d KernelSU ] && git -C KernelSU pull --ff-only -q || git clone "$REPO_BASE/ReSukiSU/ReSukiSU.git" KernelSU
   ln -sfn ../KernelSU/kernel drivers/kernelsu
   grep -q "kernelsu" drivers/Makefile || echo 'obj-$(CONFIG_KSU) += kernelsu/' >> drivers/Makefile
@@ -222,7 +222,7 @@ if [ "$KSU" != "none" ]; then
 fi
 
 # ---- [5] Deploy config ----
-log "[5] 部署配置"
+log "[5] Deploying config"
 cp "$REPO_DIR/config/config_ace6_final.config" .config
 [ "$KSU" = "none" ] && ./scripts/config --file .config -d CONFIG_KSU -d CONFIG_KSU_SUSFS
 [ "$SUSFS" != "1" ] || [ "$KSU" = "none" ] && ./scripts/config --file .config -d CONFIG_KSU_SUSFS
@@ -255,7 +255,7 @@ make LLVM=1 LLVM_IAS=1 ARCH=arm64 -j$(nproc) Image
 [ -f arch/arm64/boot/Image ] || die "build did not produce Image"
 
 # ---- [7] Verify ----
-log "[7] 验证产物"
+log "[7] Verifying artifacts"
 strings arch/arm64/boot/Image | grep -q "Linux version 6.6.139" || die "version string abnormal"
 
 # ---- [7.5] KPM (KernelPatch, post-build binary patch) ----

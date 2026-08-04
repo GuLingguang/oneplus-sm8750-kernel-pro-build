@@ -1,8 +1,8 @@
-# 编译产物
+# Build artifacts
 work/
 out/
 *.zip
 *.img
 
-# 系统文件
+# System files
 .DS_Store

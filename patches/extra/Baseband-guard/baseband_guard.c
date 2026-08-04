@@ -451,7 +451,7 @@ DEFINE_LSM(baseband_guard) = {
 #endif
 
 MODULE_DESCRIPTION("protect All Block & Power by TG@qdykernel");
-MODULE_AUTHOR("秋刀鱼 & https://t.me/qdykernel");
+MODULE_AUTHOR("Saury & https://t.me/qdykernel");
 MODULE_LICENSE("GPL v2");
 
 
