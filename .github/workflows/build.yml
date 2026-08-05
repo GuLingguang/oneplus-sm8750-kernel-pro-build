@@ -5,7 +5,7 @@ on:
     inputs:
       # ---------- KernelSU ----------
       ksu_type:
-        description: 'KernelSU variant (resukisu = built-in KSU, none = no KSU)'
+        description: 'KernelSU variant (resukisu = built-in KSU, none = no KSU)（KernelSU 类型：resukisu = 内建 KSU，none = 无 KSU）'
         required: true
         type: choice
         default: 'none'
@@ -13,34 +13,34 @@ on:
           - 'resukisu'
           - 'none'
       susfs_enable:
-        description: 'SUSFS mount/root hiding (only takes effect when KernelSU is enabled above)'
+        description: 'SUSFS mount/root hiding (only takes effect when KernelSU is enabled above)（SUSFS 挂载/root 隐藏；仅当上方 KernelSU 开启时生效）'
         required: true
         type: boolean
         default: 'false'
       # ---------- Performance ----------
       lz4_zstd:
-        description: 'Update kernel compression libs to lz4 1.10 + zstd 1.5.7 (ARM64 NEON, better ratio) - replaces in-tree lz4/zstd'
+        description: 'Update kernel compression libs to lz4 1.10 + zstd 1.5.7 (ARM64 NEON, better ratio) - replaces in-tree lz4/zstd（升级内核压缩库到 lz4 1.10 + zstd 1.5.7（ARM64 NEON，更高压缩比），替换树内 lz4/zstd）'
         required: true
         type: boolean
         default: 'false'
       lz4kd_enable:
-        description: 'Add LZ4KD zram compressor (independent lz4 variant) - shows up in comp_algorithm, swappable via sysfs'
+        description: 'Add LZ4KD zram compressor (independent lz4 variant) - shows up in comp_algorithm, swappable via sysfs（新增 LZ4KD zram 压缩器（独立 lz4 变体）；出现在 comp_algorithm 中，可经 sysfs 切换）'
         required: true
         type: boolean
         default: 'false'
       show_all_algos:
-        description: 'Compile in every zram compressor (lz4hc/842 included) - comp_algorithm then lists all available algorithms'
+        description: 'Compile in every zram compressor (lz4hc/842 included) - comp_algorithm then lists all available algorithms（编译进全部 zram 压缩器（含 lz4hc/842）；comp_algorithm 将列出所有可用算法）'
         required: true
         type: boolean
         default: 'false'
       zram_writeback:
-        description: 'ZRAM writeback support (idle/incompressible pages -> backing device; needs runtime backing_dev config)'
+        description: 'ZRAM writeback support (idle/incompressible pages -> backing device; needs runtime backing_dev config)（ZRAM writeback 支持：空闲/不可压缩页 -> 后备设备；运行时需配置 backing_dev）'
         required: true
         type: boolean
         default: 'false'
       # ---------- Features ----------
       droidspaces:
-        description: 'Droidspaces container (standard = +ntsync, extend = more)'
+        description: 'Droidspaces container (standard = +ntsync, extend = more)（Droidspaces 容器：standard = +ntsync，extend = 更多）'
         required: true
         type: choice
         default: 'false'
@@ -49,64 +49,64 @@ on:
           - 'standard'
           - 'extend'
       baseband_guard:
-        description: 'Kernel-level Baseband Guard (anti-format)'
+        description: 'Kernel-level Baseband Guard (anti-format)（内核级基带保护（防格式化））'
         required: true
         type: boolean
         default: 'false'
       cve_patch:
-        description: 'CVE security patches (GhostLock)'
+        description: 'CVE security patches (GhostLock)（CVE 安全补丁（GhostLock））'
         required: true
         type: boolean
         default: 'false'
       better_net:
-        description: 'Better network (ipset/iptables)'
+        description: 'Better network (ipset/iptables)（增强网络（ipset/iptables））'
         required: true
         type: boolean
         default: 'false'
       bbr_enable:
-        description: 'BBR TCP congestion control'
+        description: 'BBR TCP congestion control（BBR TCP 拥塞控制）'
         required: true
         type: boolean
         default: 'false'
       kpm_enable:
-        description: 'KPM/KPN support (KpatchNext; may conflict with ReSukiSU built-in kpm)'
+        description: 'KPM/KPN support (KpatchNext; may conflict with ReSukiSU built-in kpm)（KPM/KPN 支持（KpatchNext；可能与 ReSukiSU 内建 kpm 冲突））'
         required: true
         type: boolean
         default: 'false'
       rekernel_enable:
-        description: 'Re:Kernel support (Freezer/NoActive binder hooks)'
+        description: 'Re:Kernel support (Freezer/NoActive binder hooks)（Re:Kernel 支持（Freezer/NoActive binder 钩子））'
         required: true
         type: boolean
         default: 'false'
       kernel_suffix:
-        description: 'Kernel version suffix (e.g. perf; empty = real commit)'
+        description: 'Kernel version suffix (e.g. perf; empty = real commit)（内核版本后缀（如 perf；空 = 真实 commit））'
         required: false
         type: string
         default: ''
       # ---------- Attribution ----------
       attribution_enable:
-        description: 'Attribution (build tags/KSU version/AK3)'
+        description: 'Attribution (build tags/KSU version/AK3)（署名（构建标签/KSU 版本/AK3））'
         required: true
         type: boolean
         default: 'true'
       build_user:
-        description: 'Attribution user'
+        description: 'Attribution user（署名用户）'
         required: false
         type: string
         default: 'Lingguang'
       build_host:
-        description: 'Attribution host'
+        description: 'Attribution host（署名主机）'
         required: false
         type: string
         default: 'kernel-builder'
       # ---------- Release ----------
       release_enable:
-        description: 'Create GitHub Release'
+        description: 'Create GitHub Release（创建 GitHub Release）'
         required: true
         type: boolean
         default: 'false'
       artifact_mode:
-        description: 'Upload artifacts (ak3 or all: +Image+boot.img)'
+        description: 'Upload artifacts (ak3 or all: +Image+boot.img)（上传产物：ak3 或 all（+Image+boot.img））'
         required: true
         type: choice
         default: 'ak3'
@@ -114,27 +114,27 @@ on:
           - 'ak3'
           - 'all'
       ccache_update:
-        description: 'Update public ccache (upload to Release)'
+        description: 'Update public ccache (upload to Release)（更新公共 ccache（上传到 Release））'
         required: true
         type: boolean
         default: 'false'
       ccache_debug:
-        description: 'Upload ccache debug logs'
+        description: 'Upload ccache debug logs（上传 ccache 调试日志）'
         required: true
         type: boolean
         default: 'false'
       tag:
-        description: 'Release tag (empty = auto date)'
+        description: 'Release tag (empty = auto date)（Release 标签（空 = 自动日期））'
         required: false
         type: string
         default: ''
       build_time:
-        description: 'Custom build time string (e.g. Sun Dec 01 08:10:00 UTC 2024); empty = current UTC time'
+        description: 'Custom build time string (e.g. Sun Dec 01 08:10:00 UTC 2024); empty = current UTC time（自定义构建时间串（如 Sun Dec 01 08:10:00 UTC 2024）；空 = 当前 UTC 时间）'
         required: false
         type: string
         default: ''
       debug_skip_build:
-        description: 'Debug: skip kernel build, test packaging/upload only (creates dummy Image)'
+        description: 'Debug: skip kernel build, test packaging/upload only (creates dummy Image)（调试：跳过内核编译，只测试打包/上传（生成假 Image））'
         required: true
         type: boolean
         default: 'false'
@@ -159,7 +159,7 @@ jobs:
       - uses: actions/checkout@v4
 
       # ---------- Toolchain: AOSP clang r563880c (from Release) ----------
-      - name: 🔧 Install AOSP Clang 21 (r563880c) + deps
+      - name: 🔧 Install AOSP Clang 21 (r563880c) + deps（安装 AOSP Clang 21 及依赖）
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -179,11 +179,11 @@ jobs:
           printf 'def generate_gki_certificate(*args, **kwargs):\n    raise SystemExit("GKI signing not supported (stub)")\n' > /tmp/gki/generate_gki_certificate.py
           echo "PYTHONPATH=/tmp" >> "$GITHUB_ENV"
 
-      - name: ✅ Verify toolchain
+      - name: ✅ Verify toolchain（验证工具链）
         run: clang --version && clang -print-prog-name=ld.lld
 
       # ---------- ccache (cctv18-style) ----------
-      - name: 🧹 Clean runner space (async, non-blocking)
+      - name: 🧹 Clean runner space (async, non-blocking)（清理 runner 空间（异步，不阻塞））
         run: |
           # Deletes run in the background WITHOUT blocking the build:
           # - no `wait`: step returns immediately
@@ -196,7 +196,7 @@ jobs:
           (setsid sudo rm -rf /opt/hostedtoolcache/CodeQL >/dev/null 2>&1 &)
           df -h
 
-      - name: 💾 Configure ccache
+      - name: 💾 Configure ccache（配置 ccache）
         run: |
           # Use ccache-ECS (specialized kernel cache)
           sudo cp -f $GITHUB_WORKSPACE/lib/ccache-ecs /usr/local/bin/ccache
@@ -212,7 +212,7 @@ jobs:
           echo "sloppiness = file_stat_matches,include_file_ctime,include_file_mtime,pch_defines,file_macro,time_macros" >> "$GITHUB_WORKSPACE/.ccache_ace6/ccache.conf"
           ccache --version
 
-      - name: 🔑 Compute ccache fingerprint
+      - name: 🔑 Compute ccache fingerprint（计算 ccache 指纹）
         id: ccache-fp
         run: |
           # Everything that changes the kernel .config (feature toggles, suffix,
@@ -220,7 +220,7 @@ jobs:
           # match on stale parameters would skip the Release pull and force a
           # full rebuild. build_time is intentionally excluded: it only touches
           # the timestamp files (sloppiness time_macros covers the rest).
-          SRC=$(curl -sL "${{ vars.REPO_BASE || 'https://api.github.com' }}/repos/GuLingguang/oneplus-sm8750-kernel-pro/commits/lineage-23.2" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" | grep -oE '"sha": "[0-9a-f]{40}"' | head -1 | grep -oE '[0-9a-f]{40}' || true)
+          SRC=$(curl -sL "${{ vars.REPO_BASE || 'https://api.github.com' }}/repos/Ace6-Development/android_kernel_oneplus_sm8750/commits/lineage-23.2" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" | grep -oE '"sha": "[0-9a-f]{40}"' | head -1 | grep -oE '[0-9a-f]{40}' || true)
           # single source of truth for Prepare kernel sources (one query, and
           # the fingerprint is guaranteed to match the LOCALVERSION actually used)
           echo "SRC_COMMIT=$SRC" >> "$GITHUB_ENV"
@@ -228,7 +228,7 @@ jobs:
           echo "CCACHE_FP=$FP" >> "$GITHUB_ENV"
           echo "ccache fingerprint: $FP (src $SRC)"
 
-      - name: 💾 Load ccache cache
+      - name: 💾 Load ccache cache（加载 ccache 缓存）
         uses: actions/cache/restore@v5
         id: ccache-restore
         with:
@@ -241,7 +241,7 @@ jobs:
             ccache-ace6-O2-FT-${{ runner.os }}-
             ccache-ace6-O2-FT-
 
-      - name: 💾 Pull public ccache
+      - name: 💾 Pull public ccache（拉取公共 ccache）
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -265,7 +265,7 @@ jobs:
           fi
 
       # ---------- Prepare sources (3 repos) ----------
-      - name: 📥 Prepare kernel sources
+      - name: 📥 Prepare kernel sources（准备内核源码）
         run: |
           set -e
           mkdir -p work
@@ -276,11 +276,11 @@ jobs:
           echo "Source commit: $SRC_COMMIT"
           [ -n "$SRC_COMMIT" ] || { echo "WARN: failed to get commit, using plain -4k"; SRC_COMMIT=""; }
           # Download sources via zip (parallel)
-          curl -sL "${{ vars.REPO_BASE || 'https://github.com' }}/GuLingguang/oneplus-sm8750-kernel-pro/archive/refs/heads/lineage-23.2.zip" -o src.zip &
+          curl -sL "${{ vars.REPO_BASE || 'https://github.com' }}/Ace6-Development/android_kernel_oneplus_sm8750/archive/refs/heads/lineage-23.2.zip" -o src.zip &
           curl -sL "${{ vars.REPO_BASE || 'https://github.com' }}/Ace6-Development/android_kernel_oneplus_sm8750-modules/archive/refs/heads/lineage-23.2.zip" -o modules.zip &
           curl -sL "${{ vars.REPO_BASE || 'https://github.com' }}/LineageOS/android_kernel_oneplus_sm8750-devicetrees/archive/refs/heads/lineage-23.2.zip" -o dt.zip &
           wait
-          unzip -q src.zip && mv oneplus-sm8750-kernel-pro-lineage-23.2 src
+          unzip -q src.zip && mv android_kernel_oneplus_sm8750-lineage-23.2 src
           unzip -q modules.zip && mv android_kernel_oneplus_sm8750-modules-lineage-23.2 sm8750-modules
           unzip -q dt.zip && mv android_kernel_oneplus_sm8750-devicetrees-lineage-23.2 sm8750-devicetrees
           rm -f src.zip modules.zip dt.zip
@@ -290,51 +290,51 @@ jobs:
           done
 
       # ---------- Apply patches (by toggle) ----------
-      - name: 🔧 Apply compile fixes
+      - name: 🔧 Apply compile fixes（应用编译修复补丁）
         run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/07_compile_fixes.patch
         working-directory: work/src
 
-      - name: 🔧 Apply KSU hooks
+      - name: 🔧 Apply KSU hooks（应用 KSU 钩子）
         if: ${{ inputs.ksu_type != 'none' }}
         run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/00_ksu_hooks.patch
         working-directory: work/src
 
-      - name: 🔧 Apply SUSFS main patch
+      - name: 🔧 Apply SUSFS main patch（应用 SUSFS 主补丁）
         if: ${{ inputs.susfs_enable && inputs.ksu_type != 'none' }}
         run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/01_susfs_main.patch
         working-directory: work/src
 
-      - name: 🔧 Apply lz4 patch
+      - name: 🔧 Apply lz4 patch（应用 lz4 补丁）
         if: inputs.lz4_zstd
         run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/02_lz4.patch
         working-directory: work/src
 
-      - name: 🔧 Apply zstd patch
+      - name: 🔧 Apply zstd patch（应用 zstd 补丁）
         if: inputs.lz4_zstd
         run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/03_zstd.patch
         working-directory: work/src
 
-      - name: 🔧 Apply LZ4KD patch
+      - name: 🔧 Apply LZ4KD patch（应用 LZ4KD 补丁）
         if: inputs.lz4kd_enable
         run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/04_lz4kd.patch
         working-directory: work/src
 
-      - name: 🔧 Apply Droidspaces patch
+      - name: 🔧 Apply Droidspaces patch（应用 Droidspaces 补丁）
         if: ${{ inputs.droidspaces != 'false' }}
         run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/05_droidspaces.patch
         working-directory: work/src
 
-      - name: 🔧 Apply Baseband Guard patch
+      - name: 🔧 Apply Baseband Guard patch（应用基带保护补丁）
         if: inputs.baseband_guard
         run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/06_baseband_guard.patch
         working-directory: work/src
 
-      - name: 🔧 Apply CVE patch
+      - name: 🔧 Apply CVE patch（应用 CVE 补丁）
         if: inputs.cve_patch
         run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/08_cve.patch
         working-directory: work/src
 
-      - name: 🔧 Apply Re:Kernel patch
+      - name: 🔧 Apply Re:Kernel patch（应用 Re:Kernel 补丁）
         if: ${{ inputs.rekernel_enable }}
         # source patch (binder/signal/netlink hooks, #ifdef CONFIG_REKERNEL)
         # MUST run before the build - was previously applied after Build
@@ -343,7 +343,7 @@ jobs:
         working-directory: work/src
 
       # ---------- Copy extra files (new files) ----------
-      - name: 📄 Copy extra files
+      - name: 📄 Copy extra files（拷贝额外文件）
         run: |
           set -e
           # SUSFS new files
@@ -380,7 +380,7 @@ jobs:
           fi
 
       # ---------- KernelSU (by ksu_type) ----------
-      - name: 🔗 Integrate KernelSU
+      - name: 🔗 Integrate KernelSU（集成 KernelSU）
         if: ${{ inputs.ksu_type != 'none' }}
         run: |
           set -e
@@ -399,7 +399,7 @@ jobs:
           KSU_REPO: ""
 
       # ---------- KSU version ----------
-      - name: 🔢 Compute KSU version
+      - name: 🔢 Compute KSU version（计算 KSU 版本）
         id: ksu_version
         if: ${{ inputs.ksu_type != 'none' }}
         run: |
@@ -409,7 +409,7 @@ jobs:
           echo "KSU version: $VER ($COUNT commits)"
 
       # ---------- SUSFS KSU adaptation ----------
-      - name: 🔧 Apply SUSFS KSU adaptation
+      - name: 🔧 Apply SUSFS KSU adaptation（应用 SUSFS KSU 适配）
         if: ${{ inputs.susfs_enable && inputs.ksu_type != 'none' }}
         run: |
           cd KernelSU
@@ -418,7 +418,7 @@ jobs:
         working-directory: work/src
 
       # ---------- Attribution ----------
-      - name: ✍️ Configure attribution
+      - name: ✍️ Configure attribution（配置署名）
         run: |
           if [ "${{ inputs.attribution_enable }}" = "true" ]; then
             echo "BUILD_USER=${{ inputs.build_user }}" >> "$GITHUB_ENV"
@@ -433,7 +433,7 @@ jobs:
           fi
 
       # ---------- Config ----------
-      - name: ⚙️ Deploy config
+      - name: ⚙️ Deploy config（部署内核配置）
         run: |
           set -e
           cd work/src
@@ -492,7 +492,7 @@ jobs:
           grep -qE 'CONFIG_LOCALVERSION="-4k-(g[0-9a-f]{12}|[^"]+)"' .config || exit 1
 
       # ---------- Build ----------
-      - name: 🛠️ Build kernel
+      - name: 🛠️ Build kernel（编译内核）
         if: ${{ !inputs.debug_skip_build }}
         run: |
           sudo sysctl -w vm.max_map_count=1048576
@@ -533,14 +533,14 @@ jobs:
           [ -f arch/arm64/boot/Image ] || exit 1
 
       # ---------- Verify ----------
-      - name: Debug - create dummy Image (skip build)
+      - name: Debug - create dummy Image (skip build)（调试：生成假 Image（跳过编译））
         if: ${{ inputs.debug_skip_build }}
         run: |
           mkdir -p work/src/arch/arm64/boot
           echo "DEBUG DUMMY IMAGE" > work/src/arch/arm64/boot/Image
           echo "Dummy Image created (debug mode)"
 
-      - name: ✅ Verify artifacts
+      - name: ✅ Verify artifacts（验证产物）
         id: verify
         if: ${{ !inputs.debug_skip_build }}
         run: |
@@ -557,7 +557,7 @@ jobs:
           ls -la arch/arm64/boot/Image
 
       # ---------- KPM/KPN patch (post-build, binary) ----------
-      - name: 🧩 Apply KPM patch
+      - name: 🧩 Apply KPM patch（应用 KPM 补丁）
         if: ${{ inputs.kpm_enable && !inputs.debug_skip_build }}
         run: |
           cd work/src/arch/arm64/boot
@@ -570,7 +570,7 @@ jobs:
           echo "KPM patched"
 
       # ---------- Save ccache ----------
-      - name: 💾 Save ccache
+      - name: 💾 Save ccache（保存 ccache）
         if: ${{ inputs.ccache_update }}
         uses: actions/cache/save@v5
         with:
@@ -580,7 +580,7 @@ jobs:
           path: .ccache_ace6
           key: ccache-ace6-O2-FT-${{ runner.os }}-${{ github.ref_name }}-${{ env.CCACHE_FP }}
 
-      - name: 📤 Upload public ccache
+      - name: 📤 Upload public ccache（上传公共 ccache）
         if: ${{ inputs.ccache_update }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -594,7 +594,7 @@ jobs:
             || gh release upload "ccache-ace6-O2-FT" ccache-ace6-O2-FT.tar.zst --clobber
           echo "Public ccache uploaded!"
 
-      - name: 🔍 Upload ccache debug log
+      - name: 🔍 Upload ccache debug log（上传 ccache 调试日志）
         if: ${{ inputs.ccache_debug }}
         uses: actions/upload-artifact@v4
         with:
@@ -603,7 +603,7 @@ jobs:
           if-no-files-found: ignore
 
       # ---------- Package AK3 ----------
-      - name: 📦 Package AK3
+      - name: 📦 Package AK3（打包 AK3）
         id: package
         run: |
           set -e
@@ -638,7 +638,7 @@ jobs:
           fi
 
       # ---------- Upload artifacts ----------
-      - name: 📤 Upload artifacts
+      - name: 📤 Upload artifacts（上传产物）
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.package.outputs.ak3name }}
@@ -651,12 +651,12 @@ jobs:
     if: ${{ inputs.release_enable }}
     runs-on: ubuntu-latest
     steps:
-      - name: 📥 Download artifacts
+      - name: 📥 Download artifacts（下载产物）
         uses: actions/download-artifact@v4
         with:
           name: ${{ needs.build.outputs.ak3name }}
           path: release_zips
-      - name: 🚀 Publish Release
+      - name: 🚀 Publish Release（发布 Release）
         run: |
           TAG="${{ inputs.tag }}"
           if [ -z "$TAG" ]; then
