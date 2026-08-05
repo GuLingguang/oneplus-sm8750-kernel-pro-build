@@ -66,8 +66,8 @@ else
   log "downloading kernel zip ($BRANCH)..."
   curl -sL "https://github.com/$KERNEL_REPO/archive/refs/heads/$BRANCH.zip" -o kernel.zip \
     || die "download failed"
-  rm -rf src
-  unzip -q kernel.zip && rm kernel.zip
+  rm -rf src && mkdir -p src
+  unzip -q kernel.zip -d src && rm kernel.zip
   TREE="src/$(basename "$KERNEL_REPO")-$BRANCH"
 fi
 cd "$TREE"
