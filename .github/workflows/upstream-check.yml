@@ -1,0 +1,62 @@
+name: Upstream drift check
+
+# Weekly check that the current lineage-23.2 kernel tree still accepts our
+# split patches. The whole reproducibility story rests on "upstream hasn't
+# moved" — this makes that claim checkable instead of assumed.
+# A failed dry-run means "review needed", not "broken": the patch context may
+# have drifted while the intent still applies (or upstream may have adopted an
+# equivalent fix, making the patch redundant). On failure an issue is opened
+# (only one open at a time); close it after review and the check re-arms.
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'      # Monday 00:00 UTC
+  workflow_dispatch:          # manual trigger
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🔍 Run upstream drift check
+        run: ./check_upstream.sh --ci
+
+      - name: ⚠️ Open drift issue on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const TITLE = 'Upstream drift: patch(es) no longer apply — review needed';
+            const { data: open } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+            });
+            if (open.some(i => i.title === TITLE && !i.pull_request)) {
+              console.log('drift issue already open, skipping');
+              return;
+            }
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: TITLE,
+              body: [
+                'The weekly drift check failed: at least one patch in `patches/split/` no longer dry-runs cleanly against the current `lineage-23.2` tree.',
+                '',
+                'A failed dry-run means **review needed**, so it may be harmless:',
+                '',
+                '- **Upstream adopted an equivalent fix** — the patch becomes redundant and can be dropped (GhostLock was this case once)',
+                '- **Upstream upgraded the same library** (lz4/zstd) — same goal, reconcile instead of adapt',
+                '- **Context drift only** — hunks moved beyond the fuzzy match; the patch may still apply by hand',
+                '- **Real drift** — the hook point changed and the feature is now broken; adapt before the next build',
+                '',
+                'Check the failed run log for which patch, diff the hunks against the new tree, act, and close this issue — the check re-arms and opens a fresh one if something else drifts later.',
+                '',
+                'Run: ' + context.serverUrl + '/' + context.repo.owner + '/' + context.repo.repo + '/actions/runs/' + context.runId,
+              ].join('\n'),
+            });
