@@ -2,7 +2,7 @@
 
 > [English](README.md) | **中文（简体）**
 
-> OnePlus Ace 6 / 15R (ktm, SM8750) 自定义内核构建器 —— 可配置的 GitHub Actions 构建，支持 ReSukiSU + SUSFS + Droidspaces + Re:Kernel，已在 Project Infinity X（Android 16）上验证。
+> OnePlus Ace 6 (ktm, SM8750) 自定义内核构建器 —— 可配置的 GitHub Actions 构建，支持 ReSukiSU + SUSFS + Droidspaces + Re:Kernel，已在 Project Infinity X（Android 16）上验证。
 
 ![GitHub Release](https://img.shields.io/github/v/release/GuLingguang/oneplus-sm8750-kernel-pro-build)
 ![GitHub License](https://img.shields.io/github/license/GuLingguang/oneplus-sm8750-kernel-pro-build)
@@ -37,7 +37,9 @@
 
 ## 概览
 
-为 **SM8750（骁龙 8 Elite）平台**构建自定义内核 —— 主要面向 **OnePlus Ace 6 / 15R**（代号 `ktm`），运行 **Project Infinity X**（基于 LineageOS，Android 16，内核 6.6.139）。
+为 **SM8750（骁龙 8 Elite）平台**构建自定义内核 —— 面向 **OnePlus Ace 6**（代号 `ktm`），运行 **Project Infinity X**（基于 LineageOS，Android 16，内核 6.6.139）。
+
+> ℹ️ **命名说明**：海外版「OnePlus 15R」对应的是 **Ace 6T** —— 是*另一款*设备。本内核只适配 Ace 6（`ktm`），不要在 15R / Ace 6T 上刷。
 
 > ⚠️ **只在 Project Infinity X 上测试过** —— 不适用于 ColorOS/OxygenOS。LineageOS（Ace6）上大概率可用，详见[免责声明](#刷机免责声明)。
 
@@ -72,7 +74,7 @@
 
 | ROM | 状态 |
 |---|---|
-| **Project Infinity X**（v3.12，Android 16） | ✅ 已测试可用（OnePlus Ace 6 / 15R `ktm`） |
+| **Project Infinity X**（v3.12，Android 16） | ✅ 已测试可用（OnePlus Ace 6 `ktm`） |
 | **LineageOS**（Ace6 构建） | 🤔 大概率可用 —— 内核/模块/设备树都是原版 LineageOS，只加了非破坏性的 Ace6 适配（MPC7022 电量计、TMS NFC），但**未在真机确认** |
 | **ColorOS / OxygenOS** | ❌ **不支持** —— 大概率无法开机（vendor 集成方式不同） |
 | 其他 | 🏴☠️ 未知领域 |
@@ -104,7 +106,7 @@
 
 ## 验证证据
 
-实测于 **OnePlus Ace 6 / 15R（`ktm`），Project Infinity X v3.12**（2026-08-03）。下表每一行都是在设备上观察到的：
+实测于 **OnePlus Ace 6（`ktm`），Project Infinity X v3.12**（2026-08-03）。下表每一行都是在设备上观察到的：
 
 | 项目 | 证据 |
 |---|---|
@@ -122,7 +124,7 @@
 
 ## 真机截图
 
-拍摄于同一台测试机（OnePlus Ace 6 / 15R `ktm`，Project Infinity X v3.12）。点击任意缩略图查看原图。
+拍摄于同一台测试机（OnePlus Ace 6 `ktm`，Project Infinity X v3.12）。点击任意缩略图查看原图。
 
 <table>
   <tr>
@@ -388,7 +390,7 @@
 
 - **Fengchi（风驰）scx 调度器** —— 一加官方的 sched_ext 调度器
 - **ADIOS IO 调度器** —— 一加官方的定制块层调度器
-- **官方 Ace6/15R 120W SUPERVOOC 快充** —— 内核侧 vooc 协议栈；LOS ROM 的 vendor 侧可能不配合，真机充电效果是验证目标
+- **官方 Ace6 120W SUPERVOOC 快充** —— 内核侧 vooc 协议栈；LOS ROM 的 vendor 侧可能不配合，真机充电效果是验证目标
 
 不保证落地 —— 这是方向不是承诺；开工了才会更新这里的状态。
 

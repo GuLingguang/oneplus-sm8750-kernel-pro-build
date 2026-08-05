@@ -2,7 +2,7 @@
 
 > **English** | [中文（简体）](README_zh.md)
 
-> OnePlus Ace 6 / 15R (ktm, SM8750) custom kernel builder — configurable GitHub Actions build with ReSukiSU + SUSFS + Droidspaces + Re:Kernel support, verified on Project Infinity X (Android 16).
+> OnePlus Ace 6 (ktm, SM8750) custom kernel builder — configurable GitHub Actions build with ReSukiSU + SUSFS + Droidspaces + Re:Kernel support, verified on Project Infinity X (Android 16).
 
 ![GitHub Release](https://img.shields.io/github/v/release/GuLingguang/oneplus-sm8750-kernel-pro-build)
 ![GitHub License](https://img.shields.io/github/license/GuLingguang/oneplus-sm8750-kernel-pro-build)
@@ -37,7 +37,9 @@
 
 ## Overview
 
-Builds a custom kernel for the **SM8750 (Snapdragon 8 Elite) platform** — primarily **OnePlus Ace 6 / 15R** (codename `ktm`), running **Project Infinity X** (LineageOS-based, Android 16, kernel 6.6.139).
+Builds a custom kernel for the **SM8750 (Snapdragon 8 Elite) platform** — the **OnePlus Ace 6** (codename `ktm`), running **Project Infinity X** (LineageOS-based, Android 16, kernel 6.6.139).
+
+> ℹ️ **Naming note**: the overseas "OnePlus 15R" is the **Ace 6T** — a *different* device. This kernel targets the Ace 6 (`ktm`) only; do not flash it on a 15R / Ace 6T.
 
 > ⚠️ **Only tested on Project Infinity X** — NOT for ColorOS/OxygenOS. Probably works on LineageOS (Ace6). See the [disclaimer](#flashing-disclaimer-read-this-or-regret-it).
 
@@ -72,7 +74,7 @@ The kernel is built from the **official Ace6 kernel source** (lineage-23.2 branc
 
 | ROM | Status |
 |---|---|
-| **Project Infinity X** (v3.12, Android 16) | ✅ Tested & working (OnePlus Ace 6 / 15R `ktm`) |
+| **Project Infinity X** (v3.12, Android 16) | ✅ Tested & working (OnePlus Ace 6 `ktm`) |
 | **LineageOS** (Ace6 builds) | 🤔 Probably works — the kernel/modules/devicetrees are stock LineageOS with only non-destructive Ace6 additions (MPC7022 gauge, TMS NFC), but **not yet confirmed on a real device** |
 | **ColorOS / OxygenOS** | ❌ **Not supported** — likely won't boot (different vendor integration) |
 | Anything else | 🏴☠️ Unknown territory |
@@ -104,7 +106,7 @@ This project targets the **SM8750 (Snapdragon 8 Elite) platform** — the kernel
 
 ## Verified evidence
 
-Measured on **OnePlus Ace 6 / 15R (`ktm`), Project Infinity X v3.12** (2026-08-03). Every row below was observed on the device:
+Measured on **OnePlus Ace 6 (`ktm`), Project Infinity X v3.12** (2026-08-03). Every row below was observed on the device:
 
 | What | Evidence |
 |---|---|
@@ -122,7 +124,7 @@ Honest gaps (also from the same session):
 
 ## On-device screenshots
 
-Taken on the same test device (OnePlus Ace 6 / 15R `ktm`, Project Infinity X v3.12). Click any thumbnail for the full-resolution image.
+Taken on the same test device (OnePlus Ace 6 `ktm`, Project Infinity X v3.12). Click any thumbnail for the full-resolution image.
 
 <table>
   <tr>
@@ -388,7 +390,7 @@ The builder itself is **complete and verified on one device** — the gaps below
 
 - **Fengchi scx scheduler** — OnePlus's sched_ext governor
 - **ADIOS IO scheduler** — OnePlus's custom block-layer scheduler
-- **Official Ace6/15R 120W SUPERVOOC charging** — kernel-side vooc protocol stack; the LOS ROM's vendor side may not cooperate, real-device charging is the verification target
+- **Official Ace6 120W SUPERVOOC charging** — kernel-side vooc protocol stack; the LOS ROM's vendor side may not cooperate, real-device charging is the verification target
 
 No commitment — these are directions, not promises. Status updates land here when work starts.
 
