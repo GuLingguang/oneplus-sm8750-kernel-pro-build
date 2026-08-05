@@ -1,5 +1,7 @@
 # OnePlus Ace 6 Kernel Builder
 
+> **English** | [中文（简体）](README_zh.md)
+
 > OnePlus Ace 6 / 15R (ktm, SM8750) custom kernel builder — configurable GitHub Actions build with ReSukiSU + SUSFS + Droidspaces + Re:Kernel support, verified on Project Infinity X (Android 16).
 
 ![GitHub Release](https://img.shields.io/github/v/release/GuLingguang/oneplus-sm8750-kernel-pro-build)
@@ -11,8 +13,11 @@
 ## 📖 Table of Contents
 
 - [Overview](#overview)
+- [Repository at a glance](#repository-at-a-glance)
 - [Features](#features)
 - [Feature details](#feature-details)
+- [Verified evidence](#verified-evidence)
+- [On-device screenshots](#on-device-screenshots)
 - [How to use](#how-to-use)
 - [Flashing disclaimer](#flashing-disclaimer-read-this-or-regret-it)
 - [Platform compatibility](#platform-compatibility)
@@ -20,6 +25,8 @@
 - [Reproducibility](#reproducibility)
 - [Local build](#local-build)
 - [Repository layout](#repository-layout)
+- [Customizations (EN/中文)](docs/CUSTOMIZATIONS.md)
+- [Roadmap & help wanted](#roadmap--help-wanted)
 - [Credits](#credits)
 - [License](#license)
 
@@ -31,13 +38,25 @@ Builds a custom kernel for the **SM8750 (Snapdragon 8 Elite) platform** — prim
 
 > ⚠️ **Only tested on Project Infinity X** — NOT for ColorOS/OxygenOS. Probably works on LineageOS (Ace6). See the [disclaimer](#flashing-disclaimer-read-this-or-regret-it).
 
+> 💡 **What this repo is**: looking for the kernel source? CI pulls it fresh from upstream `lineage-23.2` on every build. This repo keeps the delta — the patches, the extra C sources, the workflows — and the flashable result lands in [Releases](https://github.com/GuLingguang/oneplus-sm8750-kernel-pro-build/releases).
+
 Every feature is an **optional toggle** in GitHub Actions — build exactly what you need, nothing more.
 
 The kernel is built from the **official Ace6 kernel source** (lineage-23.2 branch), with **official prebuilt vendor modules** (from the ROM's vendor_dlkm), which means:
 
 - No need to rebuild the entire module tree (UFS/GPU/etc. come from the ROM)
-- The kernel **vermagic does NOT need to be faked** — the device accepts kernels with a real commit-based version string (verified empirically: MODVERSIONS symbol checking is what matters, not the version string)
-- The build follows the **real upstream commit** of the source tree
+- The device accepts kernels with a **real commit-based version string** — we faked the vermagic first, then stopped, and the device never cared (details in [Verified evidence](#verified-evidence))
+
+## Repository at a glance
+
+| | What |
+|---|---|
+| **10 feature patches** | **29,162 lines** of adaptation against the lineage-23.2 tree |
+| **extra C sources** | **20,775 lines** — susfs.c, EVDI driver, lz4/lz4kd/zstd libraries, ntsync, Baseband-guard |
+| **API adaptations** | **16 total** — 11 SUSFS (new KSU API) + 5 Re:Kernel (lineage 6.6.139 signatures) |
+| **CI design** | 32 steps, 24 inputs, fingerprint ccache — ~8 min full build |
+| **Verified on device** | **567 official ROM modules** load & run; vendor partitions EROFS read-only |
+| **Maintenance** | no fork tree to keep in sync — the delta is 10 patches + extra sources, applied on demand against upstream `lineage-23.2` |
 
 ---
 
@@ -75,17 +94,101 @@ The kernel is built from the **official Ace6 kernel source** (lineage-23.2 branc
 
 ### SM8750 platform
 
-This project targets the **SM8750 (Snapdragon 8 Elite) platform** — the kernel, modules, and devicetree sources are all stock lineage-23.2 trees for the platform.
+This project targets the **SM8750 (Snapdragon 8 Elite) platform** — the kernel, modules, and devicetree sources are all stock lineage-23.2 trees for the platform. The short ROM compatibility table lives in the [disclaimer](#flashing-disclaimer-read-this-or-regret-it); the long version is one paragraph:
 
-| Device / ROM | Status |
+- The `lineage-23.2` SM8750 tree family is **shared across devices** — the same kernel/module/dtb trees underpin Ace6, other OnePlus SM8750 devices, and their LOS-based ROMs. What differs per device is the **vendor integration** (device-specific modules and firmware), so a kernel that boots one device may still refuse another.
+- **Other OnePlus SM8750 devices** (if they use this tree family): 🧪 probably works, **completely unverified** — test at your own risk, back up first.
+
+## Verified evidence
+
+Measured on **OnePlus Ace 6 / 15R (`ktm`), Project Infinity X v3.12** (2026-08-03). Every row below was observed on the device:
+
+| What | Evidence |
 |---|---|
-| **OnePlus Ace 6 / 15R (`ktm`)** + **Project Infinity X** (v3.12, A16) | ✅ Tested & working |
-| **Ace6** + **LineageOS** (official build) | 🤔 Likely works — same kernel/module/dtb trees, but not yet confirmed |
-| **Other OnePlus SM8750 devices** + LOS/InfinityX (if they use this tree family) | 🧪 Probably works, **completely unverified** — the `lineage-23.2` SM8750 tree is shared across the family, but each device has its own vendor integration |
-| **ColorOS / OxygenOS** (stock) | ❌ Not supported — different vendor integration, likely won't boot |
+| **Kernel version** | `6.6.139-4k-g<12-digit-commit>` — real upstream commit in LOCALVERSION |
+| **Official ROM modules** | All **567** vendor modules (`vendor_dlkm`) load and run under the custom kernel. The ROM's modules carry a different version string (`-gdc4c44f3ecc0-dirty`) — it never mattered, MODVERSIONS symbol checking is what the device enforces |
+| **ReSukiSU** | v4.1.0 (build **35046**) — connects to KernelSU Manager |
+| **zram compressors** | `lz4kd` visible in `comp_algorithm` (zram is compiled in — the ROM's prebuilt `zram.ko` was the stale one masking the list); full algorithm list with `show_all_algos` |
+| **Vendor read-only** | `/vendor`, `/vendor_dlkm`, `/odm`, `/system_dlkm` all EROFS; write attempts rejected |
 
-> [!NOTE]
-> If your device uses the **Ace6/SM8750 lineage-23.2 kernel tree family**, this builder may work for you too — but **no guarantees**. Test at your own risk, back up first.
+Honest gaps (also from the same session):
+
+- **Re:Kernel** runtime is now verified via NoActive (see [On-device screenshots](#on-device-screenshots)); it runs in source-patch mode, not LKM
+- **KPM/KPN** implements the toolchain hooks; not exercised on a real device yet
+- **LineageOS** (official Ace6 builds) is *expected* to work (identical trees), **not confirmed** — the test device runs Project Infinity X
+
+## On-device screenshots
+
+Taken on the same test device (OnePlus Ace 6 / 15R `ktm`, Project Infinity X v3.12). Each
+block pairs a feature with its on-device proof. Features without a device-visible effect
+(security patches, build configuration) have no screenshot — nothing shows on screen.
+
+### ReSukiSU (KernelSU)
+
+KSU Manager version page — `v4.1.0 (35046)`, SuSFS v2.2.0, SELinux Enforcing,
+SuperUser: 5, Modules: 11.
+
+![KSU Manager version page](docs/screenshots/ksu_manager.png)
+
+### SUSFS
+
+Hiding check — *screenshot pending* (SuSFS v2.2.0 state visible in the KSU Manager page above).
+
+### All zram algorithms
+
+The full compressor list in Scene's zram algorithm picker — lzo-rle / lz4 / lz4k / lz4kd /
+deflate / 842 / zstd all available.
+
+![All zram algorithms in Scene](docs/screenshots/zram_all_algos.png)
+
+### LZ4KD & ZRAM writeback
+
+Scene's swap status page — lz4kd active **and** zram writeback running (hybridswap backing).
+
+![LZ4KD + zram writeback in Scene](docs/screenshots/zram_writeback.png)
+
+### Droidspaces
+
+Droidspaces' own checker — "all required features found" (ntsync, EVDI, namespaces).
+
+![Droidspaces self-check](docs/screenshots/droidspaces.png)
+
+### Baseband Guard
+
+Write to a non-allowlisted partition rejected, with the `baseband_guard` dmesg denial.
+
+![Baseband Guard denial](docs/screenshots/bbg_erofs.png)
+
+### Better network
+
+`iptables -L` (system chains) and `ip6tables -t nat -L` (IPv6 NAT from `CONFIG_IP6_NF_NAT`).
+
+![Better network](docs/screenshots/network.png)
+
+### BBR
+
+`sysctl net.ipv4.tcp_congestion_control` — *screenshot pending* (managed at runtime by the
+`tcp-config` module; see [Roadmap](#roadmap--help-wanted) item if you want to provide one).
+
+### Kernel suffix / Attribution / Build time
+
+Build tags from a Termux session: kernel version string, build user/host, build timestamp.
+
+![Build tags](docs/screenshots/banner.png)
+
+### KPM/KPN
+
+Module load output — *not yet tested on device*. *(screenshot pending: `docs/screenshots/kpm.png`)*
+
+### Re:Kernel
+
+Runtime verified via **NoActive** (the third-party tombstone app, officially adapted for
+Re:Kernel). Note: our build uses the source-patch mode — if a check says "no LKM", ignore
+it and don't install the LKM variant; the hooks are compiled in.
+
+![Re:Kernel via NoActive](docs/screenshots/rekernel.png)
+
+---
 
 ## Features
 
@@ -135,7 +238,7 @@ This project targets the **SM8750 (Snapdragon 8 Elite) platform** — the kernel
 
 ### 🔗 Re:Kernel
 
-- **Source integration** (not LKM): netlink server + binder hooks (reply/transaction/free_buffer_full) + signal hooks
+- **Source integration**: netlink server + binder hooks (reply/transaction/free_buffer_full) + signal hooks — the LKM route was tried first and dropped (this tree doesn't expose the hooks it needs)
 - All wrapped in `#ifdef CONFIG_REKERNEL` — zero impact when disabled
 - Adapted for the `lineage-23.2` tree (6.6.139): `proc_ops` API, different `binder_alloc`/`signal.c` signatures
 
@@ -194,7 +297,10 @@ This project adapts patches from several sources (primarily the [cctv18/oppo_opl
 - **`KBUILD_BUILD_TIMESTAMP`** for custom/fixed build time
 - **ccache** with sloppiness config (file mtime/ctime ignored) for fast rebuilds
 - **Public ccache** (optional `ccache_update`): packages and uploads the cache to a Release for near-instant rebuilds
+- **Upstream drift check**: `check_upstream.sh` (also a weekly workflow) dry-runs all 10 patches against the latest `lineage-23.2` tree — drift surfaces as a review-request issue, ahead of it surfacing as a bootloop
 - Verified: GitHub Actions produces a bootable AK3 with the exact configured features
+
+**GitHub free-tier reality check**: Actions gives 2,000 min/month and 1 GB of caches; this repo's ccache Release asset is ~630 MB and the toolchain asset ~1.5 GB. They make repeat builds fast, but they also churn your quota. For heavy or repeated local work, `reproduce.sh` is the free path — CI is the convenient one.
 
 ---
 
@@ -219,18 +325,56 @@ It auto-detects clang 21 (multiple paths), downloads sources (or uses `KERNEL_SR
 ## Repository layout
 
 ```
-├── .github/workflows/
-│   ├── build.yml              # Main build workflow (manual trigger)
-│   └── upload-toolchain.yml   # One-time: upload AOSP clang to Release
+├── .github/
+│   ├── ISSUE_TEMPLATE/
+│   │   └── bug_report.md       # Bug template: ROM, toggles, logs
+│   └── workflows/
+│       ├── build.yml           # Main build workflow (manual trigger, 24 inputs)
+│       ├── clean-ccache.yml    # Manual: purge GitHub caches / Release ccache assets
+│       ├── upstream-check.yml  # Weekly: do the patches still apply upstream?
+│       └── upload-toolchain.yml # One-time: upload AOSP clang to Release
 ├── patches/
-│   ├── split/                 # 10 independent feature patches
-│   ├── extra/                 # New files patches can't create
-│   └── 02_ksu.patch           # SUSFS KernelSU-internal adaptation
-├── config/                    # Base kernel config (from device)
-├── ak3/                       # AnyKernel3 template
-├── lib/                       # faketime libs + ccache-ECS
-└── reproduce.sh               # Local build script
+│   ├── split/                  # 10 independent feature patches (00-09)
+│   ├── extra/                  # New files patches can't create
+│   │   ├── fs/  crypto/  drivers/  include/  lib/
+│   │   │                       # susfs.c, evdi, ntsync, lz4/lz4kd/zstd, headers
+│   │   └── Baseband-guard/     # Anti-format LSM
+│   └── 02_ksu.patch            # SUSFS KernelSU-internal adaptation
+├── config/
+│   └── config_ace6_final.config  # Base kernel config (from the device)
+├── docs/
+│   └── CUSTOMIZATIONS.md         # Our on-device modifications (EN + 中文)
+├── modules/
+│   ├── azram-backing/            # KSU module: hybridswap backing at boot (runs first)
+│   ├── selinux_perf/             # KSU module: quiet perf-HAL SELinux denials
+│   └── tcp-config/               # KSU module: TCP algo/qdisc WebUI + nc fallback
+├── ak3/                        # AnyKernel3 template (tools/, META-INF/)
+├── lib/                        # faketime libs + ccache-ECS
+├── LICENSE
+├── check_upstream.sh           # Drift check: dry-run all patches on latest tree
+└── reproduce.sh                # Local build script
 ```
+
+---
+
+## Roadmap & help wanted
+
+The builder itself is **complete and verified on one device** — the gaps below are the real ones. Every item is a concrete way to help, no kernel expertise required for most:
+
+**Looking for testers** — especially anyone on official LineageOS (Ace6): one confirmation report would close the biggest open question below.
+
+| Item | Status | How to help |
+|---|---|---|
+| **Re:Kernel runtime verification** | ✅ verified via NoActive (source-patch mode) | — |
+| **KPM/KPN on-device test** | ⏳ toolchain ready, not exercised | load a KPM module, report what works/breaks |
+| **LineageOS (Ace6) confirmation** | 🤔 expected to work, unconfirmed | flash on official LineageOS, open an issue with the [bug template](.github/ISSUE_TEMPLATE/bug_report.md) |
+| **Other SM8750 devices** | 🧪 same tree family, unverified | test at your own risk — back up `boot` first |
+
+**Maintenance commitment**: the author follows upstream `lineage-23.2` and ReSukiSU changes — when the trees drift and a patch breaks, `reproduce.sh` fails loudly at apply time; open an issue and it gets adapted.
+
+**Discussions**: issue reports are the primary channel — for everything else (feature requests, "does it work on my ROM?"), open an issue and label it. If there's enough traffic, Discussions get enabled. See [CONTRIBUTING.md](CONTRIBUTING.md) for what makes a report or PR useful.
+
+**Versions**: Release tags follow `kernel-<timestamp>-<feature-flags>` (e.g. `kernel-20260803-115320-ksu35046`) — point-in-time snapshots of whatever was built that run. There is no upgrade-path promise yet; the tag is a record, and the flashable zip is the deliverable.
 
 ---
 
