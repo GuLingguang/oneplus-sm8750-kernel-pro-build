@@ -350,6 +350,8 @@ The builder itself is **complete and verified on one device** — the gaps below
 - **ADIOS IO scheduler** — OnePlus's custom block-layer scheduler
 - **Official Ace6/15R 120W SUPERVOOC charging** — kernel-side vooc protocol stack; the LOS ROM's vendor side may not cooperate, real-device charging is the verification target
 
+No commitment — these are directions, not promises. Status updates land here when work starts.
+
 ---
 
 ## Credits
