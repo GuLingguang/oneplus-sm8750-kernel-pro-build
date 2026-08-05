@@ -27,7 +27,7 @@
 - [Reproducibility](#reproducibility)
 - [Local build](#local-build)
 - [Repository layout](#repository-layout)
-- [Customizations (EN/中文)](docs/CUSTOMIZATIONS.md)
+- [Customizations](docs/CUSTOMIZATIONS.md)
 - [Roadmap & help wanted](#roadmap--help-wanted)
 - [Credits](#credits)
 - [License](#license)
