@@ -42,7 +42,7 @@ Builds a custom kernel for the **SM8750 (Snapdragon 8 Elite) platform** — prim
 
 > 💡 **What this repo is**: looking for the kernel source? CI pulls it fresh from upstream `lineage-23.2` on every build. This repo keeps the delta — the patches, the extra C sources, the workflows — and the flashable result lands in [Releases](https://github.com/GuLingguang/oneplus-sm8750-kernel-pro-build/releases).
 
-Every feature is an **optional toggle** in GitHub Actions — build exactly what you need, nothing more.
+Every feature is an **optional toggle** in GitHub Actions — turn on only what you need.
 
 The kernel is built from the **official Ace6 kernel source** (lineage-23.2 branch), with **official prebuilt vendor modules** (from the ROM's vendor_dlkm), which means:
 

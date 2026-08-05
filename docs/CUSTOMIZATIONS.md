@@ -29,11 +29,11 @@ at every boot, via the KSU module `azram-backing` (in `modules/`).
 
 ### 1.3 The module and the division of labor
 
-`azram-backing` does exactly one thing: `swapoff → reset → attach backing`,
+`azram-backing` does one thing: `swapoff → reset → attach backing`,
 then stops. zram itself is Scene's job — `scene_swap_controller` rebuilds the
 device (size, algorithm, swapon) and its "restore writeback" path re-attaches
-our backing (it reads `backing_dev` before its own reset), which is exactly
-the cooperation Scene was designed for:
+our backing (it reads `backing_dev` before its own reset) — Scene was built
+around this pattern:
 
 | Owner | Owns |
 |---|---|
@@ -117,6 +117,6 @@ default (lzo-rle on the old kernel) persisted.
 `zram=true`/`zram_size`), tested it, then reverted — Scene is a third-party
 module and we do not modify its config. Writeback is implemented
 self-sufficiently in `azram-backing` (section 1), so Scene's zram function
-stays disabled and the file remains exactly as the Scene app wrote it
-(`comp_algorithm=lz4kd` stays, it is simply unused while Scene's zram
+stays disabled and the file stays as the Scene app wrote it
+(`comp_algorithm=lz4kd` stays, it is unused while Scene's zram
 setting is off).

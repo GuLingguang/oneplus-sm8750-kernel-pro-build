@@ -20,7 +20,7 @@
 
 ### 1.3 模块与分工
 
-`azram-backing` 只做一件事：`swapoff → reset → 配 backing`，然后停。zram 本身归 **Scene**（`scene_swap_controller`）管——它负责重建设备（大小、算法、swapon），其"恢复 writeback"分支会重新接上我们配的 backing（它在自己的 reset **之前**读 `backing_dev`）——这正是 Scene 设计上预期的协作方式：
+`azram-backing` 只做一件事：`swapoff → reset → 配 backing`，然后停。zram 本身归 **Scene**（`scene_swap_controller`）管——它负责重建设备（大小、算法、swapon），其"恢复 writeback"分支会重新接上我们配的 backing（它在自己的 reset **之前**读 `backing_dev`）——Scene 本来就是按这个方式设计的：
 
 | 负责方 | 职责 |
 |---|---|
