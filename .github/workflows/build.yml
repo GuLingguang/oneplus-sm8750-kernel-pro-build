@@ -716,9 +716,9 @@ jobs:
 
           ## 📲 Flashing
 
-          Flash the **.zip** file (AnyKernel3 package) via recovery (TWRP/OrangeFox/AOSP recovery), or install directly through the built-in KernelSU manager.
+          Flash **${{ needs.build.outputs.ak3name }}** (AnyKernel3 package) via recovery (TWRP/OrangeFox/AOSP recovery), or install directly through the built-in KernelSU manager.
 
-          > ⚠️ The \`.zip\` is the flashable package. \`Image\` and \`boot.img\` are raw build artifacts for developers only - do NOT flash them directly (boot.img carries no ramdisk).
+          ${{ inputs.artifact_mode == 'all' && '> ⚠️ The `.zip` is the flashable package. `Image` and `boot.img` are raw build artifacts for developers only - do NOT flash them directly (boot.img carries no ramdisk).' || '' }}
           EOF
           gh release create "$TAG" -R $GITHUB_REPOSITORY \
             --title "Ace6 Kernel ${{ inputs.ksu_type }} (ksu${{ needs.build.outputs.ksuver }})" \
