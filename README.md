@@ -128,42 +128,44 @@ block pairs a feature with its on-device proof. Features without a device-visibl
 KSU Manager version page — `v4.1.0 (35046)`, SuSFS v2.2.0, SELinux Enforcing,
 SuperUser: 5, Modules: 11.
 
-<a href="docs/screenshots/ksu_manager.png"><img src="docs/screenshots/ksu_manager.png" width="300" alt="KSU Manager version page"></a>
+<a href="docs/screenshots/ksu_manager.png"><img src="docs/screenshots/ksu_manager.png" width="150" alt="KSU Manager version page"></a>
 
 ### SUSFS
 
-Hiding check — *screenshot pending* (SuSFS v2.2.0 state visible in the KSU Manager page above).
+SuSFS configuration page in ReSukiSU — v2.2.0 with the full feature set.
+
+<a href="docs/screenshots/susfs.png"><img src="docs/screenshots/susfs.png" width="150" alt="SuSFS in ReSukiSU"></a>
 
 ### All zram algorithms
 
 The full compressor list in Scene's zram algorithm picker — lzo-rle / lz4 / lz4k / lz4kd /
 deflate / 842 / zstd all available.
 
-<a href="docs/screenshots/zram_all_algos.png"><img src="docs/screenshots/zram_all_algos.png" width="300" alt="All zram algorithms in Scene"></a>
+<a href="docs/screenshots/zram_all_algos.png"><img src="docs/screenshots/zram_all_algos.png" width="150" alt="All zram algorithms in Scene"></a>
 
 ### LZ4KD & ZRAM writeback
 
 Scene's swap status page — lz4kd active **and** zram writeback running (hybridswap backing).
 
-<a href="docs/screenshots/zram_writeback.png"><img src="docs/screenshots/zram_writeback.png" width="300" alt="LZ4KD + zram writeback in Scene"></a>
+<a href="docs/screenshots/zram_writeback.png"><img src="docs/screenshots/zram_writeback.png" width="150" alt="LZ4KD + zram writeback in Scene"></a>
 
 ### Droidspaces
 
 Droidspaces' own checker — "all required features found" (ntsync, EVDI, namespaces).
 
-<a href="docs/screenshots/droidspaces.png"><img src="docs/screenshots/droidspaces.png" width="300" alt="Droidspaces self-check"></a>
+<a href="docs/screenshots/droidspaces.png"><img src="docs/screenshots/droidspaces.png" width="150" alt="Droidspaces self-check"></a>
 
 ### Baseband Guard
 
 Write to a non-allowlisted partition rejected, with the `baseband_guard` dmesg denial.
 
-<a href="docs/screenshots/bbg_erofs.png"><img src="docs/screenshots/bbg_erofs.png" width="300" alt="Baseband Guard denial"></a>
+<a href="docs/screenshots/bbg_erofs.png"><img src="docs/screenshots/bbg_erofs.png" width="150" alt="Baseband Guard denial"></a>
 
 ### Better network
 
 `iptables -L` (system chains) and `ip6tables -t nat -L` (IPv6 NAT from `CONFIG_IP6_NF_NAT`).
 
-<a href="docs/screenshots/network.png"><img src="docs/screenshots/network.png" width="300" alt="Better network"></a>
+<a href="docs/screenshots/network.png"><img src="docs/screenshots/network.png" width="150" alt="Better network"></a>
 
 ### BBR
 
@@ -174,7 +176,7 @@ Write to a non-allowlisted partition rejected, with the `baseband_guard` dmesg d
 
 Build tags from a Termux session: kernel version string, build user/host, build timestamp.
 
-<a href="docs/screenshots/banner.png"><img src="docs/screenshots/banner.png" width="300" alt="Build tags"></a>
+<a href="docs/screenshots/banner.png"><img src="docs/screenshots/banner.png" width="150" alt="Build tags"></a>
 
 ### KPM/KPN
 
@@ -186,7 +188,7 @@ Runtime verified via **NoActive** (the third-party tombstone app, officially ada
 Re:Kernel). Note: our build uses the source-patch mode — if a check says "no LKM", ignore
 it and don't install the LKM variant; the hooks are compiled in.
 
-<a href="docs/screenshots/rekernel.png"><img src="docs/screenshots/rekernel.png" width="300" alt="Re:Kernel via NoActive"></a>
+<a href="docs/screenshots/rekernel.png"><img src="docs/screenshots/rekernel.png" width="150" alt="Re:Kernel via NoActive"></a>
 
 ---
 
