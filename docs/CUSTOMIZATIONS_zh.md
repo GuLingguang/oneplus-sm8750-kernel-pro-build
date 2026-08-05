@@ -75,3 +75,20 @@ qdisc（fq / fq_codel / pfifo_fast）**完全独立**：改算法不会动 qdisc
 **发现**：Scene 模块 startup.sh 的 `set_zram()` 被 `[[ "$zram" == "true" ]] && [[ "$zram_size" != "" ]]` 挡住——Scene app 往 `/data/swap_config.conf` 写了 `comp_algorithm=lz4kd`，但**从没写 `zram`/`zram_size` 字段**，导致整个重建流程被跳过，init 的默认算法（旧内核 lzo-rle）一直生效。
 
 **决策**：我们考虑过修补 `/data/swap_config.conf`（补 `zram=true`/`zram_size`），测试后**已还原**——Scene 是第三方模块，我们不修改它的配置。writeback 由 `azram-backing` 自足实现（见第 1 节），Scene 的 zram 功能保持关闭，文件保持 Scene app 写入的原样（`comp_algorithm=lz4kd` 留着，只是 Scene 的 zram 开关关闭时用不上）。
+
+---
+
+## 5. NoActive 冻结名单：Google 相册必须白名单（2026-08-05）
+
+**现象**：照片选择器（**相册与视频 Photos and videos** 权限 → **允许受限访问 Allow limited access** 模式）一直空白加载，偶尔正常；系统壁纸无法更换。
+
+**排查**（`adb shell su -c "cat /dev/binderfs/binder_logs/transactions"`，本项目内核开了 binder debug）：
+- media.module（`com.android.providers.media.module`）→ Google 相册（`com.google.android.apps.photos`）的同步事务 **46 分钟未返回**（`elapsed 2802649ms`）
+- system_server 的 binder 线程被 GMS / 地图 / Gmail / Chrome / Nekogram 的 pending 同步事务占住（47–49 分钟），同一进程列表全部可对照 `ps -A -o pid=,args=` 解析
+- 时间线与 NoActive 深度睡眠（`dozeType: locked`，锁屏 60 秒后挂起全部非白名单用户应用）完全吻合；深度睡眠退出后进程已恢复（`ps` 状态 `S`），但 pending 事务**永不消费**——binder 唤醒通知丢失
+
+**根因**：Google 相册没进 NoActive 白名单。深度睡眠挂起相册后，挂起进程不再消费 binder 事务——media.module 对相册的调用永不返回，其 binder 线程池被占死，选择器查询永远排队；system_server 线程池同样被占 → 壁纸等系统 binder 调用卡死。「偶尔正常」= 挂起进程恰好被解冻、堆积事务侥幸被消费的间隙。
+
+**解决**：Google 相册加入 NoActive 白名单（连同 GMS 等实际在用的 Google 应用）。
+
+**教训**：**正确的冻结名单比 Re:Kernel 钩子更重要**——钩子解决「冻结发生时 binder 事务怎么正确处理」，名单决定「该不该冻结」。相册是照片选择器链路依赖的服务提供者，被冻结后整个进程不在运行，无论钩子多好都救不回来。

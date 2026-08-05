@@ -120,3 +120,40 @@ self-sufficiently in `azram-backing` (section 1), so Scene's zram function
 stays disabled and the file stays as the Scene app wrote it
 (`comp_algorithm=lz4kd` stays, it is unused while Scene's zram
 setting is off).
+
+---
+
+## 5. NoActive freeze list: Google Photos must be whitelisted (2026-08-05)
+
+**Symptoms**: Photo Picker (**Photos and videos** permission → **Allow limited
+access** mode) hangs on an empty loading screen, occasionally works; system
+wallpaper cannot be changed.
+
+**Investigation** (`adb shell su -c "cat /dev/binderfs/binder_logs/transactions"`
+— this kernel has binder debug enabled):
+- media.module (`com.android.providers.media.module`) → Google Photos
+  (`com.google.android.apps.photos`) sync transaction **never returned for
+  46 minutes** (`elapsed 2802649ms`)
+- system_server's binder threads parked on pending sync transactions to
+  GMS / Maps / Gmail / Chrome / Nekogram (47–49 min each) — resolve pids with
+  `ps -A -o pid=,args=`
+- timeline matches NoActive deep sleep (`dozeType: locked`, suspends all
+  non-whitelisted user apps 60 s after screen-off); after deep sleep exited,
+  the processes were back (ps state `S`) but the pending transactions were
+  **never consumed** — lost binder wake-up notifications
+
+**Root cause**: Google Photos was not in NoActive's whitelist. Once deep sleep
+suspended it, the suspended process stopped consuming binder transactions:
+media.module's call into Photos never returns, its binder pool stalls and the
+picker queues forever; system_server's pool gets parked the same way, stalling
+system-wide binder calls (wallpaper). "Occasionally works" = the gap in which a
+suspended process happened to get thawed and the backlog got consumed.
+
+**Fix**: whitelist Google Photos in NoActive (along with GMS and the other
+Google apps you actually use).
+
+**Lesson**: **a correct freeze list matters more than the Re:Kernel hooks** —
+the hooks handle "what binder does correctly when freezing happens", the list
+decides "what gets frozen at all". Photos is a service provider the Photo
+Picker chain depends on; once its process is not running, no hook can save the
+pickup.
