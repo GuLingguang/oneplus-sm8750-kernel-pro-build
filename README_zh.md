@@ -129,11 +129,11 @@
     <td align="center"><a href="docs/screenshots/droidspaces.png"><img src="docs/screenshots/droidspaces.png" width="150" alt="Droidspaces"></a></td>
   </tr>
   <tr>
-    <td align="center"><b>① ReSukiSU</b></td>
-    <td align="center"><b>② SuSFS</b></td>
-    <td align="center"><b>③ 全压缩算法</b></td>
-    <td align="center"><b>④ LZ4KD + writeback</b></td>
-    <td align="center"><b>⑤ Droidspaces</b></td>
+    <td align="center"><b>① ReSukiSU</b><br><small>v4.1.0 (35046)、SuSFS v2.2.0、SELinux Enforcing</small></td>
+    <td align="center"><b>② SuSFS</b><br><small>v2.2.0，全套功能</small></td>
+    <td align="center"><b>③ 全压缩算法</b><br><small>lzo-rle … zstd 全可选</small></td>
+    <td align="center"><b>④ LZ4KD + writeback</b><br><small>lz4kd 生效、writeback 运行中</small></td>
+    <td align="center"><b>⑤ Droidspaces</b><br><small>all required features found</small></td>
   </tr>
   <tr>
     <td align="center"><a href="docs/screenshots/bbg_erofs.png"><img src="docs/screenshots/bbg_erofs.png" width="150" alt="Baseband Guard"></a></td>
@@ -143,11 +143,11 @@
     <td align="center"><a href="docs/screenshots/bbr.png"><img src="docs/screenshots/bbr.png" width="150" alt="BBR"></a></td>
   </tr>
   <tr>
-    <td align="center"><b>⑥ Baseband Guard</b></td>
-    <td align="center"><b>⑦ Better network</b></td>
-    <td align="center"><b>⑧ 构建标签</b></td>
-    <td align="center"><b>⑨ Re:Kernel</b></td>
-    <td align="center"><b>⑩ BBR</b></td>
+    <td align="center"><b>⑥ Baseband Guard</b><br><small>写入被拒 + dmesg 拦截日志</small></td>
+    <td align="center"><b>⑦ Better network</b><br><small>iptables + IPv6 NAT</small></td>
+    <td align="center"><b>⑧ 构建标签</b><br><small>版本串、user/host、构建时间</small></td>
+    <td align="center"><b>⑨ Re:Kernel</b><br><small>NoActive 验证、源码补丁模式</small></td>
+    <td align="center"><b>⑩ BBR</b><br><small>TCP 拥塞控制</small></td>
   </tr>
 </table>
 

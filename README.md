@@ -130,11 +130,11 @@ Taken on the same test device (OnePlus Ace 6 / 15R `ktm`, Project Infinity X v3.
     <td align="center"><a href="docs/screenshots/droidspaces.png"><img src="docs/screenshots/droidspaces.png" width="150" alt="Droidspaces"></a></td>
   </tr>
   <tr>
-    <td align="center"><b>① ReSukiSU</b></td>
-    <td align="center"><b>② SuSFS</b></td>
-    <td align="center"><b>③ Zram algorithms</b></td>
-    <td align="center"><b>④ LZ4KD + writeback</b></td>
-    <td align="center"><b>⑤ Droidspaces</b></td>
+    <td align="center"><b>① ReSukiSU</b><br><small>v4.1.0 (35046), SuSFS v2.2.0, SELinux Enforcing</small></td>
+    <td align="center"><b>② SuSFS</b><br><small>v2.2.0, full feature set</small></td>
+    <td align="center"><b>③ Zram algorithms</b><br><small>lzo-rle … zstd, all selectable</small></td>
+    <td align="center"><b>④ LZ4KD + writeback</b><br><small>lz4kd active, writeback running</small></td>
+    <td align="center"><b>⑤ Droidspaces</b><br><small>all required features found</small></td>
   </tr>
   <tr>
     <td align="center"><a href="docs/screenshots/bbg_erofs.png"><img src="docs/screenshots/bbg_erofs.png" width="150" alt="Baseband Guard"></a></td>
@@ -144,11 +144,11 @@ Taken on the same test device (OnePlus Ace 6 / 15R `ktm`, Project Infinity X v3.
     <td align="center"><a href="docs/screenshots/bbr.png"><img src="docs/screenshots/bbr.png" width="150" alt="BBR"></a></td>
   </tr>
   <tr>
-    <td align="center"><b>⑥ Baseband Guard</b></td>
-    <td align="center"><b>⑦ Better network</b></td>
-    <td align="center"><b>⑧ Build tags</b></td>
-    <td align="center"><b>⑨ Re:Kernel</b></td>
-    <td align="center"><b>⑩ BBR</b></td>
+    <td align="center"><b>⑥ Baseband Guard</b><br><small>write rejected + dmesg denial</small></td>
+    <td align="center"><b>⑦ Better network</b><br><small>iptables + IPv6 NAT</small></td>
+    <td align="center"><b>⑧ Build tags</b><br><small>version, user/host, build time</small></td>
+    <td align="center"><b>⑨ Re:Kernel</b><br><small>via NoActive, source-patch mode</small></td>
+    <td align="center"><b>⑩ BBR</b><br><small>TCP congestion control</small></td>
   </tr>
 </table>
 
