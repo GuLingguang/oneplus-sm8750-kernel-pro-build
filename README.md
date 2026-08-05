@@ -119,76 +119,27 @@ Honest gaps (also from the same session):
 
 ## On-device screenshots
 
-Taken on the same test device (OnePlus Ace 6 / 15R `ktm`, Project Infinity X v3.12). Each
-block pairs a feature with its on-device proof. Features without a device-visible effect
-(security patches, build configuration) have no screenshot — nothing shows on screen.
+Taken on the same test device (OnePlus Ace 6 / 15R `ktm`, Project Infinity X v3.12). Click any thumbnail for the full-resolution image.
 
-### ReSukiSU (KernelSU)
+<table>
+  <tr>
+    <td align="center"><a href="docs/screenshots/ksu_manager.png"><img src="docs/screenshots/ksu_manager.png" width="150" alt="ReSukiSU"></a><br><b>① ReSukiSU</b><br>v4.1.0 (35046), SuSFS v2.2.0, SELinux Enforcing</td>
+    <td align="center"><a href="docs/screenshots/susfs.png"><img src="docs/screenshots/susfs.png" width="150" alt="SuSFS"></a><br><b>② SuSFS</b><br>v2.2.0, full feature set</td>
+    <td align="center"><a href="docs/screenshots/zram_all_algos.png"><img src="docs/screenshots/zram_all_algos.png" width="150" alt="All zram algorithms"></a><br><b>③ All zram algorithms</b><br>lzo-rle … zstd, all selectable in Scene</td>
+  </tr>
+  <tr>
+    <td align="center"><a href="docs/screenshots/zram_writeback.png"><img src="docs/screenshots/zram_writeback.png" width="150" alt="LZ4KD + writeback"></a><br><b>④ LZ4KD + writeback</b><br>lz4kd active, writeback running</td>
+    <td align="center"><a href="docs/screenshots/droidspaces.png"><img src="docs/screenshots/droidspaces.png" width="150" alt="Droidspaces"></a><br><b>⑤ Droidspaces</b><br>all required features found</td>
+    <td align="center"><a href="docs/screenshots/bbg_erofs.png"><img src="docs/screenshots/bbg_erofs.png" width="150" alt="Baseband Guard"></a><br><b>⑥ Baseband Guard</b><br>write rejected + dmesg denial</td>
+  </tr>
+  <tr>
+    <td align="center"><a href="docs/screenshots/network.png"><img src="docs/screenshots/network.png" width="150" alt="Better network"></a><br><b>⑦ Better network</b><br>iptables + IPv6 NAT</td>
+    <td align="center"><a href="docs/screenshots/banner.png"><img src="docs/screenshots/banner.png" width="150" alt="Build tags"></a><br><b>⑧ Build tags</b><br>version, user/host, build time</td>
+    <td align="center"><a href="docs/screenshots/rekernel.png"><img src="docs/screenshots/rekernel.png" width="150" alt="Re:Kernel"></a><br><b>⑨ Re:Kernel</b><br>via NoActive, source-patch mode</td>
+  </tr>
+</table>
 
-KSU Manager version page — `v4.1.0 (35046)`, SuSFS v2.2.0, SELinux Enforcing,
-SuperUser: 5, Modules: 11.
-
-<a href="docs/screenshots/ksu_manager.png"><img src="docs/screenshots/ksu_manager.png" width="150" alt="KSU Manager version page"></a>
-
-### SUSFS
-
-SuSFS configuration page in ReSukiSU — v2.2.0 with the full feature set.
-
-<a href="docs/screenshots/susfs.png"><img src="docs/screenshots/susfs.png" width="150" alt="SuSFS in ReSukiSU"></a>
-
-### All zram algorithms
-
-The full compressor list in Scene's zram algorithm picker — lzo-rle / lz4 / lz4k / lz4kd /
-deflate / 842 / zstd all available.
-
-<a href="docs/screenshots/zram_all_algos.png"><img src="docs/screenshots/zram_all_algos.png" width="150" alt="All zram algorithms in Scene"></a>
-
-### LZ4KD & ZRAM writeback
-
-Scene's swap status page — lz4kd active **and** zram writeback running (hybridswap backing).
-
-<a href="docs/screenshots/zram_writeback.png"><img src="docs/screenshots/zram_writeback.png" width="150" alt="LZ4KD + zram writeback in Scene"></a>
-
-### Droidspaces
-
-Droidspaces' own checker — "all required features found" (ntsync, EVDI, namespaces).
-
-<a href="docs/screenshots/droidspaces.png"><img src="docs/screenshots/droidspaces.png" width="150" alt="Droidspaces self-check"></a>
-
-### Baseband Guard
-
-Write to a non-allowlisted partition rejected, with the `baseband_guard` dmesg denial.
-
-<a href="docs/screenshots/bbg_erofs.png"><img src="docs/screenshots/bbg_erofs.png" width="150" alt="Baseband Guard denial"></a>
-
-### Better network
-
-`iptables -L` (system chains) and `ip6tables -t nat -L` (IPv6 NAT from `CONFIG_IP6_NF_NAT`).
-
-<a href="docs/screenshots/network.png"><img src="docs/screenshots/network.png" width="150" alt="Better network"></a>
-
-### BBR
-
-`sysctl net.ipv4.tcp_congestion_control` — *screenshot pending* (managed at runtime by the
-`tcp-config` module; see [Roadmap](#roadmap--help-wanted) item if you want to provide one).
-
-### Kernel suffix / Attribution / Build time
-
-Build tags from a Termux session: kernel version string, build user/host, build timestamp.
-
-<a href="docs/screenshots/banner.png"><img src="docs/screenshots/banner.png" width="150" alt="Build tags"></a>
-
-### KPM/KPN
-
-Module load output — *not yet tested on device*. *(screenshot pending: `docs/screenshots/kpm.png`)*
-
-### Re:Kernel
-
-Runtime verified via **NoActive** (the third-party tombstone app, officially adapted for
-Re:Kernel). Note: our build uses the source-patch mode — if a check says "no LKM", ignore
-it and don't install the LKM variant; the hooks are compiled in.
-
-<a href="docs/screenshots/rekernel.png"><img src="docs/screenshots/rekernel.png" width="150" alt="Re:Kernel via NoActive"></a>
+Still pending: **BBR** (runtime-managed by the `tcp-config` module) and **KPM/KPN** (not tested on device yet).
 
 ---
 

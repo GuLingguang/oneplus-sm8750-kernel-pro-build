@@ -118,69 +118,27 @@
 
 ## 真机截图
 
-拍摄于同一台测试机（OnePlus Ace 6 / 15R `ktm`，Project Infinity X v3.12）。每个小节把开关和它的真机证据配成一对。没有设备可见效果的开关没有截图——安全补丁、构建配置在屏幕上没什么可拍的。
+拍摄于同一台测试机（OnePlus Ace 6 / 15R `ktm`，Project Infinity X v3.12）。点击任意缩略图查看原图。
 
-### ReSukiSU (KernelSU)
+<table>
+  <tr>
+    <td align="center"><a href="docs/screenshots/ksu_manager.png"><img src="docs/screenshots/ksu_manager.png" width="150" alt="ReSukiSU"></a><br><b>① ReSukiSU</b><br>v4.1.0 (35046)、SuSFS v2.2.0、SELinux Enforcing</td>
+    <td align="center"><a href="docs/screenshots/susfs.png"><img src="docs/screenshots/susfs.png" width="150" alt="SuSFS"></a><br><b>② SuSFS</b><br>v2.2.0，全套功能</td>
+    <td align="center"><a href="docs/screenshots/zram_all_algos.png"><img src="docs/screenshots/zram_all_algos.png" width="150" alt="全压缩算法"></a><br><b>③ 全压缩算法</b><br>Scene 中 lzo-rle … zstd 全可选</td>
+  </tr>
+  <tr>
+    <td align="center"><a href="docs/screenshots/zram_writeback.png"><img src="docs/screenshots/zram_writeback.png" width="150" alt="lz4kd + writeback"></a><br><b>④ LZ4KD + writeback</b><br>lz4kd 生效、writeback 运行中</td>
+    <td align="center"><a href="docs/screenshots/droidspaces.png"><img src="docs/screenshots/droidspaces.png" width="150" alt="Droidspaces"></a><br><b>⑤ Droidspaces</b><br>all required features found</td>
+    <td align="center"><a href="docs/screenshots/bbg_erofs.png"><img src="docs/screenshots/bbg_erofs.png" width="150" alt="Baseband Guard"></a><br><b>⑥ Baseband Guard</b><br>写入被拒 + dmesg 拦截日志</td>
+  </tr>
+  <tr>
+    <td align="center"><a href="docs/screenshots/network.png"><img src="docs/screenshots/network.png" width="150" alt="Better network"></a><br><b>⑦ Better network</b><br>iptables + IPv6 NAT</td>
+    <td align="center"><a href="docs/screenshots/banner.png"><img src="docs/screenshots/banner.png" width="150" alt="构建标签"></a><br><b>⑧ 构建标签</b><br>版本串、user/host、构建时间</td>
+    <td align="center"><a href="docs/screenshots/rekernel.png"><img src="docs/screenshots/rekernel.png" width="150" alt="Re:Kernel"></a><br><b>⑨ Re:Kernel</b><br>NoActive 验证、源码补丁模式</td>
+  </tr>
+</table>
 
-KSU 管理器版本页 —— `v4.1.0 (35046)`、SuSFS v2.2.0、SELinux Enforcing、SuperUser: 5、Modules: 11。
-
-<a href="docs/screenshots/ksu_manager.png"><img src="docs/screenshots/ksu_manager.png" width="150" alt="KSU 管理器版本页"></a>
-
-### SUSFS
-
-ReSukiSU 中的 SuSFS 配置页 —— v2.2.0 全套功能。
-
-<a href="docs/screenshots/susfs.png"><img src="docs/screenshots/susfs.png" width="150" alt="ReSukiSU 中的 SuSFS"></a>
-
-### All zram algorithms
-
-Scene 的 zram 算法选择界面完整列表 —— lzo-rle / lz4 / lz4k / lz4kd / deflate / 842 / zstd 全部可选。
-
-<a href="docs/screenshots/zram_all_algos.png"><img src="docs/screenshots/zram_all_algos.png" width="150" alt="Scene 全压缩算法表"></a>
-
-### LZ4KD 与 ZRAM writeback
-
-Scene 的 swap 状态页 —— **lz4kd 生效**且 **zram writeback 运行中**（hybridswap backing）。
-
-<a href="docs/screenshots/zram_writeback.png"><img src="docs/screenshots/zram_writeback.png" width="150" alt="Scene 中 lz4kd + zram writeback 运行"></a>
-
-### Droidspaces
-
-Droidspaces 自带检测 —— "all required features found"（ntsync、EVDI、namespaces）。
-
-<a href="docs/screenshots/droidspaces.png"><img src="docs/screenshots/droidspaces.png" width="150" alt="Droidspaces 自检通过"></a>
-
-### Baseband Guard
-
-对白名单外分区的写入被拒绝，附 `baseband_guard` 的 dmesg 拦截日志。
-
-<a href="docs/screenshots/bbg_erofs.png"><img src="docs/screenshots/bbg_erofs.png" width="150" alt="Baseband Guard 拦截"></a>
-
-### Better network
-
-`iptables -L`（系统规则链）和 `ip6tables -t nat -L`（`CONFIG_IP6_NF_NAT` 的 IPv6 NAT）。
-
-<a href="docs/screenshots/network.png"><img src="docs/screenshots/network.png" width="150" alt="Better network"></a>
-
-### BBR
-
-`sysctl net.ipv4.tcp_congestion_control` —— *截图待补充*（运行时由 `tcp-config` 模块管理；想补一张可看[路线图](#路线图与寻求帮助)）。
-
-### Kernel suffix / Attribution / Build time
-
-Termux 会话中的构建标签：内核版本串、构建用户/主机、构建时间戳。
-
-<a href="docs/screenshots/banner.png"><img src="docs/screenshots/banner.png" width="150" alt="构建标签"></a>
-
-### KPM/KPN
-
-模块加载输出 —— *尚未真机测试*。*（截图待补充：`docs/screenshots/kpm.png`）*
-
-### Re:Kernel
-
-运行时已通过 **NoActive**（官方适配 Re:Kernel 的第三方墓碑程序）验证。注意：我们的构建是**源码补丁模式**——如果检测提示 "no LKM"，忽略它、不要安装 LKM 变体；钩子是编译进内核的。
-
-<a href="docs/screenshots/rekernel.png"><img src="docs/screenshots/rekernel.png" width="150" alt="通过 NoActive 验证 Re:Kernel"></a>
+仍待补充：**BBR**（运行时由 `tcp-config` 模块管理）与 **KPM/KPN**（尚未真机测试）。
 
 ---
 
