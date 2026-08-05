@@ -546,11 +546,13 @@ jobs:
         run: |
           cd work/src
           strings arch/arm64/boot/Image | grep -q "Linux version 6.6.139" || exit 1
-          # real kernel identity from the build artifacts (utsrelease +
-          # compile.h): the Image banner string can be truncated by strings
-          # at the clang URL, so don't parse the banner
+          # real kernel identity from the build artifacts: kernel.release +
+          # compile info. On this tree UTS_VERSION lives in utsversion.h
+          # (compile.h only has UTS_MACHINE/BY/HOST/COMPILER), so the old
+          # compile.h grep matched nothing and kernelver was always empty.
           REL=$(cat include/config/kernel.release 2>/dev/null || true)
-          VER=$(grep -oE '#[0-9]+ SMP[^"]*' include/generated/compile.h 2>/dev/null | head -1 || true)
+          VER=$(grep -oE '#[0-9]+ SMP[^"]*' include/generated/utsversion.h 2>/dev/null | head -1 || true)
+          [ -n "$VER" ] || VER=$(strings arch/arm64/boot/Image | grep -oE '#[0-9]+ SMP PREEMPT[^"]*' | head -1 || true)
           echo "kernelrel=$REL" >> "$GITHUB_OUTPUT"
           echo "kernelver=$VER" >> "$GITHUB_OUTPUT"
           echo "Kernel: $REL | $VER"
