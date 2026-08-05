@@ -295,32 +295,36 @@ It auto-detects clang 21 (multiple paths), downloads sources (or uses `KERNEL_SR
 ```
 ├── .github/
 │   ├── ISSUE_TEMPLATE/
-│   │   └── bug_report.md       # Bug template: ROM, toggles, logs
+│   │   ├── bug_report.md         # Bug template: ROM, toggles, logs
+│   │   └── bug_report_zh.md      # 中文 Bug 模板
 │   └── workflows/
-│       ├── build.yml           # Main build workflow (manual trigger, 24 inputs)
-│       ├── clean-ccache.yml    # Manual: purge GitHub caches / Release ccache assets
-│       ├── upstream-check.yml  # Weekly: do the patches still apply upstream?
-│       └── upload-toolchain.yml # One-time: upload AOSP clang to Release
+│       ├── build.yml             # Main build workflow (manual trigger, 24 inputs)
+│       ├── clean-ccache.yml      # Manual: purge GitHub caches / Release ccache assets
+│       ├── upstream-check.yml    # Weekly: do the patches still apply upstream?
+│       └── upload-toolchain.yml  # One-time: upload AOSP clang to Release
 ├── patches/
-│   ├── split/                  # 10 independent feature patches (00-09)
-│   ├── extra/                  # New files patches can't create
+│   ├── split/                    # 10 independent feature patches (00-09)
+│   ├── extra/                    # New files patches can't create
 │   │   ├── fs/  crypto/  drivers/  include/  lib/
-│   │   │                       # susfs.c, evdi, ntsync, lz4/lz4kd/zstd, headers
-│   │   └── Baseband-guard/     # Anti-format LSM
-│   └── 02_ksu.patch            # SUSFS KernelSU-internal adaptation
+│   │   │                         # susfs.c, evdi, ntsync, lz4/lz4kd/zstd, headers
+│   │   └── Baseband-guard/       # Anti-format LSM
+│   └── 02_ksu.patch              # SUSFS KernelSU-internal adaptation
 ├── config/
 │   └── config_ace6_final.config  # Base kernel config (from the device)
 ├── docs/
-│   └── CUSTOMIZATIONS.md         # Our on-device modifications (EN + 中文)
+│   ├── CUSTOMIZATIONS.md         # Our on-device modifications
+│   ├── CUSTOMIZATIONS_zh.md      # 中文版
+│   └── screenshots/              # 10 on-device proofs
 ├── modules/
 │   ├── azram-backing/            # KSU module: hybridswap backing at boot (runs first)
 │   ├── selinux_perf/             # KSU module: quiet perf-HAL SELinux denials
 │   └── tcp-config/               # KSU module: TCP algo/qdisc WebUI + nc fallback
-├── ak3/                        # AnyKernel3 template (tools/, META-INF/)
-├── lib/                        # faketime libs + ccache-ECS
+│       └── webui-src/            # WebUI build sources (npm + esbuild)
+├── ak3/                          # AnyKernel3 template (tools/, META-INF/)
+├── lib/                          # faketime libs + ccache-ECS
 ├── LICENSE
-├── check_upstream.sh           # Drift check: dry-run all patches on latest tree
-└── reproduce.sh                # Local build script
+├── check_upstream.sh             # Drift check: dry-run all patches on latest tree
+└── reproduce.sh                  # Local build script
 ```
 
 ---

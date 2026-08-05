@@ -295,26 +295,36 @@
 ```
 ├── .github/
 │   ├── ISSUE_TEMPLATE/
-│   │   └── bug_report.md       # Bug 模板：ROM、开关、日志
+│   │   ├── bug_report.md         # Bug 模板：ROM、开关、日志
+│   │   └── bug_report_zh.md      # 中文 Bug 模板
 │   └── workflows/
-│       ├── build.yml           # 主构建 workflow（手动触发，24 个输入）
-│       ├── clean-ccache.yml    # 手动：清理 GitHub 缓存 / Release ccache asset
-│       ├── upstream-check.yml  # 每周：补丁在上游还能打上吗？
-│       └── upload-toolchain.yml # 一次性：上传 AOSP clang 到 Release
+│       ├── build.yml             # 主构建 workflow（手动触发，24 个输入）
+│       ├── clean-ccache.yml      # 手动：清理 GitHub 缓存 / Release ccache asset
+│       ├── upstream-check.yml    # 每周：补丁在上游还能打上吗？
+│       └── upload-toolchain.yml  # 一次性：上传 AOSP clang 到 Release
 ├── patches/
-│   ├── split/                  # 10 个独立功能补丁（00-09）
-│   ├── extra/                  # 补丁无法创建的新文件
+│   ├── split/                    # 10 个独立功能补丁（00-09）
+│   ├── extra/                    # 补丁无法创建的新文件
 │   │   ├── fs/  crypto/  drivers/  include/  lib/
-│   │   │                       # susfs.c, evdi, ntsync, lz4/lz4kd/zstd, headers
-│   │   └── Baseband-guard/     # 防格式化 LSM
-│   └── 02_ksu.patch            # SUSFS KernelSU 内部适配
+│   │   │                         # susfs.c, evdi, ntsync, lz4/lz4kd/zstd, headers
+│   │   └── Baseband-guard/       # 防格式化 LSM
+│   └── 02_ksu.patch              # SUSFS KernelSU 内部适配
 ├── config/
 │   └── config_ace6_final.config  # 基础内核配置（来自设备）
-├── ak3/                        # AnyKernel3 模板（tools/, META-INF/）
-├── lib/                        # faketime 库 + ccache-ECS
+├── docs/
+│   ├── CUSTOMIZATIONS.md         # 设备端自有修改（英文）
+│   ├── CUSTOMIZATIONS_zh.md      # 设备端自有修改（中文）
+│   └── screenshots/              # 10 张真机证明
+├── modules/
+│   ├── azram-backing/            # KSU 模块：开机配置 hybridswap backing（最先执行）
+│   ├── selinux_perf/             # KSU 模块：静音 perf-HAL SELinux 拒绝日志
+│   └── tcp-config/               # KSU 模块：TCP 算法/qdisc WebUI + nc fallback
+│       └── webui-src/            # WebUI 构建源码（npm + esbuild）
+├── ak3/                          # AnyKernel3 模板（tools/, META-INF/）
+├── lib/                          # faketime 库 + ccache-ECS
 ├── LICENSE
-├── check_upstream.sh           # 漂移体检：对最新树 dry-run 全部补丁
-└── reproduce.sh                # 本地构建脚本
+├── check_upstream.sh             # 漂移体检：对最新树 dry-run 全部补丁
+└── reproduce.sh                  # 本地构建脚本
 ```
 
 ---
