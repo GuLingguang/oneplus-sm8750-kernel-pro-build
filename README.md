@@ -16,13 +16,13 @@
 
 - [Overview](#overview)
 - [Repository at a glance](#repository-at-a-glance)
-- [Features](#features)
-- [Feature details](#feature-details)
-- [Verified evidence](#verified-evidence)
-- [On-device screenshots](#on-device-screenshots)
-- [How to use](#how-to-use)
 - [Flashing disclaimer](#flashing-disclaimer-read-this-or-regret-it)
 - [Platform compatibility](#platform-compatibility)
+- [Verified evidence](#verified-evidence)
+- [On-device screenshots](#on-device-screenshots)
+- [Features](#features)
+- [Feature details](#feature-details)
+- [How to use](#how-to-use)
 - [Adaptations](#adaptations)
 - [Reproducibility](#reproducibility)
 - [Local build](#local-build)
@@ -62,7 +62,7 @@ The kernel is built from the **official Ace6 kernel source** (lineage-23.2 branc
 
 ---
 
-## ⚠️ Flashing disclaimer
+## ⚠️ Flashing disclaimer (read this or regret it)
 
 > [!WARNING]
 > This kernel was tested on **one device with one ROM** — please read before flashing.
@@ -210,6 +210,8 @@ Still pending: **KPM/KPN** (not tested on device yet).
 - All wrapped in `#ifdef CONFIG_REKERNEL` — zero impact when disabled
 - Adapted for the `lineage-23.2` tree (6.6.139): `proc_ops` API, different `binder_alloc`/`signal.c` signatures
 
+> ⚠️ **Known pitfall — NoActive whitelist**: Photo Picker (**Photos and videos** permission → **Allow limited access** mode) hangs on an empty loading screen and the wallpaper can't be changed when **Google Photos is not whitelisted** in NoActive. During deep sleep/freeze, suspended apps stop consuming binder transactions: media.module's call into Photos never returns, its binder pool stalls, and the picker queues forever — meanwhile system_server's binder threads get parked on pending sync transactions to other frozen Google apps (GMS/Maps/Gmail/Chrome). Diagnosis: `adb shell su -c "cat /dev/binderfs/binder_logs/transactions"` and look for pending transactions with huge `elapsed` values; resolve the pids with `ps -A -o pid=,args=`. Fix: whitelist **Google Photos** (and the Google apps you actually use) in NoActive — a correct freeze list matters more than the Re:Kernel hooks.
+
 ### 🛡️ Baseband Guard
 
 - From [cctv18/Baseband-guard](https://github.com/cctv18/Baseband-guard)
@@ -344,7 +346,7 @@ The builder itself is **complete and verified on one device** — the gaps below
 
 **Maintenance commitment**: the author follows upstream `lineage-23.2` and ReSukiSU changes — when the trees drift and a patch breaks, `reproduce.sh` fails loudly at apply time; open an issue and it gets adapted.
 
-**Discussions**: issue reports are the primary channel — for everything else (feature requests, "does it work on my ROM?"), open an issue and label it. If there's enough traffic, Discussions get enabled. See [CONTRIBUTING.md](CONTRIBUTING.md) for what makes a report or PR useful.
+**Contributing**: see [CONTRIBUTING.md](CONTRIBUTING.md) for what makes a report or PR useful.
 
 **Versions**: Release tags follow `kernel-<timestamp>-<feature-flags>` (e.g. `kernel-20260803-115320-ksu35046`) — point-in-time snapshots of whatever was built that run. There is no upgrade-path promise yet; the tag is a record, and the flashable zip is the deliverable.
 

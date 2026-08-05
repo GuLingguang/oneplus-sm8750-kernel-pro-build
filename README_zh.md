@@ -16,13 +16,13 @@
 
 - [概览](#概览)
 - [仓库一览](#仓库一览)
-- [功能开关](#功能开关)
-- [功能详情](#功能详情)
-- [验证证据](#验证证据)
-- [真机截图](#真机截图)
-- [使用方法](#使用方法)
 - [刷机免责声明](#刷机免责声明)
 - [平台兼容性](#平台兼容性)
+- [验证证据](#验证证据)
+- [真机截图](#真机截图)
+- [功能开关](#功能开关)
+- [功能详情](#功能详情)
+- [使用方法](#使用方法)
 - [适配说明](#适配说明)
 - [可复现性](#可复现性)
 - [本地构建](#本地构建)
@@ -210,6 +210,8 @@
 - 全部包裹在 `#ifdef CONFIG_REKERNEL` 中 —— 关闭时零影响
 - 针对 `lineage-23.2` 树（6.6.139）适配：`proc_ops` API、不同的 `binder_alloc`/`signal.c` 签名
 
+> ⚠️ **已知坑 —— NoActive 白名单**：当 **Google 相册未进 NoActive 白名单**时，照片选择器（**相册与视频 Photos and videos** 权限 → **允许受限访问 Allow limited access** 模式）会一直空白加载，壁纸无法更换。深度睡眠/冻结挂起相册后，挂起进程不再消费 binder 事务：media.module 对相册的调用永不返回、其 binder 线程池被占死，选择器查询永远排队；同时 system_server 的 binder 线程会被其他被挂起的 Google 应用（GMS/地图/Gmail/Chrome）的 pending 同步事务占住。诊断：`adb shell su -c "cat /dev/binderfs/binder_logs/transactions"` 查找 `elapsed` 巨大的 pending 事务，用 `ps -A -o pid=,args=` 解析进程身份。解决：在 NoActive 里把 **Google 相册**（以及实际在用的 Google 应用）加进白名单——正确的冻结名单比 Re:Kernel 钩子更重要。
+
 ### 🛡️ Baseband Guard
 
 - 来自 [cctv18/Baseband-guard](https://github.com/cctv18/Baseband-guard)
@@ -339,12 +341,12 @@
 |---|---|---|
 | **Re:Kernel 运行时验证** | ✅ 已通过 NoActive 验证（源码补丁模式） | —— |
 | **KPM/KPN 真机测试** | ⏳ 工具链就绪，未实践 | 加载一个 KPM 模块，回报哪些正常/异常 |
-| **LineageOS (Ace6) 确认** | 🤔 预计可用，未确认 | 在官方 LineageOS 上刷，用 [bug 模板](.github/ISSUE_TEMPLATE/bug_report.md) 开 issue |
+| **LineageOS (Ace6) 确认** | 🤔 预计可用，未确认 | 在官方 LineageOS 上刷，用 [中文 bug 模板](.github/ISSUE_TEMPLATE/bug_report_zh.md) 开 issue |
 | **其他 SM8750 设备** | 🧪 同树家族，未验证 | 自行测试风险自负 —— 先备份 `boot` |
 
 **维护承诺**：作者跟进上游 `lineage-23.2` 和 ReSukiSU 的变化 —— 树漂移导致补丁打不上时，`reproduce.sh` 会在应用时响亮地失败；开 issue 就会被适配。
 
-**Discussions**：issue 报告是主要渠道 —— 其他一切（功能请求、"我的 ROM 上能用吗？"）开 issue 并打标签。流量足够时会开启 Discussions。详见 [CONTRIBUTING.md](CONTRIBUTING.md) 了解什么样的报告或 PR 更有用。
+**参与**：详见 [CONTRIBUTING_zh.md](CONTRIBUTING_zh.md) 了解什么样的报告或 PR 更有用。
 
 **版本**：Release 标签遵循 `kernel-<时间戳>-<功能标记>`（如 `kernel-20260803-115320-ksu35046`）—— 是那次构建的瞬时快照。目前没有升级路径承诺；标签是记录，可刷的 zip 才是交付物。
 
