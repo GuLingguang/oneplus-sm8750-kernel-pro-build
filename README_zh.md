@@ -126,30 +126,26 @@
     <td align="center"><a href="docs/screenshots/susfs.png"><img src="docs/screenshots/susfs.png" width="150" alt="SuSFS"></a></td>
     <td align="center"><a href="docs/screenshots/zram_all_algos.png"><img src="docs/screenshots/zram_all_algos.png" width="150" alt="全压缩算法"></a></td>
     <td align="center"><a href="docs/screenshots/zram_writeback.png"><img src="docs/screenshots/zram_writeback.png" width="150" alt="lz4kd + writeback"></a></td>
+    <td align="center"><a href="docs/screenshots/droidspaces.png"><img src="docs/screenshots/droidspaces.png" width="150" alt="Droidspaces"></a></td>
   </tr>
   <tr>
     <td align="center"><b>① ReSukiSU</b></td>
     <td align="center"><b>② SuSFS</b></td>
     <td align="center"><b>③ 全压缩算法</b></td>
     <td align="center"><b>④ LZ4KD + writeback</b></td>
+    <td align="center"><b>⑤ Droidspaces</b></td>
   </tr>
   <tr>
-    <td align="center"><a href="docs/screenshots/droidspaces.png"><img src="docs/screenshots/droidspaces.png" width="150" alt="Droidspaces"></a></td>
     <td align="center"><a href="docs/screenshots/bbg_erofs.png"><img src="docs/screenshots/bbg_erofs.png" width="150" alt="Baseband Guard"></a></td>
     <td align="center"><a href="docs/screenshots/network.png"><img src="docs/screenshots/network.png" width="150" alt="Better network"></a></td>
     <td align="center"><a href="docs/screenshots/banner.png"><img src="docs/screenshots/banner.png" width="150" alt="构建标签"></a></td>
-  </tr>
-  <tr>
-    <td align="center"><b>⑤ Droidspaces</b></td>
-    <td align="center"><b>⑥ Baseband Guard</b></td>
-    <td align="center"><b>⑦ Better network</b></td>
-    <td align="center"><b>⑧ 构建标签</b></td>
-  </tr>
-  <tr>
     <td align="center"><a href="docs/screenshots/rekernel.png"><img src="docs/screenshots/rekernel.png" width="150" alt="Re:Kernel"></a></td>
     <td align="center"><a href="docs/screenshots/bbr.png"><img src="docs/screenshots/bbr.png" width="150" alt="BBR"></a></td>
   </tr>
   <tr>
+    <td align="center"><b>⑥ Baseband Guard</b></td>
+    <td align="center"><b>⑦ Better network</b></td>
+    <td align="center"><b>⑧ 构建标签</b></td>
     <td align="center"><b>⑨ Re:Kernel</b></td>
     <td align="center"><b>⑩ BBR</b></td>
   </tr>
