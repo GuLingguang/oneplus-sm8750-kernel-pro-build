@@ -126,20 +126,19 @@ Taken on the same test device (OnePlus Ace 6 / 15R `ktm`, Project Infinity X v3.
     <td align="center"><a href="docs/screenshots/ksu_manager.png"><img src="docs/screenshots/ksu_manager.png" width="150" alt="ReSukiSU"></a><br><b>① ReSukiSU</b><br>v4.1.0 (35046), SuSFS v2.2.0, SELinux Enforcing</td>
     <td align="center"><a href="docs/screenshots/susfs.png"><img src="docs/screenshots/susfs.png" width="150" alt="SuSFS"></a><br><b>② SuSFS</b><br>v2.2.0, full feature set</td>
     <td align="center"><a href="docs/screenshots/zram_all_algos.png"><img src="docs/screenshots/zram_all_algos.png" width="150" alt="All zram algorithms"></a><br><b>③ All zram algorithms</b><br>lzo-rle … zstd, all selectable in Scene</td>
-  </tr>
-  <tr>
     <td align="center"><a href="docs/screenshots/zram_writeback.png"><img src="docs/screenshots/zram_writeback.png" width="150" alt="LZ4KD + writeback"></a><br><b>④ LZ4KD + writeback</b><br>lz4kd active, writeback running</td>
     <td align="center"><a href="docs/screenshots/droidspaces.png"><img src="docs/screenshots/droidspaces.png" width="150" alt="Droidspaces"></a><br><b>⑤ Droidspaces</b><br>all required features found</td>
-    <td align="center"><a href="docs/screenshots/bbg_erofs.png"><img src="docs/screenshots/bbg_erofs.png" width="150" alt="Baseband Guard"></a><br><b>⑥ Baseband Guard</b><br>write rejected + dmesg denial</td>
   </tr>
   <tr>
+    <td align="center"><a href="docs/screenshots/bbg_erofs.png"><img src="docs/screenshots/bbg_erofs.png" width="150" alt="Baseband Guard"></a><br><b>⑥ Baseband Guard</b><br>write rejected + dmesg denial</td>
     <td align="center"><a href="docs/screenshots/network.png"><img src="docs/screenshots/network.png" width="150" alt="Better network"></a><br><b>⑦ Better network</b><br>iptables + IPv6 NAT</td>
     <td align="center"><a href="docs/screenshots/banner.png"><img src="docs/screenshots/banner.png" width="150" alt="Build tags"></a><br><b>⑧ Build tags</b><br>version, user/host, build time</td>
     <td align="center"><a href="docs/screenshots/rekernel.png"><img src="docs/screenshots/rekernel.png" width="150" alt="Re:Kernel"></a><br><b>⑨ Re:Kernel</b><br>via NoActive, source-patch mode</td>
+    <td align="center"><a href="docs/screenshots/bbr.png"><img src="docs/screenshots/bbr.png" width="150" alt="BBR"></a><br><b>⑩ BBR</b><br>TCP congestion control</td>
   </tr>
 </table>
 
-Still pending: **BBR** (runtime-managed by the `tcp-config` module) and **KPM/KPN** (not tested on device yet).
+Still pending: **KPM/KPN** (not tested on device yet).
 
 ---
 
