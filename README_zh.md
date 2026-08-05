@@ -122,18 +122,36 @@
 
 <table>
   <tr>
-    <td align="center"><a href="docs/screenshots/ksu_manager.png"><img src="docs/screenshots/ksu_manager.png" width="150" alt="ReSukiSU"></a><br><b>① ReSukiSU</b><br>v4.1.0 (35046)、SuSFS v2.2.0、SELinux Enforcing</td>
-    <td align="center"><a href="docs/screenshots/susfs.png"><img src="docs/screenshots/susfs.png" width="150" alt="SuSFS"></a><br><b>② SuSFS</b><br>v2.2.0，全套功能</td>
-    <td align="center"><a href="docs/screenshots/zram_all_algos.png"><img src="docs/screenshots/zram_all_algos.png" width="150" alt="全压缩算法"></a><br><b>③ 全压缩算法</b><br>Scene 中 lzo-rle … zstd 全可选</td>
-    <td align="center"><a href="docs/screenshots/zram_writeback.png"><img src="docs/screenshots/zram_writeback.png" width="150" alt="lz4kd + writeback"></a><br><b>④ LZ4KD + writeback</b><br>lz4kd 生效、writeback 运行中</td>
-    <td align="center"><a href="docs/screenshots/droidspaces.png"><img src="docs/screenshots/droidspaces.png" width="150" alt="Droidspaces"></a><br><b>⑤ Droidspaces</b><br>all required features found</td>
+    <td align="center"><a href="docs/screenshots/ksu_manager.png"><img src="docs/screenshots/ksu_manager.png" width="150" alt="ReSukiSU"></a></td>
+    <td align="center"><a href="docs/screenshots/susfs.png"><img src="docs/screenshots/susfs.png" width="150" alt="SuSFS"></a></td>
+    <td align="center"><a href="docs/screenshots/zram_all_algos.png"><img src="docs/screenshots/zram_all_algos.png" width="150" alt="全压缩算法"></a></td>
+    <td align="center"><a href="docs/screenshots/zram_writeback.png"><img src="docs/screenshots/zram_writeback.png" width="150" alt="lz4kd + writeback"></a></td>
   </tr>
   <tr>
-    <td align="center"><a href="docs/screenshots/bbg_erofs.png"><img src="docs/screenshots/bbg_erofs.png" width="150" alt="Baseband Guard"></a><br><b>⑥ Baseband Guard</b><br>写入被拒 + dmesg 拦截日志</td>
-    <td align="center"><a href="docs/screenshots/network.png"><img src="docs/screenshots/network.png" width="150" alt="Better network"></a><br><b>⑦ Better network</b><br>iptables + IPv6 NAT</td>
-    <td align="center"><a href="docs/screenshots/banner.png"><img src="docs/screenshots/banner.png" width="150" alt="构建标签"></a><br><b>⑧ 构建标签</b><br>版本串、user/host、构建时间</td>
-    <td align="center"><a href="docs/screenshots/rekernel.png"><img src="docs/screenshots/rekernel.png" width="150" alt="Re:Kernel"></a><br><b>⑨ Re:Kernel</b><br>NoActive 验证、源码补丁模式</td>
-    <td align="center"><a href="docs/screenshots/bbr.png"><img src="docs/screenshots/bbr.png" width="150" alt="BBR"></a><br><b>⑩ BBR</b><br>TCP 拥塞控制</td>
+    <td align="center"><b>① ReSukiSU</b></td>
+    <td align="center"><b>② SuSFS</b></td>
+    <td align="center"><b>③ 全压缩算法</b></td>
+    <td align="center"><b>④ LZ4KD + writeback</b></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="docs/screenshots/droidspaces.png"><img src="docs/screenshots/droidspaces.png" width="150" alt="Droidspaces"></a></td>
+    <td align="center"><a href="docs/screenshots/bbg_erofs.png"><img src="docs/screenshots/bbg_erofs.png" width="150" alt="Baseband Guard"></a></td>
+    <td align="center"><a href="docs/screenshots/network.png"><img src="docs/screenshots/network.png" width="150" alt="Better network"></a></td>
+    <td align="center"><a href="docs/screenshots/banner.png"><img src="docs/screenshots/banner.png" width="150" alt="构建标签"></a></td>
+  </tr>
+  <tr>
+    <td align="center"><b>⑤ Droidspaces</b></td>
+    <td align="center"><b>⑥ Baseband Guard</b></td>
+    <td align="center"><b>⑦ Better network</b></td>
+    <td align="center"><b>⑧ 构建标签</b></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="docs/screenshots/rekernel.png"><img src="docs/screenshots/rekernel.png" width="150" alt="Re:Kernel"></a></td>
+    <td align="center"><a href="docs/screenshots/bbr.png"><img src="docs/screenshots/bbr.png" width="150" alt="BBR"></a></td>
+  </tr>
+  <tr>
+    <td align="center"><b>⑨ Re:Kernel</b></td>
+    <td align="center"><b>⑩ BBR</b></td>
   </tr>
 </table>
 
