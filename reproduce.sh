@@ -147,11 +147,16 @@ echo "clang: $("$CLANG_FOUND" --version | head -1)"
 log "[1] Preparing sources"
 mkdir -p "$WORK_DIR"
 cd "$WORK_DIR"
+# Real commit via the GitHub REST API (the HTML page no longer embeds "sha":
+# it uses "oid" now; the API is the stable source)
+SRC_COMMIT=$(curl -sL "https://api.github.com/repos/Ace6-Development/android_kernel_oneplus_sm8750/commits/lineage-23.2" | grep -oE '"(sha|oid)": "[0-9a-f]{40}"' | head -1 | grep -oE '[0-9a-f]{40}' || true)
+echo "  Source commit: ${SRC_COMMIT:-unknown}"
 if [ -z "${KERNEL_SRC:-}" ]; then
   [ -d src ] || {
     log "  Download kernel source (lineage-23.2)..."
-    curl -sL "$REPO_BASE/GuLingguang/oneplus-sm8750-kernel-pro/archive/refs/heads/lineage-23.2.zip" -o src.zip
-    unzip -q src.zip && mv oneplus-sm8750-kernel-pro-lineage-23.2 src && rm src.zip
+    curl -sL "$REPO_BASE/Ace6-Development/android_kernel_oneplus_sm8750/archive/refs/heads/lineage-23.2.zip" -o src.zip
+    unzip -q src.zip && mv android_kernel_oneplus_sm8750-lineage-23.2 src && rm src.zip
+    echo "$SRC_COMMIT" > .src_commit
   }
   [ -d sm8750-modules ] || {
     curl -sL "$REPO_BASE/Ace6-Development/android_kernel_oneplus_sm8750-modules/archive/refs/heads/lineage-23.2.zip" -o modules.zip
@@ -161,15 +166,18 @@ if [ -z "${KERNEL_SRC:-}" ]; then
     curl -sL "$REPO_BASE/LineageOS/android_kernel_oneplus_sm8750-devicetrees/archive/refs/heads/lineage-23.2.zip" -o dt.zip
     unzip -q dt.zip && mv android_kernel_oneplus_sm8750-devicetrees-lineage-23.2 sm8750-devicetrees && rm dt.zip
   }
+  # Stale-tree hint: the reused src is older than current upstream. The patch
+  # chain may have drifted — surface it now instead of at apply time.
+  if [ -f .src_commit ] && [ -n "$SRC_COMMIT" ] && [ "$(cat .src_commit)" != "$SRC_COMMIT" ]; then
+    log "WARN: local src tree is at $(cat .src_commit), upstream is now $SRC_COMMIT"
+    log "  run ./check_upstream.sh --local $WORK_DIR/src for a patch dry-run,"
+    log "  or delete work/src to re-download the current tree"
+  fi
   SRC_DIR="$WORK_DIR/src"
 else
   SRC_DIR="$KERNEL_SRC"
 fi
 cd "$SRC_DIR"
-# Real commit via the GitHub REST API (the HTML page no longer embeds "sha":
-# it uses "oid" now; the API is the stable source)
-SRC_COMMIT=$(curl -sL "https://api.github.com/repos/GuLingguang/oneplus-sm8750-kernel-pro/commits/lineage-23.2" | grep -oE '"(sha|oid)": "[0-9a-f]{40}"' | head -1 | grep -oE '[0-9a-f]{40}' || true)
-echo "  Source commit: ${SRC_COMMIT:-unknown}"
 
 # ---- [2] Apply patches (by toggle) ----
 log "[2] Applying patches"
