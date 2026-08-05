@@ -344,6 +344,12 @@ The builder itself is **complete and verified on one device** — the gaps below
 
 **Versions**: Release tags follow `kernel-<timestamp>-<feature-flags>` (e.g. `kernel-20260803-115320-ksu35046`) — point-in-time snapshots of whatever was built that run. There is no upgrade-path promise yet; the tag is a record, and the flashable zip is the deliverable.
 
+**Planned features** (all need porting from the official OKI tree — the source is not in lineage):
+
+- **Fengchi scx scheduler** — OnePlus's sched_ext governor
+- **ADIOS IO scheduler** — OnePlus's custom block-layer scheduler
+- **Official Ace6/15R 120W SUPERVOOC charging** — kernel-side vooc protocol stack; the LOS ROM's vendor side may not cooperate, real-device charging is the verification target
+
 ---
 
 ## Credits
