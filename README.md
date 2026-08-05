@@ -23,6 +23,7 @@
 - [Features](#features)
 - [Feature details](#feature-details)
 - [How to use](#how-to-use)
+- [Artifacts & releases](#artifacts--releases)
 - [Adaptations](#adaptations)
 - [Reproducibility](#reproducibility)
 - [Local build](#local-build)
@@ -233,21 +234,54 @@ Both vulnerabilities are covered:
 
 ## How to use
 
+### First fork (one-time setup)
+
 1. **Fork** this repository
-2. Go to **Actions** → **Build Ace6 Kernel** → **Run workflow**
-3. Toggle features as desired, click **Run workflow**
-4. Download the AK3 zip from the run **artifacts** (or Release if `release_enable` is on)
+2. **Allow write permissions**: Settings → Actions → General → Workflow permissions → **Read and write** (required for Release uploads)
+3. Run the **Upload AOSP Clang Toolchain** workflow once — it packages the official toolchain (clang 21.0.0 r563880c, ~1.5 GB) into your fork's own Release, where the build downloads it from (there is no apt fallback)
+4. Push any commit to your default branch to activate the weekly upstream drift check
+
+### Build
+
+1. Go to **Actions** → **Build Ace6 Kernel** → **Run workflow**
+2. Toggle features as desired, click **Run workflow**
+3. Download the AK3 zip from the run **artifacts** (or Release if `release_enable` is on)
+4. The first build is cold (~40 min); later builds reuse ccache (~8 min)
+
+### Flash
+
+1. **Back up the current slot's boot partition first** — via OrangeFox (OFRP) or any recovery's built-in backup, or:
+   `adb shell "dd if=/dev/block/by-name/boot_$(getprop ro.boot.slot) of=/sdcard/boot_backup.img"`
+2. Flash the AK3 zip (`Kernel-Ace6-*.zip`) via recovery (TWRP / OrangeFox / AOSP recovery): Install → select the zip → reboot. Or install it via the KernelSU manager (Install → flash image). AnyKernel3 targets the **active slot's `boot`** automatically (`boot_a` / `boot_b`, depending on the running slot)
+3. **Don't flash the wrong partition**: this kernel goes to `boot` only — never `init_boot`, never the inactive slot
+4. Bootloop? Restore the backed-up stock boot image
 
 ### Toolchain
 
-- Uses **AOSP Clang 21.0.0 (r563880c)** — the exact same toolchain as the official OnePlus kernel build (from the `AOSP-Clang-21.0.0-r563880c` Release of this repo)
-- clang-21 installed via apt.llvm.org, or downloaded from the Release asset
+- Uses **AOSP Clang 21.0.0 (r563880c)** — the exact same toolchain as the official OnePlus kernel build
+- The build downloads it from the **`toolchain-AOSP-Clang-21.0.0-r563880c` Release of your own repo** — hence the Upload step in "First fork" above; there is no apt.llvm.org fallback in the pipeline
 
 ### Notes
 
 - Default workflow is a **minimal build** (no KSU, no features) — enable what you need
 - `kernel_suffix` and `build_time` allow reproducible, identifiable builds
 - Attribution defaults to `Lingguang@kernel-builder` — change via `build_user`/`build_host`, or disable entirely with `attribution_enable`
+
+---
+
+## Artifacts & releases
+
+The repo produces three kinds of outputs — don't mix them up:
+
+| Output | Where | Flashable? | Notes |
+|---|---|---|---|
+| **AK3 zip** (`Kernel-Ace6-<user>-ksu<ver>-<date>.zip`) | run artifacts (14 days) / Release (permanent) | ✅ yes | AnyKernel3 package — the only thing you flash |
+| **`Image` + `boot.img`** | run artifacts only, with `artifact_mode = all` | ❌ no | raw build outputs for developers, no ramdisk — flashing them does nothing useful |
+| **`toolchain-…` / `ccache-…` Releases** | Releases tab | ❌ no | build infrastructure (toolchain / ccache), not kernels |
+
+- Run artifacts are kept **14 days** (`retention-days` in `build.yml`); Releases are permanent
+- Release tags look like `kernel-20260803-115320-ksu35046` — a point-in-time snapshot of the parameters used for that build
+- Want a permanent flashable zip for everyone? Turn **`release_enable`** on — the release job then publishes the AK3 zip with feature/version tables and flashing notes
 
 ---
 

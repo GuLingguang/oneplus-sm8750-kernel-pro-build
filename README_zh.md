@@ -23,6 +23,7 @@
 - [功能开关](#功能开关)
 - [功能详情](#功能详情)
 - [使用方法](#使用方法)
+- [产物与 Release](#产物与-release)
 - [适配说明](#适配说明)
 - [可复现性](#可复现性)
 - [本地构建](#本地构建)
@@ -233,21 +234,54 @@
 
 ## 使用方法
 
+### 首次 Fork（一次性准备）
+
 1. **Fork** 本仓库
-2. 进入 **Actions** → **Build Ace6 Kernel** → **Run workflow**
-3. 按需开关功能，点击 **Run workflow**
-4. 从 run 的 **artifacts** 下载 AK3 zip（`release_enable` 开启时也可从 Release 下载）
+2. **允许写入权限**：Settings → Actions → General → Workflow permissions → **Read and write**（Release 上传必需）
+3. 先跑一次 **Upload AOSP Clang Toolchain** workflow —— 它会将官方工具链（clang 21.0.0 r563880c，约 1.5 GB）打包上传到你 fork 自己的 Release，构建从这里下载（没有 apt 备用源）
+4. 向默认分支提交任意 commit，激活每周上游漂移检查
+
+### 构建
+
+1. 进入 **Actions** → **Build Ace6 Kernel** → **Run workflow**
+2. 按需开关功能，点击 **Run workflow**
+3. 从 run 的 **artifacts** 下载 AK3 zip（`release_enable` 开启时也可从 Release 下载）
+4. 首次构建为冷编译（约 40 分钟）；之后构建复用 ccache（约 8 分钟）
+
+### 刷入
+
+1. **先备份当前槽位的 boot 分区** —— 用 OrangeFox（OFRP）或任意 recovery 的内置备份，或：
+   `adb shell "dd if=/dev/block/by-name/boot_$(getprop ro.boot.slot) of=/sdcard/boot_backup.img"`
+2. 通过 recovery（TWRP / OrangeFox / AOSP recovery）刷入 AK3 zip（`Kernel-Ace6-*.zip`）：Install → 选择 zip → 重启；或通过 KernelSU 管理器安装（Install → 刷镜像）。AnyKernel3 会自动刷**当前活动槽位**的 `boot` 分区（`boot_a` / `boot_b`，取决于当前运行槽）
+3. **不要刷错分区**：本内核只进 `boot` —— 绝不是 `init_boot`，也不是非活动槽位
+4. 卡 bootloop？恢复备份的官方 boot 镜像
 
 ### 工具链
 
-- 使用 **AOSP Clang 21.0.0 (r563880c)** —— 与官方 OnePlus 内核构建完全相同的工具链（来自本仓库的 `AOSP-Clang-21.0.0-r563880c` Release）
-- clang-21 通过 apt.llvm.org 安装，或从 Release asset 下载
+- 使用 **AOSP Clang 21.0.0 (r563880c)** —— 与官方 OnePlus 内核构建完全相同的工具链
+- 构建从**你自己仓库的 `toolchain-AOSP-Clang-21.0.0-r563880c` Release** 下载 —— 所以首次 fork 必须先跑上传 workflow；流水线里没有 apt.llvm.org 备用源
 
 ### 备注
 
 - 默认 workflow 是**最小构建**（无 KSU、无功能）—— 需要什么开什么
 - `kernel_suffix` 和 `build_time` 支持可复现、可识别的构建
 - Attribution 默认 `Lingguang@kernel-builder` —— 可通过 `build_user`/`build_host` 修改，或用 `attribution_enable` 完全关闭
+
+---
+
+## 产物与 Release
+
+本仓库产出三类东西 —— 别搞混：
+
+| 产物 | 位置 | 可刷？ | 说明 |
+|---|---|---|---|
+| **AK3 zip**（`Kernel-Ace6-<用户>-ksu<版本>-<日期>.zip`） | run artifacts（14 天）/ Release（长期） | ✅ 可刷 | AnyKernel3 刷机包 —— 唯一需要刷的东西 |
+| **`Image` + `boot.img`** | 仅 run artifacts，需 `artifact_mode = all` | ❌ 不可刷 | 开发者裸产物，无 ramdisk —— 刷了也没用 |
+| **`toolchain-…` / `ccache-…` Release** | Releases 页 | ❌ 不可刷 | 构建基础设施（工具链 / ccache），不是内核 |
+
+- Run 产物保留 **14 天**（`build.yml` 里的 `retention-days`）；Release 长期保留
+- Release 标签形如 `kernel-20260803-115320-ksu35046` —— 该次构建参数的时间点快照
+- 想让所有人都能拿到长期可刷包？开 **`release_enable`** —— release job 会发布带功能/版本表格和刷机说明的 AK3 zip
 
 ---
 
