@@ -54,7 +54,7 @@ on:
         type: boolean
         default: 'false'
       cve_patch:
-        description: 'CVE security patches (GhostLock)（CVE 安全补丁（GhostLock））'
+        description: 'CVE security patches (GhostLock) — upstream lineage-23.2 already ships them（上游已包含，保留开关仅为兼容）'
         required: true
         type: boolean
         default: 'false'
@@ -329,9 +329,9 @@ jobs:
         run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/06_baseband_guard.patch
         working-directory: work/src
 
-      - name: 🔧 Apply CVE patch（应用 CVE 补丁）
+      - name: ℹ️ CVE patch（上游已包含，跳过）
         if: inputs.cve_patch
-        run: patch -p1 -F3 --batch -f < $GITHUB_WORKSPACE/patches/split/08_cve.patch
+        run: echo "GhostLock fixes (CVE-2026-43499, CVE-2026-53163) are already upstream in lineage-23.2; 08_cve.patch was removed."
         working-directory: work/src
 
       - name: 🔧 Apply Re:Kernel patch（应用 Re:Kernel 补丁）

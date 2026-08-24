@@ -6,7 +6,7 @@
 # The whole reproducibility story rests on "upstream hasn't moved". This script
 # makes that claim checkable instead of assumed:
 #   - pulls the latest lineage-23.2 kernel source (zip, no git needed)
-#   - dry-runs all 10 patches in workflow order (patch --dry-run touches nothing)
+#   - dry-runs all 9 patches in workflow order (patch --dry-run touches nothing)
 #   - exits 1 if any patch no longer applies
 #
 # Usage:
@@ -50,7 +50,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PATCH_DIR="$SCRIPT_DIR/patches/split"
 PATCHES=("$PATCH_DIR"/*.patch)
 PATCH_COUNT=${#PATCHES[@]}
-[ "$PATCH_COUNT" -eq 10 ] || { log "warning: expected 10 split patches, found $PATCH_COUNT"; }
+[ "$PATCH_COUNT" -eq 10 ] || { log "warning: expected 9 split patches, found $PATCH_COUNT"; }
 
 # ---- 1. source tree ----
 if [ -n "$LOCAL_TREE" ]; then

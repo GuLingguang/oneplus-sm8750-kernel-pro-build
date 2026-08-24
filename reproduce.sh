@@ -16,7 +16,7 @@
 #   --zram-writeback        ZRAM writeback to backing device (idle/incompressible pages)
 #   --droidspaces <standard|extend|false> Droidspaces
 #   --bbg                   Baseband Guard
-#   --cve                   CVE patches
+#   --cve                   CVE patches (no-op: upstream lineage-23.2 ships both GhostLock fixes)
 #   --better-net            ipset/iptables advanced network support
 #   --bbr                   BBR
 #   --kpm                   KPM
@@ -189,7 +189,7 @@ apply 07_compile_fixes.patch
 [ "$LZ4KD" = "1" ] && apply 04_lz4kd.patch
 [ "$DROIDSPACES" != "false" ] && apply 05_droidspaces.patch
 [ "$BBG" = "1" ] && apply 06_baseband_guard.patch
-[ "$CVE" = "1" ] && apply 08_cve.patch
+[ "$CVE" = "1" ] && log "CVE patches: skipped — upstream lineage-23.2 already ships CVE-2026-43499 + CVE-2026-53163"
 [ "$REKERNEL" = "1" ] && apply 09_rekernel.patch
 
 # ---- [3] Copy extra files ----

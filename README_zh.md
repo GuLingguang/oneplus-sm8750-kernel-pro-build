@@ -56,12 +56,12 @@
 
 | | 内容 |
 |---|---|
-| **10 个功能补丁** | **29,162 行**针对 lineage-23.2 树的适配 |
+| **9 个功能补丁** | **29,148 行**针对 lineage-23.2 树的适配 |
 | **额外 C 源码** | **20,775 行** —— susfs.c、EVDI 驱动、lz4/lz4kd/zstd 库、ntsync、Baseband-guard |
 | **API 适配** | **共 16 处** —— 11 处 SUSFS（新版 KSU API）+ 5 处 Re:Kernel（lineage 6.6.139 签名差异） |
 | **CI 设计** | 32 步、24 个输入、指纹 ccache —— 全量构建约 8 分钟 |
 | **真机验证** | **567 个官方 ROM 模块**全部正常加载运行；vendor 分区 EROFS 只读 |
-| **维护** | 无需维护 fork 树 —— 增量就是 10 个补丁 + 额外源码，按需应用到上游 `lineage-23.2` |
+| **维护** | 无需维护 fork 树 —— 增量就是 9 个补丁 + 额外源码，按需应用到上游 `lineage-23.2` |
 
 ---
 
@@ -173,7 +173,7 @@
 | 🛡️ **ZRAM writeback** | 关 | 将空闲/不可压缩的 zram 页写入后备设备（运行时需配置 `backing_dev`） |
 | 📦 **Droidspaces** | 关 | 轻量 Linux 容器支持（standard/extend） |
 | 🛡️ **Baseband Guard** | 关 | 内核级防格式化保护 |
-| 🔒 **CVE patches** | 关 | GhostLock（CVE-2026-43499 + CVE-2026-53163） |
+| 🔒 **CVE patches** | 关 | GhostLock（CVE-2026-43499 + CVE-2026-53163）—— 上游现已包含，补丁已移除 |
 | 🌐 **Better network** | 关 | ipset/iptables 高级网络支持 |
 | 🚀 **BBR** | 关 | TCP 拥塞控制 |
 | 🧩 **KPM/KPN** | 关 | KernelPatch Next（独立内核补丁支持） |
@@ -222,9 +222,11 @@
 
 ### 🔒 GhostLock（CVE-2026-43499 + CVE-2026-53163）
 
-两个漏洞都已覆盖：
-- **CVE-2026-43499**：rtmutex `remove_waiter` NULL 防护 —— 上游 6.6.139 树已自带（`scoped_guard`）
-- **CVE-2026-53163**：`rtmutex_api.c` 中 proxy cleanup 的 `ret < 0` 修复
+两个漏洞现在都已由上游 `lineage-23.2` 覆盖：
+- **CVE-2026-43499**：rtmutex `remove_waiter` NULL 防护 —— 上游 6.6.139 树自带（`scoped_guard`）
+- **CVE-2026-53163**：`rtmutex_api.c` 中 proxy cleanup 的 `ret < 0` 修复 —— 上游已合入 `UPSTREAM: locking/rtmutex: Skip remove_waiter() when waiter is not enqueued`（2026-08-18 推送到 `lineage-23.2`）
+
+独立的 `08_cve.patch` 因此已移除。
 
 ### ⚡ 压缩
 
@@ -291,7 +293,7 @@
 
 本项目把多个来源的补丁（主要是 [cctv18/oppo_oplus_realme_sm8750](https://github.com/cctv18/oppo_oplus_realme_sm8750) 项目，针对一加官方 OKI 树）适配到 **Ace6 内核树**（`lineage-23.2`，内核 6.6.139）。关键适配：
 
-- **补丁**拆分为独立开关（`patches/split/00-09`）：`07_compile_fixes.patch` 无条件应用，其余由 workflow 功能开关控制（KSU/SUSFS/lz4/LZ4KD/Droidspaces/BBG/CVE/Re:Kernel）
+- **补丁**拆分为独立开关（`patches/split/00-07, 09`）：`07_compile_fixes.patch` 无条件应用，其余由 workflow 功能开关控制（KSU/SUSFS/lz4/LZ4KD/Droidspaces/BBG/Re:Kernel）
 - **新文件**（补丁无法创建的部分）放在 `patches/extra/` —— lz4/zstd 库、susfs.c、evdi、ntsync、Baseband-guard
 - **Re:Kernel** 使用适配到 lineage-6.6.139 API 的源码钩子（netlink + binder/signal）
 - **模块**来自 ROM 官方预编译 `vendor_dlkm` —— 无需重建模块树
@@ -303,7 +305,7 @@
 - **`KBUILD_BUILD_TIMESTAMP`** 用于自定义/固定构建时间
 - **ccache** 配 sloppiness（忽略文件 mtime/ctime）加速重复构建
 - **Public ccache**（可选 `ccache_update`）：打包并上传缓存到 Release，近乎即时重建
-- **上游漂移体检**：`check_upstream.sh`（以及每周 workflow）对最新 `lineage-23.2` 树逐个 dry-run 全部 10 个补丁 —— 漂移会以 review 请求 issue 的形式出现，而不是先以 bootloop 的形式出现
+- **上游漂移体检**：`check_upstream.sh`（以及每周 workflow）对最新 `lineage-23.2` 树逐个 dry-run 全部 9 个补丁 —— 漂移会以 review 请求 issue 的形式出现，而不是先以 bootloop 的形式出现
 - 已验证：GitHub Actions 能产出与配置功能完全一致的、可开机的 AK3
 
 **GitHub 免费额度现实核查**：Actions 每月 2,000 分钟 + 1 GB 缓存；本仓库的 ccache Release asset 约 630 MB、toolchain asset 约 1.5 GB。它们让重复构建很快，但也会消耗你的额度。大量或反复的本地工作，`reproduce.sh` 是免费路径 —— CI 是便利路径。
@@ -341,7 +343,7 @@
 │       ├── upstream-check.yml    # 每周：补丁在上游还能打上吗？
 │       └── upload-toolchain.yml  # 一次性：上传 AOSP clang 到 Release
 ├── patches/
-│   ├── split/                    # 10 个独立功能补丁（00-09）
+│   ├── split/                    # 9 个独立功能补丁（00-07, 09）
 │   ├── extra/                    # 补丁无法创建的新文件
 │   │   ├── fs/  crypto/  drivers/  include/  lib/
 │   │   │                         # susfs.c, evdi, ntsync, lz4/lz4kd/zstd, headers

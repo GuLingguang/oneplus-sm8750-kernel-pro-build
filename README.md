@@ -56,12 +56,12 @@ The kernel is built from the **official Ace6 kernel source** (lineage-23.2 branc
 
 | | What |
 |---|---|
-| **10 feature patches** | **29,162 lines** of adaptation against the lineage-23.2 tree |
+| **9 feature patches** | **29,148 lines** of adaptation against the lineage-23.2 tree |
 | **extra C sources** | **20,775 lines** — susfs.c, EVDI driver, lz4/lz4kd/zstd libraries, ntsync, Baseband-guard |
 | **API adaptations** | **16 total** — 11 SUSFS (new KSU API) + 5 Re:Kernel (lineage 6.6.139 signatures) |
 | **CI design** | 32 steps, 24 inputs, fingerprint ccache — ~8 min full build |
 | **Verified on device** | **567 official ROM modules** load & run; vendor partitions EROFS read-only |
-| **Maintenance** | no fork tree to keep in sync — the delta is 10 patches + extra sources, applied on demand against upstream `lineage-23.2` |
+| **Maintenance** | no fork tree to keep in sync — the delta is 9 patches + extra sources, applied on demand against upstream `lineage-23.2` |
 
 ---
 
@@ -173,7 +173,7 @@ Still pending: **KPM/KPN** (not tested on device yet).
 | 🛡️ **ZRAM writeback** | off | Write idle/incompressible zram pages to a backing device (needs runtime `backing_dev` config) |
 | 📦 **Droidspaces** | off | Lightweight Linux container support (standard/extend) |
 | 🛡️ **Baseband Guard** | off | Kernel-level anti-format protection |
-| 🔒 **CVE patches** | off | GhostLock (CVE-2026-43499 + CVE-2026-53163) |
+| 🔒 **CVE patches** | off | GhostLock (CVE-2026-43499 + CVE-2026-53163) — upstream now ships both, patch removed |
 | 🌐 **Better network** | off | ipset/iptables advanced network support |
 | 🚀 **BBR** | off | TCP congestion control |
 | 🧩 **KPM/KPN** | off | KernelPatch Next (independent kernel patch support) |
@@ -222,9 +222,11 @@ Still pending: **KPM/KPN** (not tested on device yet).
 
 ### 🔒 GhostLock (CVE-2026-43499 + CVE-2026-53163)
 
-Both vulnerabilities are covered:
-- **CVE-2026-43499**: rtmutex `remove_waiter` NULL guard — already present in the upstream 6.6.139 tree (`scoped_guard`)
-- **CVE-2026-53163**: proxy cleanup `ret < 0` fix in `rtmutex_api.c`
+Both vulnerabilities are now covered by upstream `lineage-23.2` itself:
+- **CVE-2026-43499**: rtmutex `remove_waiter` NULL guard — present in the upstream 6.6.139 tree (`scoped_guard`)
+- **CVE-2026-53163**: proxy cleanup `ret < 0` fix in `rtmutex_api.c` — merged upstream as `UPSTREAM: locking/rtmutex: Skip remove_waiter() when waiter is not enqueued` (pushed to `lineage-23.2` on 2026-08-18)
+
+The standalone `08_cve.patch` was therefore removed.
 
 ### ⚡ Compression
 
@@ -291,7 +293,7 @@ The repo produces three kinds of outputs — don't mix them up:
 
 This project adapts patches from several sources (primarily the [cctv18/oppo_oplus_realme_sm8750](https://github.com/cctv18/oppo_oplus_realme_sm8750) project, which targets the OnePlus official OKI tree) to the **Ace6 kernel tree** (`lineage-23.2`, kernel 6.6.139). Key adaptations:
 
-- **Patches** are split into independent toggles (`patches/split/00-09`): `07_compile_fixes.patch` applies unconditionally, the rest are gated by workflow features (KSU/SUSFS/lz4/LZ4KD/Droidspaces/BBG/CVE/Re:Kernel)
+- **Patches** are split into independent toggles (`patches/split/00-07, 09`): `07_compile_fixes.patch` applies unconditionally, the rest are gated by workflow features (KSU/SUSFS/lz4/LZ4KD/Droidspaces/BBG/Re:Kernel)
 - **New files** (that patches can't create) live in `patches/extra/` — lz4/zstd libs, susfs.c, evdi, ntsync, Baseband-guard
 - **Re:Kernel** uses source hooks (netlink + binder/signal) adapted to the lineage-6.6.139 API
 - **Modules** come from the ROM's official prebuilt `vendor_dlkm` — no need to rebuild the module tree
@@ -303,7 +305,7 @@ This project adapts patches from several sources (primarily the [cctv18/oppo_opl
 - **`KBUILD_BUILD_TIMESTAMP`** for custom/fixed build time
 - **ccache** with sloppiness config (file mtime/ctime ignored) for fast rebuilds
 - **Public ccache** (optional `ccache_update`): packages and uploads the cache to a Release for near-instant rebuilds
-- **Upstream drift check**: `check_upstream.sh` (also a weekly workflow) dry-runs all 10 patches against the latest `lineage-23.2` tree — drift surfaces as a review-request issue, ahead of it surfacing as a bootloop
+- **Upstream drift check**: `check_upstream.sh` (also a weekly workflow) dry-runs all 9 patches against the latest `lineage-23.2` tree — drift surfaces as a review-request issue, ahead of it surfacing as a bootloop
 - Verified: GitHub Actions produces a bootable AK3 with the exact configured features
 
 **GitHub free-tier reality check**: Actions gives 2,000 min/month and 1 GB of caches; this repo's ccache Release asset is ~630 MB and the toolchain asset ~1.5 GB. They make repeat builds fast, but they also churn your quota. For heavy or repeated local work, `reproduce.sh` is the free path — CI is the convenient one.
@@ -341,7 +343,7 @@ It auto-detects clang 21 (multiple paths), downloads sources (or uses `KERNEL_SR
 │       ├── upstream-check.yml    # Weekly: do the patches still apply upstream?
 │       └── upload-toolchain.yml  # One-time: upload AOSP clang to Release
 ├── patches/
-│   ├── split/                    # 10 independent feature patches (00-09)
+│   ├── split/                    # 9 independent feature patches (00-07, 09)
 │   ├── extra/                    # New files patches can't create
 │   │   ├── fs/  crypto/  drivers/  include/  lib/
 │   │   │                         # susfs.c, evdi, ntsync, lz4/lz4kd/zstd, headers
