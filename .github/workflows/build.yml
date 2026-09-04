@@ -412,9 +412,19 @@ jobs:
       - name: 🔧 Apply SUSFS KSU adaptation（应用 SUSFS KSU 适配）
         if: ${{ inputs.susfs_enable && inputs.ksu_type != 'none' }}
         run: |
+          set -e
           cd KernelSU
-          git apply --check $GITHUB_WORKSPACE/patches/02_ksu.patch 2>/dev/null && git apply $GITHUB_WORKSPACE/patches/02_ksu.patch \
-            || echo "WARN: 02_ksu.patch not applied automatically (KSU version may have changed)" >&2
+          if git grep -q "susfs_is_current_proc_no_su" -- kernel/feature/sucompat.h \
+              && git grep -q "ksu_handle_vfs_fstat" -- kernel/runtime/ksud_integration.c; then
+            echo "Current ReSukiSU already contains the modern SUSFS integration; skip legacy 02_ksu.patch"
+          else
+            echo "Applying legacy SUSFS KSU adapter"
+            if ! git apply --check "$GITHUB_WORKSPACE/patches/02_ksu.patch"; then
+              echo "ERROR: 02_ksu.patch does not apply to this KSU revision" >&2
+              exit 1
+            fi
+            git apply "$GITHUB_WORKSPACE/patches/02_ksu.patch"
+          fi
         working-directory: work/src
 
       # ---------- Attribution ----------
