@@ -555,18 +555,36 @@ jobs:
         if: ${{ !inputs.debug_skip_build }}
         run: |
           cd work/src
-          strings arch/arm64/boot/Image | grep -q "Linux version 6.6.139" || exit 1
-          # real kernel identity from the build artifacts: kernel.release +
-          # compile info. On this tree UTS_VERSION lives in utsversion.h
-          # (compile.h only has UTS_MACHINE/BY/HOST/COMPILER), so the old
-          # compile.h grep matched nothing and kernelver was always empty.
+          IMAGE=arch/arm64/boot/Image
+          [ -s "$IMAGE" ] || { echo "ERROR: kernel Image is missing or empty" >&2; exit 1; }
+
+          # Verify the actual Image against the release produced by this build.
+          # Do not hard-code 6.6.x: lineage-23.2 regularly moves to newer stable
+          # patchlevels, while CONFIG_LOCALVERSION is part of UTS_RELEASE too.
           REL=$(cat include/config/kernel.release 2>/dev/null || true)
+          [ -n "$REL" ] || { echo "ERROR: include/config/kernel.release is missing or empty" >&2; exit 1; }
+          BANNER=$(strings "$IMAGE" | grep -m1 -F "Linux version " || true)
+          [ -n "$BANNER" ] || { echo "ERROR: no Linux version banner found in Image" >&2; exit 1; }
+          case "$BANNER" in
+            "Linux version $REL "*) ;;
+            *)
+              echo "ERROR: Image release does not match kernel.release" >&2
+              echo "Expected: Linux version $REL" >&2
+              echo "Found:    $BANNER" >&2
+              exit 1
+              ;;
+          esac
+
+          # Real kernel identity from the build artifacts: kernel.release +
+          # compile info. On this tree UTS_VERSION lives in utsversion.h
+          # (compile.h only has UTS_MACHINE/BY/HOST/COMPILER).
           VER=$(grep -oE '#[0-9]+ SMP[^"]*' include/generated/utsversion.h 2>/dev/null | head -1 || true)
-          [ -n "$VER" ] || VER=$(strings arch/arm64/boot/Image | grep -oE '#[0-9]+ SMP PREEMPT[^"]*' | head -1 || true)
+          [ -n "$VER" ] || VER=$(strings "$IMAGE" | grep -oE '#[0-9]+ SMP PREEMPT[^"]*' | head -1 || true)
           echo "kernelrel=$REL" >> "$GITHUB_OUTPUT"
           echo "kernelver=$VER" >> "$GITHUB_OUTPUT"
           echo "Kernel: $REL | $VER"
-          ls -la arch/arm64/boot/Image
+          echo "Banner: $BANNER"
+          ls -la "$IMAGE"
 
       # ---------- KPM/KPN patch (post-build, binary) ----------
       - name: 🧩 Apply KPM patch（应用 KPM 补丁）
