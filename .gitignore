@@ -6,3 +6,7 @@ out/
 
 # System files
 .DS_Store
+
+# Profile tooling
+__pycache__/
+*.py[cod]
