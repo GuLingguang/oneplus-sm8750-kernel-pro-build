@@ -1,0 +1,14 @@
+Source: https://github.com/GuLingguang/oneplus-sm8750-kernel-pro-build/actions/runs/33852164627
+Job: 100957196370 (build)
+Retrieved: 2026-09-05; selected lines only, not a complete build manifest.
+Build success is not runtime validation. Release job skipped.
+
+2026-09-04T08:10:37.5055355Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-09-04T08:10:37.6356488Z Download action repository 'actions/cache@v5' (SHA:caa296126883cff596d87d8935842f9db880ef25)
+2026-09-04T08:10:37.7659951Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-09-04T08:12:10.6680115Z Source commit: cb967c26c2c5689108fa28d3c3be2aba6ba71f5f
+2026-09-04T08:13:05.4157818Z KSU version: 35115 (4415 commits)
+2026-09-04T08:27:25.4928334Z -- Lingguang version name: v4.2.0-rc1-9d0ff6ae-dirty@Lingguang
+2026-09-04T08:27:25.5069266Z -- Lingguang: using SuSFS Inline hook
+2026-09-04T08:27:25.5333100Z -- SUSFS_VERSION: v2.2.0
+2026-09-04T08:28:05.6912717Z Banner: Linux version 6.6.142-4k-gcb967c26c2c5 (Lingguang@kernel-builder) (Android (14054515, +pgo, +bolt, +lto, +mlgo, based on r563880c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 5e96669f06077099aa41290cdb4c5e6fa0f59349), LLD 21.0.0 (/mnt/disks/build-disk/src/googleplex-android/llvm-r563880-release/out/llvm-project/llvm 5e96669f06077099aa41290cdb4c5e6fa0f59349)) # SMP PREEMPT

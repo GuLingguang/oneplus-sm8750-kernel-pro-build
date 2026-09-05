@@ -1,0 +1,354 @@
+{
+  "project_commit": "c303fae1f308cd8c0a01b22f28b5bd34de6ab21a",
+  "files": [
+    {
+      "path": "patches/02_ksu.patch",
+      "sha256": "3e830a9c5195cad541c116c589b08621e0eeb27563f3607250e2a4469678f417"
+    },
+    {
+      "path": "patches/extra/Baseband-guard/Kconfig",
+      "sha256": "2407b95f428a1ed4f7737fa5a39d57304598435c097ec2308ed429f0cdf04a98"
+    },
+    {
+      "path": "patches/extra/Baseband-guard/LICENSE",
+      "sha256": "edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6"
+    },
+    {
+      "path": "patches/extra/Baseband-guard/Makefile",
+      "sha256": "808758325f5b30678d5ecda96903fa4287e321d9bbfcc9f3427160e587db141e"
+    },
+    {
+      "path": "patches/extra/Baseband-guard/baseband_guard.c",
+      "sha256": "5f7f69e6c233da2c6481f9bfbc54d628753a84794996bb7a25546cf8569e735b"
+    },
+    {
+      "path": "patches/extra/Baseband-guard/baseband_guard.h",
+      "sha256": "2276db961f43c1a88cb66a0b9f33200f7542fbacc45dd98a25be2d20da7902eb"
+    },
+    {
+      "path": "patches/extra/Baseband-guard/docs/README-en.md",
+      "sha256": "877f837c9db2391e06e1d638a269b3d5cb08042a15489a40f75f7ec3a783593f"
+    },
+    {
+      "path": "patches/extra/Baseband-guard/docs/README.md",
+      "sha256": "ceedfe6d6e1de733e41221cc6c75911d5c595c12f34d40e79e66d4d83a0be6c6"
+    },
+    {
+      "path": "patches/extra/Baseband-guard/kernel_compat.h",
+      "sha256": "2588fa5814029907f759e4de2261bf3d104679ce25c9265f957456e928110b43"
+    },
+    {
+      "path": "patches/extra/Baseband-guard/sepatch.txt",
+      "sha256": "596edb3e1e76b252077891533936c5c29dd713490d656d229bc7037952641f69"
+    },
+    {
+      "path": "patches/extra/Baseband-guard/setup.sh",
+      "sha256": "efeb4cbeeba59fc6207657a3834fe9850abe9741ac7080f299c8d5fe552bec57"
+    },
+    {
+      "path": "patches/extra/Baseband-guard/tracing/Makefile",
+      "sha256": "9da4290e300c49fd8900d7e515e1eb753aaaba6218e3ec0920c22503d9854ff4"
+    },
+    {
+      "path": "patches/extra/Baseband-guard/tracing/kernel_compat.h",
+      "sha256": "0d1d2d32c2b2d3ed989c4bfb2bbb5b2179b749dec5d870698fe4ade4d3a99b12"
+    },
+    {
+      "path": "patches/extra/Baseband-guard/tracing/tracing.c",
+      "sha256": "92ff295a4f6cb2b79e5ea9b08dd53d4ae4f216d90eba1303c2c75a13816b20e8"
+    },
+    {
+      "path": "patches/extra/Baseband-guard/tracing/tracing.h",
+      "sha256": "171c535b3a20fa8fd73c57c5d939c583239f558fe36fea95238e772d55af1373"
+    },
+    {
+      "path": "patches/extra/crypto/lz4k.c",
+      "sha256": "cc4086ea7d77085cc05da00cbd9bdcbfabad07a08a11bddc2a62af35166cb173"
+    },
+    {
+      "path": "patches/extra/crypto/lz4kd.c",
+      "sha256": "d033407caef02e6cbd8c747029dc5b7a6d77ad9a532c5d099eea4ee38f1f99c5"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/Kconfig",
+      "sha256": "a99a852da9951f2c839f069da3d771d17007b5303290a4f3791083dfccbe6b1d"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/LICENSE",
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/Makefile",
+      "sha256": "02740dab341caca12e8cc2ca7adfea21030b7019fcd7fb5d2302eea77285d9a3"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/dkms.conf",
+      "sha256": "3a1a2da5ba0aa5195b1d1cc1cce5d304d286f34ca844fc8b78667c3bc5d3abd7"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_connector.c",
+      "sha256": "369d0b969a4fbe808dbf42a93872b86e7086da00fa69c567e71549a6e83da126"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_drv.h",
+      "sha256": "e37a9466c7a63621d0fe826d57d8fdd5338349ac81dc206b909d5221826bf442"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_event.c",
+      "sha256": "e1d38b7c88a69b5e153e32d2f1afb0623bced9b8749d1cfc0f93187ed706b79f"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_fb.c",
+      "sha256": "c6d5a4fef50cbcbe2d9da1721400c80f87a2036f912c86c8a770f96a6272af4a"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_gem.c",
+      "sha256": "f0d195fd6b608ba859eb6dfc98bc3d755ffa3b65853581ff61ca306bc2371fbc"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_ioctl.c",
+      "sha256": "fba817969f57a0a40970fd22ceae9dc91d6db81960d2b76f3ad4714828556c05"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_lindroid_drv.c",
+      "sha256": "a154b3956ef7a9e2deadde5f8032b2eae3cda0eb713659788e6933ad9aebd8ff"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_modeset.c",
+      "sha256": "6b9f96f036e7dec019fd980bc3e3d72d17154c89ffd3006cdcd5565a0f33e2da"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_sysfs.c",
+      "sha256": "8a1d787f22b00ccd66dbb6fc68a146622db2b4d76fbeb2cf306cc0a23e861dee"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/uapi/evdi_drm.h",
+      "sha256": "40cea205c60f4712b3dd5da4ded2d29784a5de9ff7f54f0246043d45c3bf604a"
+    },
+    {
+      "path": "patches/extra/drivers/misc/ntsync.c",
+      "sha256": "9c0a02bd6ab3d58b9d84246cd13d98dd284c04e9d7532802d5f6cbcc7e7cc3ac"
+    },
+    {
+      "path": "patches/extra/fs/susfs.c",
+      "sha256": "c556c644dcb345bbe7814812c6ff084e22762d4d0381c8ee331ada1b25cd6770"
+    },
+    {
+      "path": "patches/extra/include/linux/lz4k.h",
+      "sha256": "bd7671e721d8da43dcdde69e3ca5ef10d9e56cc921f91ef279420b14756e53b1"
+    },
+    {
+      "path": "patches/extra/include/linux/lz4kd.h",
+      "sha256": "bfae66282c709251ac2cf6d73446c16cc88ccb491afe7155efcd5ae9b2a96c35"
+    },
+    {
+      "path": "patches/extra/include/linux/susfs.h",
+      "sha256": "05d4ec96ba75d459612d6269614bc7e1948c4e7b1ecd4dfaf47fbd4ec4a3fcfb"
+    },
+    {
+      "path": "patches/extra/include/linux/susfs_def.h",
+      "sha256": "16d7299fd22c6539dc86fb67f963bbfa3c2422afe9f179e27e04b3168915b4ab"
+    },
+    {
+      "path": "patches/extra/include/uapi/linux/ntsync.h",
+      "sha256": "006437ee52a3e04f921df77081eb5c21c44c71f598b10ac534c6ef9e78296262"
+    },
+    {
+      "path": "patches/extra/lib/lz4/lz4.c",
+      "sha256": "9d9e372346f93ded3c91721b6e9e03b17321d201575b786060195c7d4b5571fe"
+    },
+    {
+      "path": "patches/extra/lib/lz4/lz4.h",
+      "sha256": "e1c89be230d9e49979541e0476a682bf3806617155553248d954b174f78585fd"
+    },
+    {
+      "path": "patches/extra/lib/lz4/lz4hc.c",
+      "sha256": "32fe0fef934c87c95e0f3ef1ce8a3264f766cd77d28f3ba9c944643f647e4106"
+    },
+    {
+      "path": "patches/extra/lib/lz4/lz4hc.h",
+      "sha256": "d047a42cfd9407d65821aaf526d07c3a87920c8aaabc01fcfe1c07a24db50e64"
+    },
+    {
+      "path": "patches/extra/lib/lz4k/Makefile",
+      "sha256": "8f3bfb34e294e836c1948b2df6d5797289c9678f92fb92f8019ac2c00e416314"
+    },
+    {
+      "path": "patches/extra/lib/lz4k/lz4k_decode.c",
+      "sha256": "e0742a1afcaeb2fcc5eeea59a872477d174d35abf81c02cabaa0837b6a2481df"
+    },
+    {
+      "path": "patches/extra/lib/lz4k/lz4k_encode.c",
+      "sha256": "b04e2f9945c53c0c461782efd70c41d2cfa5680b80e6f0a76ffe36db37e09f24"
+    },
+    {
+      "path": "patches/extra/lib/lz4k/lz4k_encode_private.h",
+      "sha256": "9cb4b41d089f5dfd71730ad49f3fdc6466c5eb55b4351b940923b2fa3d40a7fb"
+    },
+    {
+      "path": "patches/extra/lib/lz4k/lz4k_private.h",
+      "sha256": "be7d09e6a13ef0fc9f2a8f71248c9e0b5fe55e24ce23e9ddc66f4274fb2d8234"
+    },
+    {
+      "path": "patches/extra/lib/lz4kd/Makefile",
+      "sha256": "1ddc00869e6d6db872f1782789872e3f05bb0aaea14b292ff64228190ed2735f"
+    },
+    {
+      "path": "patches/extra/lib/lz4kd/lz4kd_decode.c",
+      "sha256": "13fb36c502017e6875e939b40ea22b7a7f9a8ec4a38a874675d1561952de569d"
+    },
+    {
+      "path": "patches/extra/lib/lz4kd/lz4kd_decode_delta.c",
+      "sha256": "9ec94c7bcb1477420f0e20d5f13695f02bbf5bac59588631de034805bfdab510"
+    },
+    {
+      "path": "patches/extra/lib/lz4kd/lz4kd_encode.c",
+      "sha256": "d496dbc4c9afb0bce67b1d25464a29123d2ba74e04c8a86bfce130294e676706"
+    },
+    {
+      "path": "patches/extra/lib/lz4kd/lz4kd_encode_delta.c",
+      "sha256": "b6ada89a4a0f8186e656ae4c2cb70371829d2b098f1158f94ff0f8e8e6fbecd0"
+    },
+    {
+      "path": "patches/extra/lib/lz4kd/lz4kd_encode_private.h",
+      "sha256": "1c7a33b74d2cc8e8a06359f10b565958524aad8cbbf16b93ac5a9247e66f1c54"
+    },
+    {
+      "path": "patches/extra/lib/lz4kd/lz4kd_private.h",
+      "sha256": "03864ddf7b811b39d86abb88e403ef0efee5a6c8ffadf3d340ae6ba7ed5e6c34"
+    },
+    {
+      "path": "patches/extra/lib/zstd/common/allocations.h",
+      "sha256": "06ae0fa61a2e2af2bf051d51239f4918bfc32ea20bb8bd7d79751604fbedd9dd"
+    },
+    {
+      "path": "patches/extra/lib/zstd/common/bits.h",
+      "sha256": "a297f5c2c467f6b83837c31e926deeffc598f917a2c1aa7dac96efa2c0cec96a"
+    },
+    {
+      "path": "patches/extra/lib/zstd/compress/zstd_preSplit.c",
+      "sha256": "daab8cf059168388fb04146aa554d2ba1df6a6257feebab5e623cda262105739"
+    },
+    {
+      "path": "patches/extra/lib/zstd/compress/zstd_preSplit.h",
+      "sha256": "1076ed8d34be618d13ad749de055c3a2cc89f332924a0b9858fb74e0c4a07f05"
+    },
+    {
+      "path": "patches/split/00_ksu_hooks.patch",
+      "sha256": "844fa3798438157cc58c91ce1f8b6d2b87ccd51afc964a842bd78186f9ba5e69"
+    },
+    {
+      "path": "patches/split/01_susfs_main.patch",
+      "sha256": "d9431503377cb95a3e351842fa716e68437bb15f240eb1fefd966244fd0294de"
+    },
+    {
+      "path": "patches/split/02_lz4.patch",
+      "sha256": "64653a531858b4214986fcbbfe34487fdb54780b793a188640fb42f5b9727a38"
+    },
+    {
+      "path": "patches/split/03_zstd.patch",
+      "sha256": "bf157b55a1254353d11e410e332ebfb3c0015561abfcbc34eff877f30d1aa40e"
+    },
+    {
+      "path": "patches/split/04_lz4kd.patch",
+      "sha256": "a3557fe5b8f3b846f33922ab8a7477b32a8429567988abf74dd65697e580be91"
+    },
+    {
+      "path": "patches/split/05_droidspaces.patch",
+      "sha256": "ddf0aff68fa4e10cc405812b3191960b29a2c99c278a3c975f77e44ca25935eb"
+    },
+    {
+      "path": "patches/split/06_baseband_guard.patch",
+      "sha256": "b61304c1f8c377b299380b6d99ee9d08f892d84b7a0f0e93e3ad72f1bbed9692"
+    },
+    {
+      "path": "patches/split/07_compile_fixes.patch",
+      "sha256": "ff1c7105e78fdfe652186c3c0c8c32494691e70b8671cdab51424706398b2b01"
+    },
+    {
+      "path": "patches/split/09_rekernel.patch",
+      "sha256": "7befec71d2a15c8199a32f8cbe0a9831a6c36b778a46c2e04cd4f5d962a1b86b"
+    },
+    {
+      "path": "ak3/LICENSE",
+      "sha256": "df6f65da47d459fdf2a2ef0eadb34f37d838befc91352b64a84f35507bea95cd"
+    },
+    {
+      "path": "ak3/META-INF/com/google/android/update-binary",
+      "sha256": "18bfaca89bdf67115447895e28b65a6127a8ddab6ff2561b214e70cef35f76f9"
+    },
+    {
+      "path": "ak3/META-INF/com/google/android/updater-script",
+      "sha256": "bb624eb9bfdf3b2ee9f5aa1b6b6324fb05cd0408bb98cfd1397d667076072b31"
+    },
+    {
+      "path": "ak3/anykernel.sh",
+      "sha256": "43f993a7b5f3e089880146dfc9d9d6eedaa5b407a3d64afd5240ee839c0d6c0e"
+    },
+    {
+      "path": "ak3/tools/ak3-core.sh",
+      "sha256": "48b18b8b1199cd5994a0b284877cf87807e17d118caa485d6cc5e9fddfa5f2b1"
+    },
+    {
+      "path": "ak3/tools/busybox",
+      "sha256": "4d60ab3f5a59ebb2ca863f2f514e6924401b581e9b64f602665c008177626651"
+    },
+    {
+      "path": "ak3/tools/fec",
+      "sha256": "a486890d0fd713557c55af881a78b3fd11a16ff195e29bd8559b0407de08d60e"
+    },
+    {
+      "path": "ak3/tools/httools_static",
+      "sha256": "9f7285341423ca02e1ff54a05b757db8bb09cfa36802879db3b358ae5a6c96aa"
+    },
+    {
+      "path": "ak3/tools/lptools_static",
+      "sha256": "da1b80e231bb7576d76e6f57bea4e27706805ec86b9b9c6524ac609c3179b969"
+    },
+    {
+      "path": "ak3/tools/magiskboot",
+      "sha256": "0f2f86d782f7304c28e9e20dc3c3ddfe2e77038c7280ed220002ecb83fa96584"
+    },
+    {
+      "path": "ak3/tools/magiskpolicy",
+      "sha256": "3fe64ff00b40460116e8e4da734cf211369122848d7e8fa003ff4f8f20760f59"
+    },
+    {
+      "path": "ak3/tools/snapshotupdater_static",
+      "sha256": "708b431da44619a716011153137d18252841ce4eb7f7ab17fe78df02ad2db55c"
+    },
+    {
+      "path": "config/config_ace6_final.config",
+      "sha256": "5b7fabb4e1a509f46fa66b9098e7a2435aad5aed0c684bf5b776d73aeb1431bf"
+    },
+    {
+      "path": "lib/ccache-ecs",
+      "sha256": "40ecaea37903393fde418ad46fb8668546a04d6ed3b949059cbd4f1a1c148939"
+    },
+    {
+      "path": "lib/libfakestat.so",
+      "sha256": "48453b71186dcd4b596905b990a37453b4b428bf2ab7f4f9e809a405a8be567b"
+    },
+    {
+      "path": "lib/libfaketimeMT.so",
+      "sha256": "edc6c5afefdaf1404c1df91d8cc6b8193b738bcb1f1678752ddfb93b29d7cc95"
+    }
+  ],
+  "workflow_patch_order": [
+    "07_compile_fixes.patch",
+    "00_ksu_hooks.patch",
+    "01_susfs_main.patch",
+    "02_lz4.patch",
+    "03_zstd.patch",
+    "04_lz4kd.patch",
+    "05_droidspaces.patch",
+    "06_baseband_guard.patch",
+    "09_rekernel.patch"
+  ],
+  "historical_run_patch_subset": [
+    "07_compile_fixes.patch",
+    "00_ksu_hooks.patch",
+    "01_susfs_main.patch"
+  ],
+  "origin_status": "Vendored bytes identified by project commit and SHA-256; original upstream feature commits still require attribution"
+}
