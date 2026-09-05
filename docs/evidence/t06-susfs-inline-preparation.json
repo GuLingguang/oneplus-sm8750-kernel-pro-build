@@ -4,12 +4,12 @@
   "profile": "ace6-resukisu-susfs-inline-6.6",
   "profile_status_at_evidence": {
     "code": "source-ready",
-    "contract": "not-tested",
+    "contract": "static-verified",
     "build": "not-tested",
     "runtime": "not-tested"
   },
-  "lock_id": "c893eec7212587a246967bed57595cb9bca4ae1dde7b5c4e1f9e67900e983171",
-  "manifest_id": "2f9ab271c11822b8dc1ff236336027b7df3f2b5e2f128d9562d0eae94d518f39",
+  "lock_id": "81252695734e949099245701f9289696c04f93ec1f86c2b37c3cc103c20d8f37",
+  "manifest_id": "bc38224ff8f185a7ceeb60091aa80d2b09d4f1cebcb40f266538cc17a98583ac",
   "config_id": "8f27df126bda1f578127ee69e8273f1f9b0c08bfda9e0c3e083db2f5f906244e",
   "locked_sources": {
     "kernel": {
@@ -320,5 +320,10 @@
       "path": "patches/upstream/susfs/gki-android15-6.6/include/linux/susfs_def.h",
       "sha256": "16d7299fd22c6539dc86fb67f963bbfa3c2422afe9f179e27e04b3168915b4ab"
     }
-  ]
+  ],
+  "refresh": {
+    "reason": "profile digest changed when static contract status was recorded",
+    "final_prepare_rerun": true,
+    "final_prepare_phase": "sources-prepared"
+  }
 }
