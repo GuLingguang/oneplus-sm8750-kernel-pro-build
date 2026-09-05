@@ -17,7 +17,7 @@
   "experimental": false,
   "status": {
     "code": "source-ready",
-    "contract": "not-tested",
+    "contract": "static-verified",
     "build": "not-tested",
     "runtime": "not-tested"
   }

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "profile": "ace6-resukisu-susfs-inline-6.6",
-  "profile_sha256": "3dc176c84c7c76ea60b13a8389d4e02fb08db23d8199987a456af68ad2e9eda4",
+  "profile_sha256": "122e492be0a5e9ffa0683878c3dfc7ed2f5b442d361a25b411f9d527cee0bc41",
   "hook_mode": "susfs-inline",
   "sources": {
     "kernel": {

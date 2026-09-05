@@ -9,7 +9,7 @@ integration paths.
 | --- | --- | --- | --- | --- | --- |
 | `ace6-minimal-6.6` | Ace6 6.6.142 | none | off | off | available; final config/build pending T14/T15/T25 |
 | `ace6-resukisu-manual-6.6` | Ace6 + fixed ReSukiSU candidate | Manual | off | off | blocked T07 |
-| `ace6-resukisu-susfs-inline-6.6` | Ace6 + fixed ReSukiSU/SUSFS candidates | SUSFS Inline | on | off | blocked T06/T07 |
+| `ace6-resukisu-susfs-inline-6.6` | Ace6 + fixed ReSukiSU/SUSFS candidates | SUSFS Inline | on | off | source-ready; static contract verified; build/runtime pending T07/T25/T26 |
 | `ace6-droidspaces-standard-6.6` | Ace6 | none | off | standard | blocked T09/T10 |
 | `ace6-droidspaces-extend-6.6` | inherits standard | none | off | extend | blocked T09/T10/T11; experimental |
 | `ace6-droidspaces-resukisu-standard-6.6` | inherits standard + ReSukiSU | Manual | off | standard | blocked T07/T09/T10 |
