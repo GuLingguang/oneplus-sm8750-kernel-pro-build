@@ -1,0 +1,29 @@
+{
+  "date": "2026-09-05",
+  "baseline_project_commit": "c303fae1f308cd8c0a01b22f28b5bd34de6ab21a",
+  "test_command": "python3 -m unittest discover -s tests -v",
+  "tests_passed": 15,
+  "tests_failed": 0,
+  "real_source_prepare": {
+    "network_fetch": "passed for kernel/modules/devicetrees at exact SHAs",
+    "final_external_provider_run": "passed",
+    "manifest_id": "0977d075911aa8de8053af72c2dda67e8fafed51bda16e4d439ebf4b7c616801",
+    "lock_id": "8b94f463785863324a030f3f842d7b941d2c01317585ec4aab1c8f6be1bdfe9d",
+    "external_providers": {
+      "kernel": "clean; HEAD unchanged; no tracked/untracked/ignored changes",
+      "modules": "clean; HEAD unchanged; no tracked/untracked/ignored changes",
+      "devicetrees": "clean; HEAD unchanged; no tracked/untracked/ignored changes"
+    },
+    "required_links": {
+      "drivers/base/kernelFwUpdate/Kconfig": "exists",
+      "arch/arm64/boot/dts/vendor": "exists"
+    },
+    "prepared_trees_match_first_network_run": true
+  },
+  "kernel_compile": "not-run",
+  "olddefconfig": "not-run",
+  "ci_dispatch": "not-run",
+  "device_tests": "not-run",
+  "issue_3": "read-only checked open; no comments or state changes",
+  "publication": "not-run"
+}

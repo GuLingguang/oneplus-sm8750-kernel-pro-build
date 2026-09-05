@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "phase": "sources-prepared",
+  "config": {
+    "schema_version": 1,
+    "version": {
+      "profile": "ace6-minimal-6.6"
+    },
+    "features": {
+      "ksu_type": "none",
+      "susfs": false,
+      "lz4_zstd": false,
+      "lz4kd": false,
+      "show_all_algos": false,
+      "zram_writeback": false,
+      "baseband_guard": false,
+      "cve_patch": false,
+      "better_net": false,
+      "bbr": false,
+      "kpm": false,
+      "rekernel": false,
+      "ghost_task": false,
+      "droidspaces": "false"
+    },
+    "identity": {
+      "kernel_suffix": "",
+      "build_user": "Lingguang",
+      "build_host": "kernel-builder",
+      "build_time": "",
+      "tag": "",
+      "attribution_enable": true
+    },
+    "artifacts": {
+      "release_enable": false,
+      "ccache_update": false,
+      "ccache_debug": false,
+      "debug_skip_build": false,
+      "ccache_enable": true,
+      "artifact_mode": "ak3",
+      "independent_modules": false
+    }
+  },
+  "config_id": "b0f963f43d5a37f491044f5bcb0901f3864286e9cc006a3ee728692340504da7",
+  "lock_id": "8b94f463785863324a030f3f842d7b941d2c01317585ec4aab1c8f6be1bdfe9d",
+  "sources": {
+    "kernel": {
+      "commit": "cb967c26c2c5689108fa28d3c3be2aba6ba71f5f",
+      "tree": "774dea2b01bf6e8ea22ef5b4ae3fce66236edd77",
+      "prepared_tree": "ea32a0d47e4f2d3ed1d0231f84144b169e2f758f"
+    },
+    "modules": {
+      "commit": "7d5d39a539ddc2b53054e8fa7ae2b5890dccae54",
+      "tree": "6b84b5d6c9903bbac416688f92f511807a0a0f46",
+      "prepared_tree": "6b84b5d6c9903bbac416688f92f511807a0a0f46"
+    },
+    "devicetrees": {
+      "commit": "ebb25e3526ad84cc5a1090a5a9242f33ff087bf2",
+      "tree": "1a25439eec3ba89a9cf62e7625684f9f95597555",
+      "prepared_tree": "1a25439eec3ba89a9cf62e7625684f9f95597555"
+    }
+  },
+  "steps": [
+    {
+      "index": 0,
+      "path": "patches/split/07_compile_fixes.patch",
+      "sha256": "ff1c7105e78fdfe652186c3c0c8c32494691e70b8671cdab51424706398b2b01",
+      "status": "applied",
+      "log": "Checking patch certs/extract-cert.c...\nApplied patch certs/extract-cert.c cleanly."
+    }
+  ],
+  "build": "not-run",
+  "runtime": "not-tested",
+  "artifacts": [],
+  "reproducibility": {
+    "source_preparation": true,
+    "byte_identical_build": false
+  },
+  "manifest_id": "0977d075911aa8de8053af72c2dda67e8fafed51bda16e4d439ebf4b7c616801"
+}
