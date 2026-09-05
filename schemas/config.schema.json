@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Normalized four-layer Ace6 inputs",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "version": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "profile"
+      ],
+      "additionalProperties": false
+    },
+    "features": {
+      "type": "object",
+      "properties": {
+        "ksu_type": {
+          "type": "string",
+          "enum": [
+            "none",
+            "resukisu"
+          ]
+        },
+        "susfs": {
+          "type": "boolean"
+        },
+        "lz4_zstd": {
+          "type": "boolean"
+        },
+        "lz4kd": {
+          "type": "boolean"
+        },
+        "show_all_algos": {
+          "type": "boolean"
+        },
+        "zram_writeback": {
+          "type": "boolean"
+        },
+        "baseband_guard": {
+          "type": "boolean"
+        },
+        "cve_patch": {
+          "type": "boolean"
+        },
+        "better_net": {
+          "type": "boolean"
+        },
+        "bbr": {
+          "type": "boolean"
+        },
+        "kpm": {
+          "type": "boolean"
+        },
+        "rekernel": {
+          "type": "boolean"
+        },
+        "ghost_task": {
+          "type": "boolean"
+        },
+        "droidspaces": {
+          "type": "string",
+          "enum": [
+            "false",
+            "standard",
+            "extend"
+          ]
+        }
+      },
+      "required": [
+        "ksu_type",
+        "susfs",
+        "lz4_zstd",
+        "lz4kd",
+        "show_all_algos",
+        "zram_writeback",
+        "baseband_guard",
+        "cve_patch",
+        "better_net",
+        "bbr",
+        "kpm",
+        "rekernel",
+        "ghost_task",
+        "droidspaces"
+      ],
+      "additionalProperties": false
+    },
+    "identity": {
+      "type": "object",
+      "properties": {
+        "kernel_suffix": {
+          "type": "string"
+        },
+        "build_user": {
+          "type": "string"
+        },
+        "build_host": {
+          "type": "string"
+        },
+        "build_time": {
+          "type": "string"
+        },
+        "tag": {
+          "type": "string"
+        },
+        "attribution_enable": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kernel_suffix",
+        "build_user",
+        "build_host",
+        "build_time",
+        "tag",
+        "attribution_enable"
+      ],
+      "additionalProperties": false
+    },
+    "artifacts": {
+      "type": "object",
+      "properties": {
+        "release_enable": {
+          "type": "boolean"
+        },
+        "ccache_update": {
+          "type": "boolean"
+        },
+        "ccache_debug": {
+          "type": "boolean"
+        },
+        "debug_skip_build": {
+          "type": "boolean"
+        },
+        "ccache_enable": {
+          "type": "boolean"
+        },
+        "artifact_mode": {
+          "type": "string",
+          "enum": [
+            "ak3",
+            "image",
+            "boot",
+            "all"
+          ]
+        },
+        "independent_modules": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "release_enable",
+        "ccache_update",
+        "ccache_debug",
+        "debug_skip_build",
+        "ccache_enable",
+        "artifact_mode",
+        "independent_modules"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "version",
+    "features",
+    "identity",
+    "artifacts"
+  ],
+  "additionalProperties": false
+}

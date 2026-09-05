@@ -1,0 +1,216 @@
+{
+  "ksu_type": {
+    "layer": "features",
+    "type": "string",
+    "default": "none",
+    "aliases": [],
+    "legacy_cli": "--ksu",
+    "enum": [
+      "none",
+      "resukisu"
+    ]
+  },
+  "susfs": {
+    "layer": "features",
+    "type": "boolean",
+    "default": false,
+    "aliases": [
+      "susfs_enable"
+    ],
+    "legacy_cli": "--susfs"
+  },
+  "lz4_zstd": {
+    "layer": "features",
+    "type": "boolean",
+    "default": false,
+    "aliases": [],
+    "legacy_cli": "--lz4"
+  },
+  "lz4kd": {
+    "layer": "features",
+    "type": "boolean",
+    "default": false,
+    "aliases": [
+      "lz4kd_enable"
+    ],
+    "legacy_cli": "--lz4kd"
+  },
+  "show_all_algos": {
+    "layer": "features",
+    "type": "boolean",
+    "default": false,
+    "aliases": [],
+    "legacy_cli": "--show-all-algos"
+  },
+  "zram_writeback": {
+    "layer": "features",
+    "type": "boolean",
+    "default": false,
+    "aliases": [],
+    "legacy_cli": "--zram-writeback"
+  },
+  "baseband_guard": {
+    "layer": "features",
+    "type": "boolean",
+    "default": false,
+    "aliases": [],
+    "legacy_cli": "--bbg"
+  },
+  "cve_patch": {
+    "layer": "features",
+    "type": "boolean",
+    "default": false,
+    "aliases": [],
+    "legacy_cli": "--cve"
+  },
+  "better_net": {
+    "layer": "features",
+    "type": "boolean",
+    "default": false,
+    "aliases": [],
+    "legacy_cli": "--better-net"
+  },
+  "bbr": {
+    "layer": "features",
+    "type": "boolean",
+    "default": false,
+    "aliases": [
+      "bbr_enable"
+    ],
+    "legacy_cli": "--bbr"
+  },
+  "kpm": {
+    "layer": "features",
+    "type": "boolean",
+    "default": false,
+    "aliases": [
+      "kpm_enable"
+    ],
+    "legacy_cli": "--kpm"
+  },
+  "rekernel": {
+    "layer": "features",
+    "type": "boolean",
+    "default": false,
+    "aliases": [
+      "rekernel_enable"
+    ],
+    "legacy_cli": "--rekernel"
+  },
+  "ghost_task": {
+    "layer": "features",
+    "type": "boolean",
+    "default": false,
+    "aliases": [],
+    "legacy_cli": null
+  },
+  "droidspaces": {
+    "layer": "features",
+    "type": "string",
+    "default": "false",
+    "aliases": [],
+    "legacy_cli": "--droidspaces",
+    "enum": [
+      "false",
+      "standard",
+      "extend"
+    ]
+  },
+  "kernel_suffix": {
+    "layer": "identity",
+    "type": "string",
+    "default": "",
+    "aliases": [],
+    "legacy_cli": "--suffix"
+  },
+  "build_user": {
+    "layer": "identity",
+    "type": "string",
+    "default": "Lingguang",
+    "aliases": [],
+    "legacy_cli": "--user"
+  },
+  "build_host": {
+    "layer": "identity",
+    "type": "string",
+    "default": "kernel-builder",
+    "aliases": [],
+    "legacy_cli": "--host"
+  },
+  "build_time": {
+    "layer": "identity",
+    "type": "string",
+    "default": "",
+    "aliases": [],
+    "legacy_cli": "--time"
+  },
+  "tag": {
+    "layer": "identity",
+    "type": "string",
+    "default": "",
+    "aliases": [],
+    "legacy_cli": null
+  },
+  "attribution_enable": {
+    "layer": "identity",
+    "type": "boolean",
+    "default": true,
+    "aliases": [],
+    "legacy_cli": "--no-attribution"
+  },
+  "release_enable": {
+    "layer": "artifacts",
+    "type": "boolean",
+    "default": false,
+    "aliases": [],
+    "legacy_cli": null
+  },
+  "ccache_update": {
+    "layer": "artifacts",
+    "type": "boolean",
+    "default": false,
+    "aliases": [],
+    "legacy_cli": null
+  },
+  "ccache_debug": {
+    "layer": "artifacts",
+    "type": "boolean",
+    "default": false,
+    "aliases": [],
+    "legacy_cli": null
+  },
+  "debug_skip_build": {
+    "layer": "artifacts",
+    "type": "boolean",
+    "default": false,
+    "aliases": [],
+    "legacy_cli": null
+  },
+  "ccache_enable": {
+    "layer": "artifacts",
+    "type": "boolean",
+    "default": true,
+    "aliases": [],
+    "legacy_cli": null
+  },
+  "artifact_mode": {
+    "layer": "artifacts",
+    "type": "string",
+    "default": "ak3",
+    "aliases": [],
+    "legacy_cli": null,
+    "enum": [
+      "ak3",
+      "image",
+      "boot",
+      "all"
+    ]
+  },
+  "independent_modules": {
+    "layer": "artifacts",
+    "type": "boolean",
+    "default": false,
+    "aliases": [],
+    "legacy_cli": null
+  }
+}
