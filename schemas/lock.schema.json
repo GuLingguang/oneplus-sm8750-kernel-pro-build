@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Ace6 fixed source-preparation inputs",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "profile": {
+      "type": "string"
+    },
+    "profile_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "hook_mode": {
+      "enum": [
+        "none",
+        "manual",
+        "susfs-inline"
+      ]
+    },
+    "sources": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "commit": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+          },
+          "directory": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "reference",
+          "commit",
+          "directory"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "local_files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "path",
+          "sha256"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "operation": {
+            "enum": [
+              "patch",
+              "copy"
+            ]
+          },
+          "layer": {
+            "enum": [
+              "upstream",
+              "integration",
+              "feature"
+            ]
+          },
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "destination": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "operation",
+          "layer",
+          "path",
+          "sha256",
+          "destination"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "resources": {
+      "type": "object"
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "build_environment": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "limitations"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "profile",
+    "profile_sha256",
+    "hook_mode",
+    "sources",
+    "local_files",
+    "steps",
+    "resources",
+    "blockers",
+    "build_environment"
+  ],
+  "additionalProperties": false
+}
