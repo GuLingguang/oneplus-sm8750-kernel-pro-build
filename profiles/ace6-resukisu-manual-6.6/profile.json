@@ -1,0 +1,25 @@
+{
+  "name": "ace6-resukisu-manual-6.6",
+  "extends": null,
+  "hook_mode": "manual",
+  "features": {
+    "ksu_type": "resukisu",
+    "susfs": false,
+    "droidspaces": "false",
+    "rekernel": false
+  },
+  "capabilities": [
+    "kernel-source",
+    "root-manual"
+  ],
+  "blockers": [
+    "T07: version-specific Manual Hook patch set and contract not established"
+  ],
+  "experimental": false,
+  "status": {
+    "code": "scaffold",
+    "contract": "not-tested",
+    "build": "not-tested",
+    "runtime": "not-tested"
+  }
+}

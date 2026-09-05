@@ -1,0 +1,21 @@
+{
+  "name": "ace6-droidspaces-extend-6.6",
+  "extends": "ace6-droidspaces-standard-6.6",
+  "hook_mode": "none",
+  "features": {
+    "droidspaces": "extend"
+  },
+  "capabilities": [
+    "droidspaces-extend"
+  ],
+  "blockers": [
+    "T11: EVDI/userspace dependencies not locked or validated"
+  ],
+  "experimental": true,
+  "status": {
+    "code": "scaffold",
+    "contract": "not-tested",
+    "build": "not-tested",
+    "runtime": "not-tested"
+  }
+}

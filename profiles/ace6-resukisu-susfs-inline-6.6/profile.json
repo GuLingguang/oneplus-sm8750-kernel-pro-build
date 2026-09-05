@@ -1,0 +1,26 @@
+{
+  "name": "ace6-resukisu-susfs-inline-6.6",
+  "extends": null,
+  "hook_mode": "susfs-inline",
+  "features": {
+    "ksu_type": "resukisu",
+    "susfs": true,
+    "droidspaces": "false",
+    "rekernel": false
+  },
+  "capabilities": [
+    "kernel-source",
+    "root-inline",
+    "susfs"
+  ],
+  "blockers": [
+    "T06/T07: selected ReSukiSU/SUSFS candidate pair needs rebuilt integration and type/consumer contracts"
+  ],
+  "experimental": false,
+  "status": {
+    "code": "scaffold",
+    "contract": "not-tested",
+    "build": "not-tested",
+    "runtime": "not-tested"
+  }
+}

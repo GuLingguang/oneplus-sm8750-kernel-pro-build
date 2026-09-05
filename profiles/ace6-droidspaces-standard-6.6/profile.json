@@ -1,0 +1,25 @@
+{
+  "name": "ace6-droidspaces-standard-6.6",
+  "extends": null,
+  "hook_mode": "none",
+  "features": {
+    "ksu_type": "none",
+    "susfs": false,
+    "droidspaces": "standard",
+    "rekernel": false
+  },
+  "capabilities": [
+    "kernel-source",
+    "droidspaces-standard"
+  ],
+  "blockers": [
+    "T09/T10: container configuration and vendor workaround contract pending"
+  ],
+  "experimental": false,
+  "status": {
+    "code": "scaffold",
+    "contract": "not-tested",
+    "build": "not-tested",
+    "runtime": "not-tested"
+  }
+}

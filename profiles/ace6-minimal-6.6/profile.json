@@ -1,0 +1,22 @@
+{
+  "name": "ace6-minimal-6.6",
+  "extends": null,
+  "hook_mode": "none",
+  "features": {
+    "ksu_type": "none",
+    "susfs": false,
+    "droidspaces": "false",
+    "rekernel": false
+  },
+  "capabilities": [
+    "kernel-source"
+  ],
+  "blockers": [],
+  "experimental": false,
+  "status": {
+    "code": "scaffold",
+    "contract": "not-tested",
+    "build": "not-tested",
+    "runtime": "not-tested"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "ace6-rekernel-experimental",
+  "extends": "ace6-resukisu-manual-6.6",
+  "hook_mode": "manual",
+  "features": {
+    "rekernel": true
+  },
+  "capabilities": [
+    "rekernel"
+  ],
+  "blockers": [
+    "T12/T13: Re:Kernel single implementation and protocol contract pending"
+  ],
+  "experimental": true,
+  "status": {
+    "code": "scaffold",
+    "contract": "not-tested",
+    "build": "not-tested",
+    "runtime": "not-tested"
+  }
+}

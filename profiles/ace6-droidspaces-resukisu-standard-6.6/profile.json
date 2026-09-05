@@ -1,0 +1,21 @@
+{
+  "name": "ace6-droidspaces-resukisu-standard-6.6",
+  "extends": "ace6-droidspaces-standard-6.6",
+  "hook_mode": "manual",
+  "features": {
+    "ksu_type": "resukisu"
+  },
+  "capabilities": [
+    "root-manual"
+  ],
+  "blockers": [
+    "T07: Manual Hook contract pending"
+  ],
+  "experimental": false,
+  "status": {
+    "code": "scaffold",
+    "contract": "not-tested",
+    "build": "not-tested",
+    "runtime": "not-tested"
+  }
+}
