@@ -1,0 +1,324 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-05",
+  "profile": "ace6-resukisu-susfs-inline-6.6",
+  "profile_status_at_evidence": {
+    "code": "source-ready",
+    "contract": "not-tested",
+    "build": "not-tested",
+    "runtime": "not-tested"
+  },
+  "lock_id": "c893eec7212587a246967bed57595cb9bca4ae1dde7b5c4e1f9e67900e983171",
+  "manifest_id": "2f9ab271c11822b8dc1ff236336027b7df3f2b5e2f128d9562d0eae94d518f39",
+  "config_id": "8f27df126bda1f578127ee69e8273f1f9b0c08bfda9e0c3e083db2f5f906244e",
+  "locked_sources": {
+    "kernel": {
+      "commit": "cb967c26c2c5689108fa28d3c3be2aba6ba71f5f",
+      "provider": "clean external provider override"
+    },
+    "modules": {
+      "commit": "7d5d39a539ddc2b53054e8fa7ae2b5890dccae54",
+      "provider": "clean external provider override"
+    },
+    "devicetrees": {
+      "commit": "ebb25e3526ad84cc5a1090a5a9242f33ff087bf2",
+      "provider": "clean external provider override"
+    },
+    "resukisu": {
+      "commit": "9d0ff6aea9e25fc7dd26f4643175a41f68375e5e",
+      "provider": "clean external provider override"
+    },
+    "susfs": {
+      "commit": "937215cb3a1b1f333d764c366c7a49972fa8e7a0",
+      "provider": "clean external provider override"
+    }
+  },
+  "external_provider_checks": {
+    "kernel": {
+      "provider_commit": "cb967c26c2c5689108fa28d3c3be2aba6ba71f5f",
+      "expected_commit": "cb967c26c2c5689108fa28d3c3be2aba6ba71f5f",
+      "head_matches": true,
+      "clean_including_ignored": true,
+      "skip_worktree_or_assume_unchanged_entries": 0
+    },
+    "modules": {
+      "provider_commit": "7d5d39a539ddc2b53054e8fa7ae2b5890dccae54",
+      "expected_commit": "7d5d39a539ddc2b53054e8fa7ae2b5890dccae54",
+      "head_matches": true,
+      "clean_including_ignored": true,
+      "skip_worktree_or_assume_unchanged_entries": 0
+    },
+    "devicetrees": {
+      "provider_commit": "ebb25e3526ad84cc5a1090a5a9242f33ff087bf2",
+      "expected_commit": "ebb25e3526ad84cc5a1090a5a9242f33ff087bf2",
+      "head_matches": true,
+      "clean_including_ignored": true,
+      "skip_worktree_or_assume_unchanged_entries": 0
+    },
+    "resukisu": {
+      "provider_commit": "9d0ff6aea9e25fc7dd26f4643175a41f68375e5e",
+      "expected_commit": "9d0ff6aea9e25fc7dd26f4643175a41f68375e5e",
+      "head_matches": true,
+      "clean_including_ignored": true,
+      "skip_worktree_or_assume_unchanged_entries": 0
+    },
+    "susfs": {
+      "provider_commit": "937215cb3a1b1f333d764c366c7a49972fa8e7a0",
+      "expected_commit": "937215cb3a1b1f333d764c366c7a49972fa8e7a0",
+      "head_matches": true,
+      "clean_including_ignored": true,
+      "skip_worktree_or_assume_unchanged_entries": 0
+    }
+  },
+  "prepared_source_trees": {
+    "kernel": "3744ef319a04789a9739ebf0d28c7c447ce8f094",
+    "modules": "6b84b5d6c9903bbac416688f92f511807a0a0f46",
+    "devicetrees": "1a25439eec3ba89a9cf62e7625684f9f95597555",
+    "resukisu": "9cdadcc8d9daf21adb10d83355b58a3ee837f031",
+    "susfs": "69d4cb2dc557ff32455f4184411b9c789b92a89a"
+  },
+  "steps": [
+    {
+      "index": 0,
+      "path": "patches/split/07_compile_fixes.patch",
+      "status": "applied"
+    },
+    {
+      "index": 1,
+      "path": "patches/integration/resukisu-kernel.link",
+      "status": "applied",
+      "target": "resukisu:kernel"
+    },
+    {
+      "index": 2,
+      "path": "patches/integration/ace6-resukisu-drivers.patch",
+      "status": "applied"
+    },
+    {
+      "index": 3,
+      "path": "patches/upstream/susfs/gki-android15-6.6/fs/susfs.c",
+      "status": "applied"
+    },
+    {
+      "index": 4,
+      "path": "patches/upstream/susfs/gki-android15-6.6/include/linux/susfs.h",
+      "status": "applied"
+    },
+    {
+      "index": 5,
+      "path": "patches/upstream/susfs/gki-android15-6.6/include/linux/susfs_def.h",
+      "status": "applied"
+    },
+    {
+      "index": 6,
+      "path": "patches/integration/ace6-susfs-6.6.patch",
+      "status": "applied"
+    }
+  ],
+  "prepared_kernel": {
+    "link_target": "../../ReSukiSU/kernel",
+    "changed_path_count": 31,
+    "git_diff_check": "passed"
+  },
+  "contract": {
+    "susfs_version": "v2.3.0",
+    "active_hook_choice": "CONFIG_KSU_SUSFS",
+    "assertions": {
+      "prepare_phase": {
+        "passed": true,
+        "detail": "sources-prepared"
+      },
+      "all_lock_steps_applied": {
+        "passed": true,
+        "detail": [
+          "applied",
+          "applied",
+          "applied",
+          "applied",
+          "applied",
+          "applied",
+          "applied"
+        ]
+      },
+      "external_sources_match_and_clean": {
+        "passed": true,
+        "detail": {
+          "kernel": {
+            "provider_commit": "cb967c26c2c5689108fa28d3c3be2aba6ba71f5f",
+            "expected_commit": "cb967c26c2c5689108fa28d3c3be2aba6ba71f5f",
+            "head_matches": true,
+            "clean_including_ignored": true,
+            "skip_worktree_or_assume_unchanged_entries": 0
+          },
+          "modules": {
+            "provider_commit": "7d5d39a539ddc2b53054e8fa7ae2b5890dccae54",
+            "expected_commit": "7d5d39a539ddc2b53054e8fa7ae2b5890dccae54",
+            "head_matches": true,
+            "clean_including_ignored": true,
+            "skip_worktree_or_assume_unchanged_entries": 0
+          },
+          "devicetrees": {
+            "provider_commit": "ebb25e3526ad84cc5a1090a5a9242f33ff087bf2",
+            "expected_commit": "ebb25e3526ad84cc5a1090a5a9242f33ff087bf2",
+            "head_matches": true,
+            "clean_including_ignored": true,
+            "skip_worktree_or_assume_unchanged_entries": 0
+          },
+          "resukisu": {
+            "provider_commit": "9d0ff6aea9e25fc7dd26f4643175a41f68375e5e",
+            "expected_commit": "9d0ff6aea9e25fc7dd26f4643175a41f68375e5e",
+            "head_matches": true,
+            "clean_including_ignored": true,
+            "skip_worktree_or_assume_unchanged_entries": 0
+          },
+          "susfs": {
+            "provider_commit": "937215cb3a1b1f333d764c366c7a49972fa8e7a0",
+            "expected_commit": "937215cb3a1b1f333d764c366c7a49972fa8e7a0",
+            "head_matches": true,
+            "clean_including_ignored": true,
+            "skip_worktree_or_assume_unchanged_entries": 0
+          }
+        }
+      },
+      "resukisu_driver_link": {
+        "passed": true,
+        "detail": {
+          "target": "../../ReSukiSU/kernel",
+          "resolved_matches_expected": true
+        }
+      },
+      "faccessat_filename_ownership": {
+        "passed": true,
+        "detail": "getname_flags -> filename_lookup -> putname"
+      },
+      "faccessat_call_signature": {
+        "passed": true,
+        "detail": "struct filename ** call"
+      },
+      "stat_call_signature": {
+        "passed": true,
+        "detail": "struct filename ** call"
+      },
+      "resukisu_header_susfs_signature": {
+        "passed": true,
+        "detail": "active CONFIG_KSU_SUSFS declarations"
+      },
+      "resukisu_definition_susfs_signature": {
+        "passed": true,
+        "detail": "active CONFIG_KSU_SUSFS definitions"
+      },
+      "no_legacy_vfs_adapter_signature": {
+        "passed": true,
+        "detail": "patched fs/open.c and fs/stat.c contain no const char __user ** handler"
+      },
+      "zygote_flag_producer": {
+        "passed": true,
+        "detail": "setuid_hook.c"
+      },
+      "zygote_flag_consumer": {
+        "passed": true,
+        "detail": "namespace.c::__lookup_mnt"
+      },
+      "thread_flag_definitions": {
+        "passed": true,
+        "detail": "susfs_def.h"
+      },
+      "native_exec_filename_contract": {
+        "passed": true,
+        "detail": "exec.c pointer-to-pointer calls"
+      },
+      "native_vfs_fstat_hook": {
+        "passed": true,
+        "detail": "ksud_integration.c"
+      },
+      "susfs_object_build_rule": {
+        "passed": true,
+        "detail": "fs/Makefile"
+      },
+      "official_enable_patch_not_applied": {
+        "passed": true,
+        "detail": "lock step paths"
+      },
+      "legacy_02_ksu_patch_not_applied": {
+        "passed": true,
+        "detail": "lock step paths"
+      },
+      "prepared_tree_diff_check": {
+        "passed": true,
+        "detail": "clean"
+      }
+    },
+    "all_assertions_passed": true
+  },
+  "validation": {
+    "profile_check_prepare_allowed": true,
+    "unit_test_command": "python3 -m unittest discover -s tests -v",
+    "unit_tests_passed": 18,
+    "unit_tests_failed": 0,
+    "kernel_compile": "not-run",
+    "olddefconfig": "not-run",
+    "runtime_mount_hiding": "not-tested; deferred to T26",
+    "release_or_publication": "not-run"
+  },
+  "integration_decisions": {
+    "official_10_enable_susfs_for_ksu_patch": "not-applied; native SUSFS support is already in locked ReSukiSU",
+    "legacy_02_ksu_patch": "not-applied",
+    "legacy_const_char_user_adapter": "not-selected; only inactive non-SUSFS/manual compatibility branch remains in ReSukiSU",
+    "adaptation": "official SUSFS 6.6 patch context adjusted for target vma_data_pages(); no semantic hunk changes"
+  },
+  "patches": [
+    {
+      "path": "patches/split/07_compile_fixes.patch",
+      "sha256": "ff1c7105e78fdfe652186c3c0c8c32494691e70b8671cdab51424706398b2b01",
+      "status": "applied"
+    },
+    {
+      "path": "patches/integration/resukisu-kernel.link",
+      "sha256": "8685d7d98ad07743a384b996825c31039adbf424fb2f8e7ff3f12eb3fb329798",
+      "status": "applied"
+    },
+    {
+      "path": "patches/integration/ace6-resukisu-drivers.patch",
+      "sha256": "fafaa2cc5a3ebef40f7243308aa76e1eaf3599f6435e360badd6f883c4fa296c",
+      "status": "applied"
+    },
+    {
+      "path": "patches/upstream/susfs/gki-android15-6.6/fs/susfs.c",
+      "sha256": "c556c644dcb345bbe7814812c6ff084e22762d4d0381c8ee331ada1b25cd6770",
+      "status": "applied"
+    },
+    {
+      "path": "patches/upstream/susfs/gki-android15-6.6/include/linux/susfs.h",
+      "sha256": "d9fd277faaeeb9e2e3bf65b0d68223ad20a164342f3baa3ddb48010ddef9cb14",
+      "status": "applied"
+    },
+    {
+      "path": "patches/upstream/susfs/gki-android15-6.6/include/linux/susfs_def.h",
+      "sha256": "16d7299fd22c6539dc86fb67f963bbfa3c2422afe9f179e27e04b3168915b4ab",
+      "status": "applied"
+    },
+    {
+      "path": "patches/integration/ace6-susfs-6.6.patch",
+      "sha256": "8674dcf9488d94cbe23d6ec7a82b42bd6b9e16e5463006783a0eaa993fd29f62",
+      "status": "applied"
+    }
+  ],
+  "vendored_susfs_inputs": [
+    {
+      "path": "patches/upstream/susfs/gki-android15-6.6/50_add_susfs_in_gki-android15-6.6.patch",
+      "sha256": "8367a82548d56c4f8d75df25ca218d67a1d7bc27a3b3f2dbdafe7881e8a857c3"
+    },
+    {
+      "path": "patches/upstream/susfs/gki-android15-6.6/fs/susfs.c",
+      "sha256": "c556c644dcb345bbe7814812c6ff084e22762d4d0381c8ee331ada1b25cd6770"
+    },
+    {
+      "path": "patches/upstream/susfs/gki-android15-6.6/include/linux/susfs.h",
+      "sha256": "d9fd277faaeeb9e2e3bf65b0d68223ad20a164342f3baa3ddb48010ddef9cb14"
+    },
+    {
+      "path": "patches/upstream/susfs/gki-android15-6.6/include/linux/susfs_def.h",
+      "sha256": "16d7299fd22c6539dc86fb67f963bbfa3c2422afe9f179e27e04b3168915b4ab"
+    }
+  ]
+}
