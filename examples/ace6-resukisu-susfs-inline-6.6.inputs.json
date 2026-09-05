@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "version": {
+    "profile": "ace6-resukisu-susfs-inline-6.6"
+  },
+  "features": {
+    "ksu_type": "resukisu",
+    "susfs": true,
+    "lz4_zstd": false,
+    "lz4kd": false,
+    "show_all_algos": false,
+    "zram_writeback": false,
+    "baseband_guard": false,
+    "cve_patch": false,
+    "better_net": false,
+    "bbr": false,
+    "kpm": false,
+    "rekernel": false,
+    "ghost_task": false,
+    "droidspaces": "false"
+  },
+  "identity": {
+    "kernel_suffix": "",
+    "build_user": "Lingguang",
+    "build_host": "kernel-builder",
+    "build_time": "",
+    "tag": "",
+    "attribution_enable": true
+  },
+  "artifacts": {
+    "release_enable": false,
+    "ccache_update": false,
+    "ccache_debug": false,
+    "debug_skip_build": false,
+    "ccache_enable": true,
+    "artifact_mode": "ak3",
+    "independent_modules": false
+  }
+}
