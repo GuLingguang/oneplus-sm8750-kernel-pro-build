@@ -1,0 +1,47 @@
+{
+  "purpose": "Observed exact candidates for future feature attribution; NOT asserted as origins of legacy vendored patches",
+  "sources": [
+    {
+      "repo": "actions/github-script",
+      "ref": "refs/tags/v7",
+      "output": "f28e40c7f34bde8b3046d885e986cb6290c5673b\trefs/tags/v7\n",
+      "error": ""
+    },
+    {
+      "repo": "cctv18/oppo_oplus_realme_sm8750",
+      "ref": "HEAD",
+      "output": "21db9e7d547ca625bd5aa734fb5dfc8b94ea48ef\tHEAD\n",
+      "error": ""
+    },
+    {
+      "repo": "ravindu644/Droidspaces-OSS",
+      "ref": "HEAD",
+      "output": "9c6a1c056e6cdb096c8cfd037e3221fcdf39bf7d\tHEAD\n",
+      "error": ""
+    },
+    {
+      "repo": "Sakion-Team/Re-Kernel",
+      "ref": "HEAD",
+      "output": "13ddb07e06b2d7e956f474a5796669983e8feaab\tHEAD\n",
+      "error": ""
+    },
+    {
+      "repo": "cctv18/Baseband-guard",
+      "ref": "HEAD",
+      "output": "a5b57f15d6b597a1bd157c42330fe80020b1d628\tHEAD\n",
+      "error": ""
+    },
+    {
+      "repo": "ShirkNeko/SukiSU_patch",
+      "ref": "HEAD",
+      "output": "547ae94bcaec53d030398f857950c64662043a5d\tHEAD\n",
+      "error": ""
+    },
+    {
+      "repo": "KernelSU-Next/KPatch-Next",
+      "ref": "HEAD",
+      "output": "456744b29efb9989445463ab29e368fa59a103c4\tHEAD\n",
+      "error": ""
+    }
+  ]
+}
