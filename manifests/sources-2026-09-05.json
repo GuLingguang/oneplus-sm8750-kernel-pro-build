@@ -1,0 +1,36 @@
+{
+  "sources": {
+    "kernel": {
+      "url": "https://github.com/Ace6-Development/android_kernel_oneplus_sm8750.git",
+      "reference": "lineage-23.2",
+      "commit": "cb967c26c2c5689108fa28d3c3be2aba6ba71f5f",
+      "directory": "src"
+    },
+    "modules": {
+      "url": "https://github.com/Ace6-Development/android_kernel_oneplus_sm8750-modules.git",
+      "reference": "lineage-23.2",
+      "commit": "7d5d39a539ddc2b53054e8fa7ae2b5890dccae54",
+      "directory": "sm8750-modules"
+    },
+    "devicetrees": {
+      "url": "https://github.com/LineageOS/android_kernel_oneplus_sm8750-devicetrees.git",
+      "reference": "lineage-23.2",
+      "commit": "ebb25e3526ad84cc5a1090a5a9242f33ff087bf2",
+      "directory": "sm8750-devicetrees"
+    },
+    "resukisu": {
+      "url": "https://github.com/ReSukiSU/ReSukiSU.git",
+      "reference": "main (candidate from historical run; not floating)",
+      "commit": "9d0ff6aea9e25fc7dd26f4643175a41f68375e5e",
+      "directory": "ReSukiSU"
+    },
+    "susfs": {
+      "url": "https://gitlab.com/simonpunk/susfs4ksu.git",
+      "reference": "gki-android15-6.6 / v2.3.0",
+      "commit": "937215cb3a1b1f333d764c366c7a49972fa8e7a0",
+      "directory": "susfs4ksu"
+    }
+  },
+  "observed_resukisu_main": "f7829ddf548a18b851d653feb76b4a569b8fd2a4",
+  "selection": "retain historical ReSukiSU as explicit candidate; pairing contract pending T06/T07"
+}
