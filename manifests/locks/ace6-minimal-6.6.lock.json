@@ -94,7 +94,7 @@
     },
     {
       "path": "scripts/profile.py",
-      "sha256": "42e7daaf209b989e0c95b08f90f4b36fabdbf76a271dcdb82942cde1a52ac783"
+      "sha256": "32e15ecd448e681bdb121bb82f51dec7662849db888f6134060749adc4b6a75e"
     },
     {
       "path": "schemas/config.schema.json",
@@ -106,7 +106,7 @@
     },
     {
       "path": "schemas/lock.schema.json",
-      "sha256": "8ef3602c93b72c8f2d9b16ce084ea3be12202d30f8a9e9473d5ba7477924603d"
+      "sha256": "9cbfa5b1c670a08c6861fbb65140e194eef02b2895288cd30fcc2f46d4228473"
     },
     {
       "path": "schemas/manifest.schema.json",

@@ -127,6 +127,14 @@ class PreparationTests(unittest.TestCase):
         self.lock['steps'].append({'source':'kernel','operation':'patch','layer':'integration',
                                    'path':name,'sha256':h,'destination':''})
 
+    def add_link(self, name='link.spec', target='linked', origin='modules:value'):
+        path=self.root/name
+        path.write_text(origin+'\n')
+        h=p.file_hash(path)
+        self.lock['local_files'].append({'path':name,'sha256':h})
+        self.lock['steps'].append({'source':'kernel','operation':'link','layer':'integration',
+                                   'path':name,'sha256':h,'destination':target})
+
     def prepare(self,name='work'):
         return p.prepare(self.config,self.profile,self.lock,self.root/name,self.external,self.root)
 
@@ -181,6 +189,19 @@ class PreparationTests(unittest.TestCase):
         self.lock['steps'][0].update(operation='copy',destination='../outside')
         with self.assertRaisesRegex(p.Invalid,'unsafe path'):self.prepare()
         self.assertFalse((self.root/'outside').exists())
+
+    def test_link_uses_locked_source_and_stays_relative(self):
+        self.add_link()
+        self.prepare()
+        target=self.root/'work/kernel/linked'
+        self.assertTrue(target.is_symlink())
+        self.assertEqual(target.read_text(),'one\n')
+        self.assertEqual(target.resolve(),(self.root/'work/modules/value').resolve())
+
+    def test_link_spec_rejects_unknown_or_escaping_source(self):
+        self.add_link(origin='unknown:value')
+        with self.assertRaisesRegex(p.Invalid,'invalid link spec'):
+            self.prepare()
 
 
 if __name__=='__main__':unittest.main()

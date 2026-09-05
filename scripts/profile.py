@@ -70,6 +70,15 @@ def inside(root, relative):
     return path
 
 
+def link_spec(path, sources):
+    """Read a checked-in source link declaration: SOURCE:relative/path."""
+    value = Path(path).read_text(encoding="utf-8").strip()
+    source, separator, relative = value.partition(":")
+    require(separator and source in sources and relative, f"invalid link spec: {path}")
+    inside(Path('/tmp/ace6-path-validation'), relative)
+    return source, relative
+
+
 def validate_schema(value, schema, path="$", root=None):
     """Validate the explicit subset used by the checked-in JSON schemas.
 
@@ -255,8 +264,10 @@ def validate_lock(lock, config, p, root=ROOT):
         require(step["source"] in lock["sources"], "step references missing source")
         require(step["layer"] in ("upstream", "integration", "feature"), "invalid patch layer")
         require(inventory.get(step["path"]) == step["sha256"], "step absent from hashed inventory")
-        if step["operation"] == "copy":
+        if step["operation"] in ("copy", "link"):
             inside(Path('/tmp/ace6-path-validation'), step["destination"])
+        if step["operation"] == "link":
+            link_spec(inside(root, step["path"]), lock["sources"])
     if f["kpm"]:
         kpm = lock["resources"].get("kpm")
         require(isinstance(kpm, dict) and kpm.get("version") and DIGEST.fullmatch(kpm.get("sha256", "")), "KPM lacks pinned version/hash")
@@ -339,11 +350,20 @@ def prepare(config, p, lock, work, external=None, root=ROOT):
             if step["operation"] == "patch":
                 run(["git", "apply", "--check", patch], cwd=dest)
                 entry["log"] = run(["git", "apply", "--verbose", patch], cwd=dest, include_stderr=True)
-            else:
+            elif step["operation"] == "copy":
                 target = inside(dest, step["destination"])
                 require(not target.is_symlink(), "refusing to overwrite symlink")
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(patch, target)
+            else:
+                source_name, source_path = link_spec(patch, lock["sources"])
+                origin = inside(stage, lock["sources"][source_name]["directory"] + "/" + source_path)
+                require(origin.exists() and not origin.is_symlink(), "link origin is missing or symlinked")
+                target = inside(dest, step["destination"])
+                require(not target.exists() and not target.is_symlink(), "refusing to overwrite existing link target")
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.symlink_to(os.path.relpath(origin, target.parent), target_is_directory=origin.is_dir())
+                entry["target"] = f"{source_name}:{source_path}"
             entry["status"] = "applied"
         for name, source in lock["sources"].items():
             dest = inside(stage, source["directory"])
