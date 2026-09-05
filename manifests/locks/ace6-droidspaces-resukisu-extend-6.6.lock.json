@@ -1,0 +1,164 @@
+{
+  "schema_version": 1,
+  "profile": "ace6-droidspaces-resukisu-extend-6.6",
+  "profile_sha256": "fe2fd58f11261c59498aea444f5afde3e26ff884afc54556d7c29166e061b5c6",
+  "hook_mode": "manual",
+  "sources": {
+    "kernel": {
+      "url": "https://github.com/Ace6-Development/android_kernel_oneplus_sm8750.git",
+      "reference": "lineage-23.2",
+      "commit": "cb967c26c2c5689108fa28d3c3be2aba6ba71f5f",
+      "directory": "src"
+    },
+    "modules": {
+      "url": "https://github.com/Ace6-Development/android_kernel_oneplus_sm8750-modules.git",
+      "reference": "lineage-23.2",
+      "commit": "7d5d39a539ddc2b53054e8fa7ae2b5890dccae54",
+      "directory": "sm8750-modules"
+    },
+    "devicetrees": {
+      "url": "https://github.com/LineageOS/android_kernel_oneplus_sm8750-devicetrees.git",
+      "reference": "lineage-23.2",
+      "commit": "ebb25e3526ad84cc5a1090a5a9242f33ff087bf2",
+      "directory": "sm8750-devicetrees"
+    },
+    "resukisu": {
+      "url": "https://github.com/ReSukiSU/ReSukiSU.git",
+      "reference": "main (candidate from historical run; not floating)",
+      "commit": "9d0ff6aea9e25fc7dd26f4643175a41f68375e5e",
+      "directory": "ReSukiSU"
+    }
+  },
+  "local_files": [
+    {
+      "path": "patches/split/07_compile_fixes.patch",
+      "sha256": "ff1c7105e78fdfe652186c3c0c8c32494691e70b8671cdab51424706398b2b01"
+    },
+    {
+      "path": "ak3/LICENSE",
+      "sha256": "df6f65da47d459fdf2a2ef0eadb34f37d838befc91352b64a84f35507bea95cd"
+    },
+    {
+      "path": "ak3/META-INF/com/google/android/update-binary",
+      "sha256": "18bfaca89bdf67115447895e28b65a6127a8ddab6ff2561b214e70cef35f76f9"
+    },
+    {
+      "path": "ak3/META-INF/com/google/android/updater-script",
+      "sha256": "bb624eb9bfdf3b2ee9f5aa1b6b6324fb05cd0408bb98cfd1397d667076072b31"
+    },
+    {
+      "path": "ak3/anykernel.sh",
+      "sha256": "43f993a7b5f3e089880146dfc9d9d6eedaa5b407a3d64afd5240ee839c0d6c0e"
+    },
+    {
+      "path": "ak3/tools/ak3-core.sh",
+      "sha256": "48b18b8b1199cd5994a0b284877cf87807e17d118caa485d6cc5e9fddfa5f2b1"
+    },
+    {
+      "path": "ak3/tools/busybox",
+      "sha256": "4d60ab3f5a59ebb2ca863f2f514e6924401b581e9b64f602665c008177626651"
+    },
+    {
+      "path": "ak3/tools/fec",
+      "sha256": "a486890d0fd713557c55af881a78b3fd11a16ff195e29bd8559b0407de08d60e"
+    },
+    {
+      "path": "ak3/tools/httools_static",
+      "sha256": "9f7285341423ca02e1ff54a05b757db8bb09cfa36802879db3b358ae5a6c96aa"
+    },
+    {
+      "path": "ak3/tools/lptools_static",
+      "sha256": "da1b80e231bb7576d76e6f57bea4e27706805ec86b9b9c6524ac609c3179b969"
+    },
+    {
+      "path": "ak3/tools/magiskboot",
+      "sha256": "0f2f86d782f7304c28e9e20dc3c3ddfe2e77038c7280ed220002ecb83fa96584"
+    },
+    {
+      "path": "ak3/tools/magiskpolicy",
+      "sha256": "3fe64ff00b40460116e8e4da734cf211369122848d7e8fa003ff4f8f20760f59"
+    },
+    {
+      "path": "ak3/tools/snapshotupdater_static",
+      "sha256": "708b431da44619a716011153137d18252841ce4eb7f7ab17fe78df02ad2db55c"
+    },
+    {
+      "path": "config/config_ace6_final.config",
+      "sha256": "5b7fabb4e1a509f46fa66b9098e7a2435aad5aed0c684bf5b776d73aeb1431bf"
+    },
+    {
+      "path": "lib/ccache-ecs",
+      "sha256": "40ecaea37903393fde418ad46fb8668546a04d6ed3b949059cbd4f1a1c148939"
+    },
+    {
+      "path": "lib/libfakestat.so",
+      "sha256": "48453b71186dcd4b596905b990a37453b4b428bf2ab7f4f9e809a405a8be567b"
+    },
+    {
+      "path": "lib/libfaketimeMT.so",
+      "sha256": "edc6c5afefdaf1404c1df91d8cc6b8193b738bcb1f1678752ddfb93b29d7cc95"
+    },
+    {
+      "path": "scripts/profile.py",
+      "sha256": "42e7daaf209b989e0c95b08f90f4b36fabdbf76a271dcdb82942cde1a52ac783"
+    },
+    {
+      "path": "schemas/config.schema.json",
+      "sha256": "c075f1a112c49b60cc371fc81c88d629d840621118b186c7d28e939e33db7e46"
+    },
+    {
+      "path": "schemas/input-fields.json",
+      "sha256": "d132cf8d3e9e516425eebe157cb9bf85d8dfd18d707c34896ebae3ffa5166986"
+    },
+    {
+      "path": "schemas/lock.schema.json",
+      "sha256": "8ef3602c93b72c8f2d9b16ce084ea3be12202d30f8a9e9473d5ba7477924603d"
+    },
+    {
+      "path": "schemas/manifest.schema.json",
+      "sha256": "a87a1e5851e72783cee97649c9f6ea5c64539c80d2c1a242a319b612b575fd35"
+    }
+  ],
+  "steps": [
+    {
+      "source": "kernel",
+      "operation": "patch",
+      "layer": "integration",
+      "path": "patches/split/07_compile_fixes.patch",
+      "sha256": "ff1c7105e78fdfe652186c3c0c8c32494691e70b8671cdab51424706398b2b01",
+      "destination": ""
+    }
+  ],
+  "resources": {
+    "clang": {
+      "version": "AOSP Clang 21.0.0 r563880c",
+      "url": "https://github.com/GuLingguang/oneplus-sm8750-kernel-pro-build/releases/download/toolchain-AOSP-Clang-21.0.0-r563880c/clang-r563880c.tar.gz",
+      "sha256": "ee099045b1323087e0c1d3962d1d8c582fcdef45986976b82886a6177f142763",
+      "size": 1161295162,
+      "verification": "digest supplied by GitHub Release API; archive not downloaded in M1"
+    },
+    "actions": {
+      "actions/checkout": "11d5960a326750d5838078e36cf38b85af677262",
+      "actions/cache": "caa296126883cff596d87d8935842f9db880ef25",
+      "actions/upload-artifact": "ea165f8d65b6e75b540449e92b4886f43607fa02",
+      "actions/download-artifact": "d3f86a106a0bac45b974a628896c90dbdf5c8093",
+      "actions/github-script": "f28e40c7f34bde8b3046d885e986cb6290c5673b"
+    },
+    "kpm": null,
+    "ksu_identity": {
+      "version_code": 35115,
+      "version_name": "v4.2.0-rc1-9d0ff6ae",
+      "status": "recorded from historical log; deterministic build injection pending T15"
+    }
+  },
+  "blockers": [],
+  "build_environment": {
+    "status": "not-fully-locked",
+    "limitations": [
+      "apt dependencies and mkbootimg package not pinned",
+      "host image digest unavailable; no byte-reproducible build claim",
+      "KPM resource unresolved and feature disabled",
+      "source preparation only; final config, KSU identity injection, resource fetch/hash verification and packaging pending T14-T18"
+    ]
+  }
+}
