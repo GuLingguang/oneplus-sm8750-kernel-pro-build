@@ -23,3 +23,17 @@
    patches. Build environment/resource gaps keep T03 partially complete.
 8. Source-preparation success, build success and runtime acceptance use separate
    statuses. No M1 output is a flashable kernel or a release recommendation.
+
+## 2026-09-05 — T06 SUSFS Inline source preparation
+
+1. Keep the complete locked ReSukiSU `kernel/` tree as a relative source link;
+   do not copy or overlay a second KSU adapter into the kernel tree.
+2. Use the official SUSFS `gki-android15-6.6` files and patch as the upstream
+   input, adapting only the target tree's `vma_data_pages()` context.
+3. Treat the `struct filename **` faccessat/stat signatures, filename ownership,
+   thread flags and zygote-next mount lookup as one cross-tree contract. The
+   inactive non-SUSFS/manual branch's `const char __user **` signatures are not
+   selected by this profile.
+4. Record source preparation and static contract evidence separately from
+   compilation, olddefconfig, runtime mount hiding and publication. T07 remains
+   the next gate for the remaining signature/guard/consumer checks.

@@ -17,15 +17,18 @@ At the chosen ReSukiSU commit, `kernel/feature/sucompat.h` declares SUSFS
 path takes `const char __user **`. `kernel/Kconfig` declares the mutually
 exclusive hook choice. Official SUSFS `README.md` describes its inline integration
 and warns that patches are based primarily on official KernelSU. These are
-selection inputs, **not evidence that the ReSukiSU pairing has passed a contract**.
+selection inputs. T06 now records a source-level contract and a clean
+preparation run for the selected pairing; build and runtime acceptance remain
+separate gates.
 
-T06 must reconstruct the official kernel patch plus the explicit ReSukiSU
-adaptation on this kernel, including filename ownership/error paths, no_su and
-zygote_next consumers. T07 must then verify every applicable signature, guard and
-consumer. The old legacy adapter is never applied automatically to this candidate.
-Until that work is complete, the SUSFS profile remains blocked and cannot build
-through the new preparer.
+T06 reconstructed the official kernel patch plus the explicit ReSukiSU adaptation
+on this kernel, including filename ownership/error paths, no_su and zygote_next
+consumers. T07 must still verify every applicable signature, guard and consumer
+before a build claim. The old legacy adapter is never applied automatically to
+this candidate. The SUSFS profile is source-preparation-ready, while its build
+and runtime gates remain open.
 
-M1 has not executed T06/T07 and has not resolved the known faccessat runtime risk.
+T06 has been executed with static evidence; T07 and the known faccessat runtime
+risk remain unresolved until their dedicated checks.
 The original legacy checkpoint remains available for comparison, not for a claim
 of runtime safety or a verified flash-recovery package.
