@@ -156,7 +156,7 @@ jobs:
       kernelrel: ${{ steps.verify.outputs.kernelrel }}
       kernelver: ${{ steps.verify.outputs.kernelver }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4; historical run 33852164627
 
       # ---------- Toolchain: AOSP clang r563880c (from Release) ----------
       - name: 🔧 Install AOSP Clang 21 (r563880c) + deps（安装 AOSP Clang 21 及依赖）
@@ -229,7 +229,7 @@ jobs:
           echo "ccache fingerprint: $FP (src $SRC)"
 
       - name: 💾 Load ccache cache（加载 ccache 缓存）
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
         id: ccache-restore
         with:
           path: .ccache_ace6
@@ -602,7 +602,7 @@ jobs:
       # ---------- Save ccache ----------
       - name: 💾 Save ccache（保存 ccache）
         if: ${{ inputs.ccache_update }}
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5
         with:
           # workspace-relative path (see Load step); fingerprint key: same
           # parameters -> same key -> GitHub skips the re-upload (identical
@@ -626,7 +626,7 @@ jobs:
 
       - name: 🔍 Upload ccache debug log（上传 ccache 调试日志）
         if: ${{ inputs.ccache_debug }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ccache-debug-log
           path: ccache.log
@@ -669,7 +669,7 @@ jobs:
 
       # ---------- Upload artifacts ----------
       - name: 📤 Upload artifacts（上传产物）
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ${{ steps.package.outputs.ak3name }}
           path: out/*
@@ -682,7 +682,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 📥 Download artifacts（下载产物）
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: ${{ needs.build.outputs.ak3name }}
           path: release_zips
