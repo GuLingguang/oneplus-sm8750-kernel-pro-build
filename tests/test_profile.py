@@ -84,12 +84,17 @@ class ConfigTests(unittest.TestCase):
         with self.assertRaisesRegex(p.Invalid,'KPM'):p.validate_lock(lock,config,profile)
 
     def test_susfs_and_optional_features_block_before_download(self):
-        for inputs in [{'ksu_type':'resukisu','susfs_enable':True},{'baseband_guard':True},{'lz4kd_enable':True}]:
+        for inputs in [{'baseband_guard':True},{'lz4kd_enable':True}]:
             config,profile=p.normalize(inputs)
             lock=p.read_json(p.ROOT/'manifests/locks'/(profile['name']+'.lock.json'))
             with tempfile.TemporaryDirectory() as tmp, patch.object(p,'run',side_effect=AssertionError('must not run commands')):
                 with self.assertRaisesRegex(p.Invalid,'blocked'):p.prepare(config,profile,lock,Path(tmp)/'work')
                 self.assertEqual(list(Path(tmp).iterdir()),[])
+
+    def test_susfs_inline_source_preparation_is_unblocked(self):
+        config,profile=p.normalize({'ksu_type':'resukisu','susfs_enable':True})
+        lock=p.read_json(p.ROOT/'manifests/locks'/(profile['name']+'.lock.json'))
+        self.assertTrue(p.preflight(config,profile,lock)['prepare_allowed'])
 
     def test_duplicate_keys_fail(self):
         with tempfile.TemporaryDirectory() as tmp:

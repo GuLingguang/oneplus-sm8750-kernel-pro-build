@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "profile": "ace6-resukisu-susfs-inline-6.6",
-  "profile_sha256": "f9644c25fed3e065660264fd9f9ba5e934d293d000a42fd3c76ed530f1147436",
+  "profile_sha256": "3dc176c84c7c76ea60b13a8389d4e02fb08db23d8199987a456af68ad2e9eda4",
   "hook_mode": "susfs-inline",
   "sources": {
     "kernel": {
@@ -123,6 +123,34 @@
     {
       "path": "schemas/manifest.schema.json",
       "sha256": "a87a1e5851e72783cee97649c9f6ea5c64539c80d2c1a242a319b612b575fd35"
+    },
+    {
+      "path": "patches/integration/resukisu-kernel.link",
+      "sha256": "8685d7d98ad07743a384b996825c31039adbf424fb2f8e7ff3f12eb3fb329798"
+    },
+    {
+      "path": "patches/integration/ace6-resukisu-drivers.patch",
+      "sha256": "fafaa2cc5a3ebef40f7243308aa76e1eaf3599f6435e360badd6f883c4fa296c"
+    },
+    {
+      "path": "patches/integration/ace6-susfs-6.6.patch",
+      "sha256": "8674dcf9488d94cbe23d6ec7a82b42bd6b9e16e5463006783a0eaa993fd29f62"
+    },
+    {
+      "path": "patches/upstream/susfs/gki-android15-6.6/50_add_susfs_in_gki-android15-6.6.patch",
+      "sha256": "8367a82548d56c4f8d75df25ca218d67a1d7bc27a3b3f2dbdafe7881e8a857c3"
+    },
+    {
+      "path": "patches/upstream/susfs/gki-android15-6.6/fs/susfs.c",
+      "sha256": "c556c644dcb345bbe7814812c6ff084e22762d4d0381c8ee331ada1b25cd6770"
+    },
+    {
+      "path": "patches/upstream/susfs/gki-android15-6.6/include/linux/susfs.h",
+      "sha256": "d9fd277faaeeb9e2e3bf65b0d68223ad20a164342f3baa3ddb48010ddef9cb14"
+    },
+    {
+      "path": "patches/upstream/susfs/gki-android15-6.6/include/linux/susfs_def.h",
+      "sha256": "16d7299fd22c6539dc86fb67f963bbfa3c2422afe9f179e27e04b3168915b4ab"
     }
   ],
   "steps": [
@@ -132,6 +160,54 @@
       "layer": "integration",
       "path": "patches/split/07_compile_fixes.patch",
       "sha256": "ff1c7105e78fdfe652186c3c0c8c32494691e70b8671cdab51424706398b2b01",
+      "destination": ""
+    },
+    {
+      "source": "kernel",
+      "operation": "link",
+      "layer": "integration",
+      "path": "patches/integration/resukisu-kernel.link",
+      "sha256": "8685d7d98ad07743a384b996825c31039adbf424fb2f8e7ff3f12eb3fb329798",
+      "destination": "drivers/kernelsu"
+    },
+    {
+      "source": "kernel",
+      "operation": "patch",
+      "layer": "integration",
+      "path": "patches/integration/ace6-resukisu-drivers.patch",
+      "sha256": "fafaa2cc5a3ebef40f7243308aa76e1eaf3599f6435e360badd6f883c4fa296c",
+      "destination": ""
+    },
+    {
+      "source": "kernel",
+      "operation": "copy",
+      "layer": "upstream",
+      "path": "patches/upstream/susfs/gki-android15-6.6/fs/susfs.c",
+      "sha256": "c556c644dcb345bbe7814812c6ff084e22762d4d0381c8ee331ada1b25cd6770",
+      "destination": "fs/susfs.c"
+    },
+    {
+      "source": "kernel",
+      "operation": "copy",
+      "layer": "upstream",
+      "path": "patches/upstream/susfs/gki-android15-6.6/include/linux/susfs.h",
+      "sha256": "d9fd277faaeeb9e2e3bf65b0d68223ad20a164342f3baa3ddb48010ddef9cb14",
+      "destination": "include/linux/susfs.h"
+    },
+    {
+      "source": "kernel",
+      "operation": "copy",
+      "layer": "upstream",
+      "path": "patches/upstream/susfs/gki-android15-6.6/include/linux/susfs_def.h",
+      "sha256": "16d7299fd22c6539dc86fb67f963bbfa3c2422afe9f179e27e04b3168915b4ab",
+      "destination": "include/linux/susfs_def.h"
+    },
+    {
+      "source": "kernel",
+      "operation": "patch",
+      "layer": "integration",
+      "path": "patches/integration/ace6-susfs-6.6.patch",
+      "sha256": "8674dcf9488d94cbe23d6ec7a82b42bd6b9e16e5463006783a0eaa993fd29f62",
       "destination": ""
     }
   ],

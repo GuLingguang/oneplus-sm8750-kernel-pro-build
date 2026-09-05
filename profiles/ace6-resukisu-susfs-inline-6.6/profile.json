@@ -13,12 +13,10 @@
     "root-inline",
     "susfs"
   ],
-  "blockers": [
-    "T06/T07: selected ReSukiSU/SUSFS candidate pair needs rebuilt integration and type/consumer contracts"
-  ],
+  "blockers": [],
   "experimental": false,
   "status": {
-    "code": "scaffold",
+    "code": "source-ready",
     "contract": "not-tested",
     "build": "not-tested",
     "runtime": "not-tested"
