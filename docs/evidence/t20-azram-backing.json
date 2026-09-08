@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "task": "T20",
+  "status": {
+    "code": "device-runtime-verified",
+    "contract": "device-partition-and-owner-boundary-verified",
+    "build": "guarded-v1.2-source-updated",
+    "runtime": "v1.2-enabled-after-main-profile-boot; backing-bound; manual-writeback-trigger-returned-zero",
+    "release_allowed": false
+  },
+  "target": {
+    "model": "PLQ110",
+    "device": "OP6113L1",
+    "android_release": "16",
+    "backing_link": "/dev/block/by-name/hybridswap",
+    "backing_real": "/dev/block/sda13"
+  },
+  "device_observation": {
+    "backing_is_block_device": true,
+    "backing_is_mounted": false,
+    "backing_is_swap": false,
+    "zram_disksize_bytes": 6442450944,
+    "zram_swap_active": true,
+      "zram_algorithm": "lz4kd",
+      "zram_backing_after_test": "/dev/block/sda13",
+      "backing_dev_interface_present": true,
+      "backing_dev_interface_reason": "main profile exposes writable /sys/block/zram0/backing_dev",
+      "writeback_stats": "243016 536 243714"
+  },
+  "owners": {
+    "scene_swap_controller": {
+      "present": true,
+      "config_zram": "false",
+      "config_zram_writeback": "default",
+      "operations": ["reset", "compressor", "disksize", "backing_dev", "mkswap", "swapon"]
+    },
+    "ZramWritebackBoost": {
+      "present": true,
+      "role": "writeback scheduling and limits",
+      "reset_or_backing_owner": false
+    },
+    "azram-backing": {
+      "worktree_version": "guarded-v1.2",
+      "device_version": "old-v1.0",
+      "device_old_service_safety": "unconditional-swapoff-reset-before-backing-interface-check",
+      "role": "one-time backing hand-off only"
+    }
+  },
+  "guards": [
+    "target identity",
+    "Scene zram=false",
+    "Scene zram_writeback=default",
+    "backing block-device and real-path resolution",
+    "mount/swap conflict absence",
+    "existing backing absence or exact match",
+    "recovery tools and captured zram state before reset"
+  ],
+  "validation": {
+    "shell_syntax": "passed",
+    "device_preflight": "passed-before-guarded-backing-handoff",
+    "device_swapoff_reset": "not_recorded_in_final_device_evidence",
+    "legacy_module_disable": "completed-with-local-backup",
+    "device_boot_after_legacy_disable": "passed",
+    "device_boot_after_replacement": "passed",
+    "manual_writeback": "echo idle > /sys/block/zram0/writeback returned rc=0"
+  },
+  "device_remediation": {
+    "backup": "work/_tmp/device-backup-20260907/azram-backing",
+    "disable_marker": true,
+    "reboot_performed": true,
+    "boot_completed": true,
+    "new_module_installed": true,
+    "new_module_version": "guarded-v1.2"
+  },
+  "next_gate": "longer writeback/rollback validation remains separate from the verified one-shot hand-off"
+}

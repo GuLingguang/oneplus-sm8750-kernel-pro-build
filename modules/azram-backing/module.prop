@@ -1,6 +1,6 @@
 id=azram-backing
 name=ZRAM Backing (hybridswap)
-version=v1.0
-versionCode=1
+version=v1.2
+versionCode=3
 author=GuLingguang
-description=Boot-time zram backing device setup (hybridswap partition). Runs before Scene's swap controller; zram size and writeback scheduling belong to Scene.
+description=Guarded Ace6 hybridswap hand-off; refuses kernels without writable zram writeback. Scene remains owner of rebuild, sizing and swapon.
