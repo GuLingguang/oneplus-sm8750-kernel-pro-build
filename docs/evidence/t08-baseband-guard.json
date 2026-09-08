@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "task": "T08",
+  "status": {
+    "code": "source-fixed",
+    "contract": "object-verified",
+    "build": "bbg-objects-only",
+    "runtime": "not-tested",
+    "release_allowed": false
+  },
+  "source": {
+    "repository": "https://github.com/cctv18/Baseband-guard",
+    "commit": "a5b57f15d6b597a1bd157c42330fe80020b1d628",
+    "tree": "079b754a93d1711585d7f5a0a4d4769f00c3486c",
+    "fetch_mirror_used": "https://v4.gh-proxy.org/",
+    "mirror_changes_source_identity": false,
+    "vendored_origin_sha256": {
+      "Makefile": "808758325f5b30678d5ecda96903fa4287e321d9bbfcc9f3427160e587db141e",
+      "baseband_guard.c": "5f7f69e6c233da2c6481f9bfbc54d628753a84794996bb7a25546cf8569e735b",
+      "baseband_guard.h": "2276db961f43c1a88cb66a0b9f33200f7542fbacc45dd98a25be2d20da7902eb",
+      "kernel_compat.h": "2588fa5814029907f759e4de2261bf3d104679ce25c9265f957456e928110b43"
+    }
+  },
+  "local_delta": [
+    {
+      "path": "patches/extra/Baseband-guard/baseband_guard.c",
+      "sha256": "4b3eeaec356453388d4b98ff601782166773f16d1de85dec448f947a0808ed5f",
+      "changes": [
+        "valid dentry guard before inode access",
+        "protected device predicate returns deny for non-allowlisted block devices",
+        "symlink target and inode operation null/lifetime guards",
+        "trusted rename bypass and file inode null guards"
+      ]
+    },
+    {
+      "path": "patches/extra/Baseband-guard/Makefile",
+      "sha256": "77d16360517492884ff0694a2b9ccb28af6f6179e8a90979c06290bd144ee642",
+      "changes": [
+        "fixed fork URL and full source commit",
+        "removed parent-repository Git probing and build-time fetch"
+      ]
+    }
+  ],
+  "coverage": {
+    "null_or_error_dentry": "allow_without_dereference",
+    "negative_or_inode_less_dentry": "allow_without_dereference",
+    "regular_target": "allow",
+    "allowlisted_block_device": "allow",
+    "protected_block_device": "deny_for_untrusted_rename_setattr",
+    "absolute_symlink_to_protected_block_device": "deny_for_untrusted_rename_setattr",
+    "absolute_symlink_to_regular_or_allowed_target": "allow",
+    "trusted_process": "allow_for_rename_setattr"
+  },
+  "checks": {
+    "kernel_commit": "cb967c26c2c5689108fa28d3c3be2aba6ba71f5f",
+    "cumulative_patch_check": {
+      "patches": [
+        "patches/split/07_compile_fixes.patch",
+        "patches/split/06_baseband_guard.patch"
+      ],
+      "status": "passed"
+    },
+    "olddefconfig": "passed",
+    "kernel_config": {
+      "CONFIG_BBG": "y",
+      "CONFIG_BBG_BLOCK_RECOVERY": "y",
+      "CONFIG_LSM_contains_baseband_guard": true
+    },
+    "prepared_tree_diff_check": "passed",
+    "bbg_object_build": {
+      "status": "passed",
+      "objects": {
+        "security/baseband-guard/baseband_guard.o": "5b9de8a0d04912ca9311443d30dcb909b7a54ffc457dd6d255d206e4e7eb3122",
+        "security/baseband-guard/tracing/tracing.o": "3d3af4d4065771996edbf1a2533429190348f317ca7af961daf3621388906e43"
+      },
+      "host_note": "system bc was absent; a disposable HZ=250 generator was used for CONFIG_HZ=250 only"
+    },
+    "decision_model": {
+      "dentry_cases": 9,
+      "operation_gate_cases": 2,
+      "passed": 11,
+      "binary_sha256": "532eeb409d191a4790f694918aad0127f1f6bdb5cf79a6da3b5c00631e28b6cd"
+    },
+    "source_diff_check": "passed"
+  },
+  "build": "full_kernel_not_run",
+  "runtime": "not-tested",
+  "artifacts": []
+}

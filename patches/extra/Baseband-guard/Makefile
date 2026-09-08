@@ -16,25 +16,12 @@ else
   $(shell mv $(objtree)/flask.h $(objtree)/av_permissions.h $(objtree)/security/selinux)
 endif
 
-GIT_BIN := /usr/bin/env PATH="$$PATH":/usr/bin:/usr/local/bin git
-
-ifeq ($(findstring $(srctree),$(src)),$(srctree))
-  BBG_DIR := $(src)
-else
-  BBG_DIR := $(srctree)/$(src)
-endif
-
-$(shell cd $(BBG_DIR) && test -f .git/shallow && $(GIT_BIN) fetch --unshallow)
-
-REPO_LINK := $(shell cd $(BBG_DIR) && $(GIT_BIN) remote get-url origin 2>/dev/null)
-COMMIT_SHA := $(shell cd $(BBG_DIR) && $(GIT_BIN) rev-parse --short=8 HEAD 2>/dev/null)
-
-ifeq ($(strip $(REPO_LINK)),)
-  REPO_LINK := unknown
-endif
-ifeq ($(strip $(COMMIT_SHA)),)
-  COMMIT_SHA := cctv18-fork
-endif
+# The build consumes vendored source files rather than a Git checkout.  Do not
+# walk up into the kernel repository or fetch an unpinned remote while deriving
+# the module identity; that would report the wrong repository and make builds
+# depend on network availability.
+REPO_LINK := https://github.com/cctv18/Baseband-guard
+COMMIT_SHA := a5b57f15d6b597a1bd157c42330fe80020b1d628
 
 ifeq ($(shell grep -q "file_ioctl_compat" $(srctree)/include/linux/lsm_hook_defs.h $(srctree)/include/linux/lsm_hooks.h 2>/dev/null && echo true),true)
     ccflags-y += -DBB_HAS_IOCTL_COMPAT
@@ -44,7 +31,7 @@ ifeq ($(shell grep -q "selinux_state" $(srctree)/security/selinux/include/securi
     ccflags-y += -DBB_HAS_SELINUX_STATE
 endif
 
-HAS_DEFINE_LSM := $(shell grep -q "\#define DEFINE_LSM(lsm)" $(srctree)/include/linux/lsm_hooks.h && echo true)
+HAS_DEFINE_LSM := $(shell grep -q 'define DEFINE_LSM(lsm)' $(srctree)/include/linux/lsm_hooks.h && echo true)
 
 ifeq ($(CONFIG_BBG),y)
   $(info -- Baseband-guard: CONFIG_BBG enabled, now checking...)

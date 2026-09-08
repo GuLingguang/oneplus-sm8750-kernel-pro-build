@@ -31,7 +31,7 @@ On mobile devices, the **baseband and boot chain** are high-value targets. Once 
 ## Key Features
 
 - **Kernel-level Interception**: Blocks write attempts to protected targets at the system level via LSM hooks, preventing user-space bypass.  
-- **Lightweight & Easy to Integrate**: Provides `Kconfig`, `Makefile`, and `setup.sh` for simple integration into Android kernel trees.  
+- **Integration**: Provides `Kconfig`, `Makefile`, and `setup.sh` for integration into Android kernel trees.
 - **Maintainability**: Uses `kernel_compat.h` for compatibility splitting across kernel versions.  
 - **Configurable**: The list of protected targets and matching rules can be maintained in the source (see `baseband_guard.c`).  
 
@@ -55,7 +55,7 @@ Baseband-guard, as an **LSM module**, installs hooks in the kernel’s file writ
 
 ## Quick Start
 
-1. **Run setup script**: Simply run the following in your kernel source directory:  
+1. **Run setup script**: Run the following command in the kernel source directory:
    ```bash
    wget -O- https://github.com/vc-teahouse/Baseband-guard/raw/main/setup.sh | bash
    ```
@@ -65,14 +65,14 @@ Baseband-guard, as an **LSM module**, installs hooks in the kernel’s file writ
    CONFIG_BBG=y
    ```
    **TIPS OF CONFIG_LSM**
-   - if you are using local compile, please follow setup.sh output to manually modify your defconfig(Note: make sure the `gawk` was installed into your system)
-   - if you are using Github Action to compile your kernel, you can add this command to your compile workflow
+   - for a local build, follow the setup.sh output and modify the defconfig manually; `gawk` must be installed
+   - for a GitHub Actions build, add this command to the build workflow
      ```bash
      sed -i '/^config LSM$/,/^help$/{ /^[[:space:]]*default/ { /baseband_guard/! s/selinux/selinux,baseband_guard/ } }' security/Kconfig
      ```
      **WARN** This method will cause setup.sh --cleanup remove ALL LSM Kconfig defaults settings, so it only recommend for automatically build script 
 
-3. **Build & package**: Rebuild the kernel and `boot/vendor_boot` images according to your workflow, then flash to a test device.
+3. **Build & package**: Rebuild the kernel and `boot/vendor_boot` images according to the project workflow, then flash to a test device.
 
 4. **Verify**: Simulate writes on protected targets to confirm they are denied and logged.
 

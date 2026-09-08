@@ -218,6 +218,7 @@ static int bb_file_permission(struct file *file, int mask)
 	if (!file) return 0;
 
 	inode = file_inode(file);
+	if (!inode) return 0;
 	if (likely(!S_ISBLK(inode->i_mode))) return 0;
 
 	if (likely(current_process_trusted()))
@@ -229,59 +230,65 @@ static int bb_file_permission(struct file *file, int mask)
 	return deny("write to protected partition", file, inode, 0);
 }
 
-static inline int is_protected_blkdev(struct dentry *dentry)
+static inline bool is_protected_dev(dev_t dev)
 {
-    struct inode *inode;
+	if (!dev)
+		return false;
 
-    if (!IS_ERR_OR_NULL(dentry))
-        return 0;
+	if (allow_has(dev) || reverse_allow_match_and_cache(dev))
+		return false;
 
-    inode = d_backing_inode(dentry);
-    if (!inode)
-        return 0;
+	block_add(dev);
+	return true;
+}
 
-    if (unlikely(S_ISBLK(inode->i_mode))) { // just add blkdevs into blocklist for now, to avoid rename to zramxxx
-        if (allow_has(inode->i_rdev) || reverse_allow_match_and_cache(inode->i_rdev))
-			return 0;
+static inline bool is_protected_blkdev(struct dentry *dentry)
+{
+	struct inode *inode;
 
-		// mean we are processing protect devices, add them to blocklist!!! 
-		block_add(inode->i_rdev);
+	/* LSM callers normally pass a live dentry, but error/negative dentries
+	 * must never reach d_backing_inode() or the inode operations below. */
+	if (IS_ERR_OR_NULL(dentry))
+		return false;
 
-        return 0;
-    }
+	inode = d_backing_inode(dentry);
+	if (!inode)
+		return false;
 
-	// there will handle all symlink, to avoid create an symlink -> /dev/block/by-name and modify
-    if (unlikely(S_ISLNK(inode->i_mode) && inode->i_op->get_link)) { // fix /dev/block/by-name/xxx rename bypass
+	if (unlikely(S_ISBLK(inode->i_mode)))
+		return is_protected_dev(inode->i_rdev);
+
+	/* Resolve absolute symlinks to block devices so by-name aliases cannot
+	 * bypass the same protection applied to the underlying device. */
+	if (unlikely(S_ISLNK(inode->i_mode) && inode->i_op && inode->i_op->get_link)) {
 		DEFINE_DELAYED_CALL(done);
 		const char* symlink_target_link = inode->i_op->get_link(dentry, inode, &done);
-		int result = 0;
+		bool result = false;
 		struct path target_path;
 
 		if (IS_ERR_OR_NULL(symlink_target_link)) {
-			result = 0;
-        	goto out;
+			goto out;
 		}
 
 		if (symlink_target_link[0] != '/') {
-			// because /dev/block/by-name's symlink's target always is absolute path, so we don't care relative path
-			result = 0;
+			/* Relative links need a containing path and are outside this
+			 * conservative by-name protection check. */
 			goto out;
 		}
 
 		if (kern_path(symlink_target_link, LOOKUP_FOLLOW, &target_path) == 0) {
-        	struct inode *target_inode = d_backing_inode(target_path.dentry);
-        	if (target_inode && S_ISBLK(target_inode->i_mode)) {
-            	result = 1;
-        	}
-        	path_put(&target_path);
-    	}
+			struct inode *target_inode = d_backing_inode(target_path.dentry);
+			if (target_inode && S_ISBLK(target_inode->i_mode))
+				result = is_protected_dev(target_inode->i_rdev);
+			path_put(&target_path);
+		}
 out:
 		do_delayed_call(&done);
 		clear_delayed_call(&done);
 		return result;
-    }
+	}
 
-    return 0;
+	return false;
 }
 
 static dev_t byname_dev = 0;
@@ -289,11 +296,14 @@ static unsigned long byname_ino = 0;
 
 static int is_bb_byname_dir(struct inode *dir)
 {
+	if (!dir || !dir->i_sb)
+		return 0;
+
 	if (unlikely(byname_ino == 0)) {
         struct path path;
         if (kern_path(BB_BYNAME_DIR, LOOKUP_FOLLOW, &path) == 0) {
             struct inode *inode = d_backing_inode(path.dentry);
-            if (inode) {
+            if (inode && inode->i_sb) {
                 byname_dev = inode->i_sb->s_dev;
                 byname_ino = inode->i_ino;
             }
@@ -324,8 +334,11 @@ static int bb_inode_symlink(struct inode *dir, struct dentry *dentry, const char
 static int bb_inode_rename(struct inode *old_dir, struct dentry *old_dentry,
                            struct inode *new_dir, struct dentry *new_dentry)
 {
-    if (!old_dentry)
-        return 0;
+	if (likely(current_process_trusted()))
+		return 0;
+
+	if (IS_ERR_OR_NULL(old_dentry))
+		return 0;
 
     if (unlikely(is_protected_blkdev(old_dentry)))
         return deny("rename on protected block device", 0, d_inode(old_dentry), 0);
@@ -384,6 +397,7 @@ static int bb_file_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 
 	if (!file) return 0;
 	inode = file_inode(file);
+	if (!inode) return 0;
 	if (likely(!S_ISBLK(inode->i_mode))) return 0;
 
 	if (!is_destructive_ioctl(cmd))
@@ -453,5 +467,3 @@ DEFINE_LSM(baseband_guard) = {
 MODULE_DESCRIPTION("protect All Block & Power by TG@qdykernel");
 MODULE_AUTHOR("秋刀鱼 & https://t.me/qdykernel");
 MODULE_LICENSE("GPL v2");
-
-

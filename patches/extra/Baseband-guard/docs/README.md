@@ -30,9 +30,9 @@
 ## 主要特性
 
 - **内核态拦截**：通过 LSM 在内核层面拦截对受保护目标的写入尝试，避免用户态绕过。  
-- **轻量易集成**：提供 `Kconfig`、`Makefile` 与 `setup.sh`，便于集成到 Android 内核树中构建。  
+- **集成文件**：提供 `Kconfig`、`Makefile` 与 `setup.sh`，用于集成到 Android 内核树中构建。
 - **可维护性**：通过 `kernel_compat.h` 做兼容性拆分，降低不同内核版本适配负担。  
-- **可配置**：受保护目标列表与匹配策略可在源码中维护（详见 `baseband_guard.c`，请依据你的产品需求调整）。
+- **可配置**：受保护目标列表与匹配策略可在源码中维护（详见 `baseband_guard.c`，按产品需求调整）。
 
 ---
 
@@ -54,7 +54,7 @@ Baseband-guard 作为 **LSM** 模块在关键文件写入路径安装钩子（�
 
 ## 快速开始
 
-1. **运行脚本**：只需在内核源码目录下运行以下指令：
+1. **运行脚本**：在内核源码目录下运行以下指令：
    ```bash
    wget -O- https://github.com/vc-teahouse/Baseband-guard/raw/main/setup.sh | bash
    ```
@@ -64,14 +64,14 @@ Baseband-guard 作为 **LSM** 模块在关键文件写入路径安装钩子（�
    CONFIG_BBG=y
    ```
    **CONFIG_LSM 特别说明**
-   - 如果你正在使用本地编译，请参阅setup.sh执行后的输出手动修改您的defconfig(Note: 请确保`gawk`已安装至你的系统环境)
-   - 如果你正在使用Github Action云编译，可在构建脚本中添加
+   - 本地编译时，按照 setup.sh 执行后的输出手动修改 defconfig；系统中必须安装 `gawk`
+   - 使用 GitHub Actions 编译时，可在构建脚本中添加
      ```bash
      sed -i '/^config LSM$/,/^help$/{ /^[[:space:]]*default/ { /baseband_guard/! s/selinux/selinux,baseband_guard/ } }' security/Kconfig
      ```     
      **警告** 此方法会导致执行setup.sh --cleanup时出现LSM Kconfig配置中default全部被删除的问题，故只推荐用于自动化脚本编译
 
-3. **编译与打包**：按你的项目流程重新构建内核与 `boot/vendor_boot` 镜像，并刷入测试设备。
+3. **编译与打包**：按项目流程重新构建内核与 `boot/vendor_boot` 镜像，并刷入测试设备。
 
 4. **验证**：在受保护目标上模拟写入，确认被拒绝并产生日志。
 
