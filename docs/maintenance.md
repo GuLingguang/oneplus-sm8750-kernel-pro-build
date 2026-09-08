@@ -12,6 +12,12 @@ syntax, workflow action pinning, generated-file placement, whitespace, and the
 unit tests. The WebUI bundle is checked separately by `.github/workflows/ci.yml`
 with its `package-lock.json` dependency graph.
 
+For the broader local validation pass, run
+`python3 scripts/debug_combinations.py --json-out work/_tmp/debug-combinations.json`.
+The matching Debug build workflow keeps fast checks separate from compilation;
+use its `compile` scope for representative builds and `full` for every
+build-capable profile plus the drift report.
+
 To update a source, inspect the exact commit and update the lock in a reviewable
 change. `reference` is only a descriptive branch/tag label. Never resolve it
 implicitly during a build and never fall back after a fetch failure. Verify the

@@ -253,6 +253,25 @@ The standalone `08_cve.patch` was therefore removed.
 3. Download the AK3 zip from the run **artifacts** (or Release if `release_enable` is on)
 4. The first build is cold; subsequent builds can reuse ccache. Build time depends on runner capacity and cache state.
 
+### Debug checks
+
+The **Debug build** workflow is manual and has three scopes:
+
+- `fast` runs the repository gate, every feature-input combination, all profile dry-runs, the upstream checker entrypoint, and the WebUI build. It downloads no kernel source.
+- `compile` builds three representative profiles with a compiler timeout and isolated evidence artifacts.
+- `full` builds all seven profiles currently allowed through build preflight and adds the report-only upstream drift check.
+
+The two standalone Droidspaces `extend` profiles remain expected blockers. The
+fast job checks that they stop before source download; they are excluded from
+the compile sets. Build jobs run at most two profiles at once and never update
+the public ccache or publish a Release.
+
+For the same local combination check:
+
+```bash
+python3 scripts/debug_combinations.py --json-out work/_tmp/debug-combinations.json
+```
+
 ### Flash
 
 1. **Back up the current slot's boot partition first** — via OrangeFox (OFRP) or any recovery's built-in backup, or:
@@ -361,6 +380,7 @@ rebuild. Nothing is patched in an external source provider.
 │   └── workflows/
 │       ├── ci.yml                 # Push/PR: repository and WebUI checks
 │       ├── build.yml             # Main build workflow (manual trigger, 24 inputs)
+│       ├── debug-build.yml        # Manual fast/profile/compile/drift checks
 │       ├── clean-ccache.yml      # Manual: purge GitHub caches / Release ccache assets
 │       ├── upstream-check.yml    # Weekly: do the patches still apply upstream?
 │       └── upload-toolchain.yml  # One-time: upload AOSP clang to Release
