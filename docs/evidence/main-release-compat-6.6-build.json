@@ -1,0 +1,28 @@
+{
+  "profile": "ace6-main-release-compat-6.6",
+  "jobs": 30,
+  "kernel_release": "6.6.142-4k-gcb967c26c2c5+",
+  "image_sha256": "fac576ecbe5ff6554326731e0fdebe855497c92fa794336dcaa53e84673df7d4",
+  "artifact": "out/main-release-compat-6.6/Kernel-Ace6-Lingguang-ksu35115-20260907.zip",
+  "artifact_sha256": "1c890fe6f9d63d2436388c64393cc391c72f689ec3e601523b248ffee312c6da",
+  "manifest": "out/main-release-compat-6.6/build-manifest.json",
+  "manifest_id": "bf0b856039f34ad681adcd16625a1c333a61a97df701d33d6061bb0885f14ef4",
+  "zip_test": "passed",
+  "image_hash_matches_archive": true,
+  "preflight_blockers": [],
+  "preflight_warnings": [
+    "T11: EVDI module/userspace ABI and virtual HCI/systemd-coredump runtime remain unverified",
+    "T13/T26: Re:Kernel userspace counterpart and runtime protocol remain unverified",
+    "T20/T26: ZRAM writeback requires device backing-device validation",
+    "release: requested intent recorded; publication remains disabled until runtime, rollback and handoff gates pass"
+  ],
+  "publication": {
+    "requested": true,
+    "allowed": false,
+    "published": false
+  },
+  "device_test": "partial: built kernel identity and kernel-side feature checks passed; EVDI/Droidspaces/Re:Kernel userspace flows remain incomplete",
+  "device_evidence": "docs/evidence/main-release-device-20260907.json",
+  "zram_backing": "verified: /dev/block/sda13 hybridswap; one idle writeback command returned rc=0",
+  "flash": "not_claimed_by_build_record"
+}

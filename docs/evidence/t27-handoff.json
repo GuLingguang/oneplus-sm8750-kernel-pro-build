@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "task": "T27",
+  "status": {
+    "code": "local-handoff-complete-release-blocked",
+    "artifact_audit": "5-of-5-nonblocked-ak3-passed",
+    "runtime": "partial-t19-t21-t26",
+    "release_allowed": false
+  },
+  "snapshot": "original T27 handoff before the 2026-09-07 main-profile device follow-up",
+  "superseded_runtime_evidence": "docs/evidence/main-release-device-20260907.json",
+  "artifact_audit": {
+    "zip_test": "5/5 passed",
+    "manifest_sha256_match": "5/5 passed",
+    "profiles": [
+      {
+        "profile": "ace6-minimal-6.6",
+        "artifact": "out/minimal-6.6/Kernel-Ace6-Lingguang-20260906.zip",
+        "sha256": "d9a93a69c06e2b583edf768394e06cadfd5e2add356521555e6bd7c60ef15628"
+      },
+      {
+        "profile": "ace6-resukisu-manual-6.6",
+        "artifact": "out/resukisu-manual-6.6/Kernel-Ace6-Lingguang-ksu35115-20260906.zip",
+        "sha256": "c73185fc98085bd27aabb84ba7a5bc10152d581a160de94dd127672d8bacecac"
+      },
+      {
+        "profile": "ace6-resukisu-susfs-inline-6.6",
+        "artifact": "out/resukisu-susfs-inline-6.6/Kernel-Ace6-Lingguang-ksu35115-20260906.zip",
+        "sha256": "e6fbc2e0b11357a1bd7fcc8aba631b7fa8c25fc3acdcc46f68b773a612c64233"
+      },
+      {
+        "profile": "ace6-droidspaces-standard-6.6",
+        "artifact": "out/droidspaces-standard-6.6/Kernel-Ace6-Lingguang-20260906.zip",
+        "sha256": "7b7ee0731a1bb20daf13590cbcfa4b2d8843b946735fe4f8465b8ec40f4a63fb"
+      },
+      {
+        "profile": "ace6-droidspaces-resukisu-standard-6.6",
+        "artifact": "out/droidspaces-resukisu-standard-6.6/Kernel-Ace6-Lingguang-ksu35115-20260906.zip",
+        "sha256": "383cd67bccf49468f5a55595b51bfd63929e44052a6789f9e7e34a39f5ddb266"
+      }
+    ]
+  },
+  "runtime_boundary": {
+    "target": "PLQ110 / OP6113L1 / ktm",
+    "profile": "ace6-resukisu-susfs-inline-6.6",
+    "boot_and_root_verified": true,
+    "five_minute_read_only_soak": true,
+    "full_feature_matrix": false,
+    "rollback_test": false,
+    "device_pre_review_modules": {
+      "tcp-config": "v1.0 backed up; v1.1 installed and boot-restored; unauthenticated listener absent",
+      "azram-backing": "v1.0 backed up and disabled after reboot; unconditional swapoff/reset before backing interface check",
+      "replacement_or_disablement": "legacy modules backed up; tcp-config replaced, azram-backing disabled"
+    },
+    "module_runtime_gates": {
+      "tcp-config": "v1.1-boot-restored-direct-apply-and-real-UI-passed; display-fix-candidate-pending",
+      "azram-backing": "legacy-disabled-after-reboot; guarded-static-only",
+      "selinux_perf": "v1.1-boot-restored; disable-enable-AVC-comparison-zero-delta"
+    }
+  },
+  "module_candidates": [
+    {
+      "module": "azram-backing",
+      "artifact": "work/_tmp/t27-module-out2/Kernel-Ace6-module-azram-backing-v1.2-20260907.zip",
+      "sha256": "b7cb13431c9609e7a8746e5dbf092a4a66981f43edd7bac8cfa3158f09f687a6",
+      "zip_test": "passed",
+      "installed": false
+    },
+    {
+      "module": "selinux_perf",
+      "artifact": "work/_tmp/t27-module-out2/Kernel-Ace6-module-selinux_perf-v1.1-20260907.zip",
+      "sha256": "c74f4aa0c80e563d18d7d398d1e93d9867f0ceac6c4a3fe74d621b9b6f6aa26f",
+      "zip_test": "passed",
+      "installed": true,
+      "boot_restored": true,
+      "controlled_avc_comparison": "zero matching AVC in disabled/enabled 5000-record samples"
+    },
+    {
+      "module": "tcp-config",
+      "artifact": "work/_tmp/t27-module-out2/Kernel-Ace6-module-tcp-config-v1.1-20260907.zip",
+      "sha256": "50e3e2e73091b8d862aefa94ee9d572b599e4acb1fcb869477a39d34853dc4c6",
+      "zip_test": "passed",
+      "installed": true,
+      "boot_restored": true,
+      "direct_apply": "cubic/fq passed",
+      "real_webui": "cubic/fq click passed",
+      "local_followup_candidate": {
+        "artifact": "work/_tmp/t27-module-out3/Kernel-Ace6-module-tcp-config-v1.1-20260907.zip",
+        "sha256": "b183679146bcc8d33d1cdc6fe0f720e2ca584791278d4ae24c7c628e31ba33bb",
+        "zip_test": "passed",
+        "installed": false,
+        "change": "fix kernel-default display parser only"
+      }
+    }
+  ],
+  "publication": {
+    "commit": false,
+    "upload": false,
+    "github_release": false,
+    "device_partition_write": false,
+    "next_gate": "install/recheck local display-fix candidate, zram kernel-interface blocker, then explicit publication decision"
+  }
+}

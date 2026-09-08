@@ -1,0 +1,44 @@
+{
+  "device": "PLQ110 / OP6113L1",
+  "adb": "10.168.1.128:33357",
+  "root_adbd": true,
+  "kernel_identity": {
+    "proc_version": "6.6.142-4k-gcb967c26c2c5+",
+    "build_user": "Lingguang",
+    "build_host": "kernel-builder",
+    "compiler": "Android clang 21.0.0",
+    "uname_spoofed_by_susfs": true
+  },
+  "checks": {
+    "ksu_susfs": "pass: CONFIG_KSU_SUSFS and runtime SUSFS logs present",
+    "rekernel": "partial: /proc/rekernel/22 and LibNoActive present; event protocol not exercised",
+    "evdi": "partial: driver/sysfs loaded; no userspace frame submission (all counters zero)",
+    "ntsync": "pass: /dev/ntsync exists with mode 0666",
+    "droidspaces": "partial: two root daemons running; container/display lifecycle not exercised",
+    "zram_algorithms": "pass: lzo, lzo-rle, lz4, lz4hc, lz4k, lz4kd, deflate, 842, zstd registered",
+    "zram_default": "pass: lz4kd",
+    "zram_writeback": "pass: backing_dev=/dev/block/sda13 (hybridswap); writeback interface present; nonzero bd_stat observed after boot and manual trigger",
+    "zram_ownership": "pass: azram-backing binds backing only; Scene owns size/algorithm/swapon; ZramWritebackBoost owns writeback scheduling",
+    "bbr": "pass: available; current default is cubic as configured",
+    "better_network": "pass: IP_SET/BPF_STREAM_PARSER and IPv4/IPv6 NAT table runtime present",
+    "baseband_guard": "pass: initialized and marking untrusted SELinux-domain pids",
+    "kpm": "pass: no KPM config/resource observed",
+    "cve": "not_runtime_tested: build compatibility no-op",
+    "attribution": "pass: proc_version contains Lingguang@kernel-builder"
+  },
+  "memory_modules": {
+    "active_direct_zram_swap": [
+      "azram-backing",
+      "scene_swap_controller",
+      "ZramWritebackBoost"
+    ],
+    "azram_backing": "/dev/block/sda13",
+    "azram_backing_size_bytes": 1073741824,
+    "zram_disksize_bytes": 6442450944,
+    "zram_default_algorithm": "lz4kd",
+    "writeback_stats_at_check": "243016 536 243714",
+    "writeback_trigger": "manual echo idle completed with rc=0; no additional delta at invocation, worker had already populated backing stats"
+  },
+  "flash": "not_performed",
+  "release": "not_published"
+}

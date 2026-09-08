@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "task": "T26",
+  "status": {
+    "code": "booted-and-root-verified",
+    "contract": "runtime-startup-and-ksu",
+    "build": "built",
+    "runtime": "partial-pass",
+    "release_allowed": false
+  },
+  "profile": {
+    "name": "ace6-resukisu-susfs-inline-6.6",
+    "config_id": "8f27df126bda1f578127ee69e8273f1f9b0c08bfda9e0c3e083db2f5f906244e",
+    "lock_id": "e03aff8df39f8aab50e5c5cb74e0e2dacea28849a9590d1078cfd26380280a90",
+    "kernel_release": "6.6.142-4k-gcb967c26c2c5+",
+    "image_sha256": "252fd976f9df48a1eeea3bf8a843cb0b1ab0e49eb4afcac32e207a1923d0d36a",
+    "artifact": "out/resukisu-susfs-inline-6.6/Kernel-Ace6-Lingguang-ksu35115-20260906.zip",
+    "artifact_sha256": "e6fbc2e0b11357a1bd7fcc8aba631b7fa8c25fc3acdcc46f68b773a612c64233"
+  },
+  "device": {
+    "model": "PLQ110",
+    "product": "PLQ110",
+    "device": "OP6113L1",
+    "target_codename": "ktm",
+    "android_release": "16",
+    "active_slot": "_a"
+  },
+  "observations": {
+    "boot_completed": true,
+    "root_adbd": true,
+    "adbd_context": "u:r:ksu:s0",
+    "ksud": "4.1.0-1338-g058cdc93 (uapi: 2)",
+    "proc_version_release": "6.6.142-4k-gcb967c26c2c5+",
+    "uname_release": "6.6.89-android15-8-g7e1f3c083cc6-abogki467167594-4k",
+    "spoof_uname_observed": true,
+    "embedded_config": {
+      "CONFIG_KSU": "y",
+      "CONFIG_KSU_SUSFS": "y",
+      "CONFIG_KSU_SUSFS_SPOOF_UNAME": "y",
+      "CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG": "y"
+    },
+    "kernel_banner_matches_artifact": true
+  },
+  "smoke_tests": {
+    "wifi": "connected-and-validated",
+    "cellular": "in-service-lte",
+    "bluetooth": "enabled",
+    "display": "on",
+    "touch": "touchpanel-registered",
+    "camera_service_devices": 4,
+    "hardware_sensors": 43,
+    "loaded_kernel_modules": 572,
+    "battery": {
+      "health": "good",
+      "capacity_percent": 99,
+      "temperature_c": 33.2
+    },
+    "zram": {
+      "algorithm": "lzo-rle",
+      "disksize_bytes": 6442450944,
+      "swap_active": true
+    },
+    "thermal_status": 0,
+    "explicit_panic_or_oops_scan": "no actionable match",
+    "stability_soak": {
+      "duration_seconds": 300,
+      "samples": 30,
+      "sample_interval_seconds": 10,
+      "boot_completed_stable": true,
+      "kernel_release_stable": true,
+      "wifi_validated_stable": true,
+      "zram_visible_stable": true,
+      "battery_temperature_c_range": [29.3, 29.8],
+      "panic_or_oops_match": false
+    }
+  },
+  "limits": [
+    "No camera capture, call/data throughput, charging, suspend/resume, or long-duration stability test",
+    "No rollback test",
+    "Release and byte-identical reproducibility remain disabled"
+  ]
+}
