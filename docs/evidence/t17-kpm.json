@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "task": "T17",
+  "status": {
+    "code": "blocked",
+    "contract": "compatible-pinned-kpm-resource-not-established",
+    "build": "not-run",
+    "runtime": "not-tested",
+    "release_allowed": false
+  },
+  "sources": {
+    "kernel": {
+      "commit": "cb967c26c2c5689108fa28d3c3be2aba6ba71f5f"
+    },
+    "kpatch_next": {
+      "commit": "456744b29efb9989445463ab29e368fa59a103c4",
+      "version": "0.13.5",
+      "revision": 2,
+      "clean": true,
+      "current_magic": "KP2026",
+      "magic_change_commit": "cc19c5ee72b05d5c3a2cfcf0fd3c3079ca81a5e4"
+    },
+    "sukisu_patch_provider": {
+      "commit": "547ae94bcaec53d030398f857950c64662043a5d",
+      "clean": true
+    }
+  },
+  "available_provider_artifacts": {
+    "kpm/kpimg": {
+      "sha256": "41c5ad2f3a71fab156f976af1e1d369596f1c7a6452b0b4f7fa48f44db440aae",
+      "size": 180160,
+      "header_magic": "KP1158",
+      "compatible_with_current_source": false
+    },
+    "kpm/kptools": {
+      "sha256": "82bb6bc06e0e85534ab19106f0810c9f28eae315f5c787a92f618698b9824051",
+      "target": "AArch64 Android 33",
+      "compatible_with_current_source": false
+    },
+    "kpm/patch_android": {
+      "sha256": "03431d035fcaaff97a07b32f190e63ffdbfa586faa20f262c0e051b33d0c3976",
+      "target": "AArch64 Android 33",
+      "compatible_with_current_source": false
+    },
+    "kpm/patch_linux": {
+      "sha256": "1bd00563e9d8fbbd11a16c0c1c59c5add406e6c5c92557def50f93d6f0aebe2d",
+      "target": "x86-64 Linux",
+      "compatible_with_current_source": false
+    }
+  },
+  "required_local_tools": {
+    "aarch64-none-elf-gcc": false,
+    "aarch64-none-elf-ld": false,
+    "aarch64-none-elf-as": false,
+    "aarch64-none-elf-objcopy": false,
+    "android_ndk": false,
+    "zip": false
+  },
+  "validation": {
+    "resources_kpm_left_null": true,
+    "old_binary_reused": false,
+    "full_kpatch_build": false,
+    "kernel_image_patch": false,
+    "real_device": false,
+    "next_gate": "obtain target toolchains; build from 456744b; establish kernel compatibility; then T18"
+  }
+}
