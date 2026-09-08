@@ -1,0 +1,471 @@
+name: Debug build
+
+on:
+  push:
+    branches:
+      - refactor/ace6-profile-build
+    paths:
+      - '.github/workflows/debug-build.yml'
+      - 'config/**'
+      - 'manifests/**'
+      - 'modules/**'
+      - 'patches/**'
+      - 'profiles/**'
+      - 'scripts/**'
+      - 'schemas/**'
+      - 'tests/**'
+      - 'check_upstream.sh'
+      - 'reproduce.sh'
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: 'fast checks, representative builds, or every build-capable profile'
+        required: true
+        type: choice
+        default: fast
+        options:
+          - fast
+          - compile
+          - full
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ace6-debug-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONDONTWRITEBYTECODE: '1'
+  PYTHONPYCACHEPREFIX: ${{ github.workspace }}/work/_tmp/pycache
+
+jobs:
+  fast:
+    name: Fast checks and feature combinations
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Run repository CI gate
+        run: timeout --foreground --kill-after=30s 8m python3 scripts/ci.py
+
+      - name: Check every feature combination
+        run: |
+          set -euo pipefail
+          timeout --foreground --kill-after=30s 3m \
+            python3 scripts/debug_combinations.py \
+            --json-out work/_tmp/debug-combinations.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path('work/_tmp/debug-combinations.json').read_text())
+          if report['total_inputs'] < 1000:
+              raise SystemExit('feature combination space is unexpectedly small')
+          for status in ('ready', 'blocked', 'rejected'):
+              if report['status_counts'].get(status, 0) == 0:
+                  raise SystemExit(f'missing combination status: {status}')
+          if len(report['profiles']) != 9:
+              raise SystemExit('all nine profiles were not checked')
+          expected_blocked = {
+              'ace6-droidspaces-extend-6.6',
+              'ace6-droidspaces-resukisu-extend-6.6',
+          }
+          actual_blocked = {
+              item['profile'] for item in report['profiles']
+              if item['status'] == 'blocked'
+          }
+          if actual_blocked != expected_blocked:
+              raise SystemExit(f'unexpected blocked profiles: {sorted(actual_blocked)}')
+          print(report['status_counts'])
+          PY
+
+      - name: Dry-run every profile
+        run: |
+          set -euo pipefail
+          mkdir -p work/_tmp/profile-plans
+          blocked_profiles=(
+            ace6-droidspaces-extend-6.6
+            ace6-droidspaces-resukisu-extend-6.6
+          )
+          is_expected_blocked() {
+            local candidate="$1"
+            for blocked in "${blocked_profiles[@]}"; do
+              [[ "$candidate" == "$blocked" ]] && return 0
+            done
+            return 1
+          }
+          for path in profiles/*/profile.json; do
+            profile="${path#profiles/}"
+            profile="${profile%/profile.json}"
+            if timeout --foreground --kill-after=15s 90s \
+                python3 scripts/build.py --profile "$profile" --dry-run \
+                >"work/_tmp/profile-plans/$profile.json" \
+                2>"work/_tmp/profile-plans/$profile.error"; then
+              if is_expected_blocked "$profile"; then
+                echo "profile unexpectedly became buildable: $profile"
+                exit 1
+              fi
+              echo "profile dry-run passed: $profile"
+            elif is_expected_blocked "$profile"; then
+              echo "profile blocked as expected: $profile"
+            else
+              cat "work/_tmp/profile-plans/$profile.error"
+              echo "unexpected profile dry-run failure: $profile"
+              exit 1
+            fi
+          done
+
+      - name: Check upstream checker entrypoint
+        run: timeout --foreground --kill-after=15s 30s ./check_upstream.sh --help
+
+      - name: Upload fast-check reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ace6-debug-fast-${{ github.run_id }}
+          path: work/_tmp
+          retention-days: 3
+          if-no-files-found: ignore
+
+  webui:
+    name: WebUI build with bounded commands
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: modules/tcp-config/webui-src
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Verify Node and npm
+        run: node --version && npm --version
+
+      - name: Install locked WebUI dependencies
+        env:
+          NPM_CONFIG_ALLOW_REMOTE: all
+        run: timeout --foreground --kill-after=30s 8m npm ci --no-audit --no-fund
+
+      - name: Rebuild checked-in WebUI bundle
+        run: timeout --foreground --kill-after=30s 5m npm run build
+
+      - name: Reject stale generated bundle
+        working-directory: .
+        run: git diff --exit-code -- modules/tcp-config/webroot/index.js
+
+  compile_smoke:
+    name: Compile ${{ matrix.profile }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.scope == 'compile' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: true
+      max-parallel: 2
+      matrix:
+        profile:
+          - ace6-minimal-6.6
+          - ace6-resukisu-susfs-inline-6.6
+          - ace6-main-release-compat-6.6
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      ACE6_BUILD_TIMEOUT_SECONDS: '3600'
+      ACE6_CCACHE_ENABLE: 'true'
+      ACE6_RELEASE_ENABLE: 'false'
+      ACE6_CCACHE_UPDATE: 'false'
+      ACE6_CCACHE_DEBUG: 'true'
+      ACE6_DEBUG_SKIP_BUILD: 'false'
+      ACE6_ARTIFACT_MODE: ak3
+      ACE6_INDEPENDENT_MODULES: 'false'
+      ACE6_GHOST_TASK: 'false'
+      ACE6_BUILD_USER: Lingguang
+      ACE6_BUILD_HOST: kernel-builder
+      ACE6_BUILD_TIME: ''
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Install locked toolchain and host dependencies
+        run: |
+          set -euo pipefail
+          timeout --foreground --kill-after=30s 10m sudo apt-get update
+          timeout --foreground --kill-after=30s 10m sudo apt-get install -y \
+            zip unzip zstd patch bc flex bison libssl-dev libncurses-dev \
+            libelf-dev dwarves python3 ccache mkbootimg
+          archive="$GITHUB_WORKSPACE/work/_tmp/clang-r563880c.tar.gz"
+          mkdir -p "$(dirname "$archive")"
+          timeout --foreground --kill-after=30s 8m \
+            gh release download toolchain-AOSP-Clang-21.0.0-r563880c \
+            -p clang-r563880c.tar.gz -R "$GITHUB_REPOSITORY" \
+            -D "$(dirname "$archive")"
+          python3 scripts/build.py --workflow --profile "${{ matrix.profile }}" --verify-toolchain "$archive"
+          mkdir -p clang
+          tar xzf "$archive" -C clang
+          echo "$PWD/clang/bin" >> "$GITHUB_PATH"
+          mkdir -p "$GITHUB_WORKSPACE/work/_tmp/gki"
+          python3 - <<'PY' >"$GITHUB_WORKSPACE/work/_tmp/gki/generate_gki_certificate.py"
+          print('def generate_gki_certificate(*args, **kwargs):')
+          print('    raise SystemExit("GKI signing is not enabled by this workflow")')
+          PY
+          echo "PYTHONPATH=$GITHUB_WORKSPACE/work/_tmp" >> "$GITHUB_ENV"
+
+      - name: Verify toolchain
+        run: clang --version && clang -print-prog-name=ld.lld
+
+      - name: Configure ccache
+        run: |
+          set -euo pipefail
+          sudo cp -f lib/ccache-ecs /usr/local/bin/ccache
+          sudo chmod +x /usr/local/bin/ccache
+          echo "CCACHE_DIR=$GITHUB_WORKSPACE/.ccache_ace6" >> "$GITHUB_ENV"
+          echo 'CCACHE_MAXSIZE=3G' >> "$GITHUB_ENV"
+          echo 'CCACHE_IS_KERNEL_COMPILING=true' >> "$GITHUB_ENV"
+          mkdir -p "$GITHUB_WORKSPACE/.ccache_ace6"
+          printf '%s\n' \
+            'sloppiness = file_stat_matches,include_file_ctime,include_file_mtime,pch_defines,file_macro,time_macros' \
+            >> "$GITHUB_WORKSPACE/.ccache_ace6/ccache.conf"
+          ccache --version
+
+      - name: Resolve build fingerprint
+        run: python3 scripts/build.py --workflow --profile "${{ matrix.profile }}" --fingerprint
+
+      - name: Load ccache cache
+        id: ccache-restore
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: .ccache_ace6
+          key: ccache-ace6-debug-${{ runner.os }}-${{ matrix.profile }}-${{ env.CCACHE_FP }}
+          restore-keys: |
+            ccache-ace6-debug-${{ runner.os }}-${{ matrix.profile }}-
+            ccache-ace6-O2-FT-${{ runner.os }}-
+
+      - name: Merge public ccache when local cache is empty
+        if: ${{ steps.ccache-restore.outputs.cache-hit != 'true' }}
+        run: |
+          set -euo pipefail
+          archive="$GITHUB_WORKSPACE/work/_tmp/ccache-ace6-O2-FT.tar.zst"
+          if timeout --foreground --kill-after=30s 8m \
+              gh release download ccache-ace6-O2-FT \
+              -p ccache-ace6-O2-FT.tar.zst -R "$GITHUB_REPOSITORY" \
+              -D "$(dirname "$archive")"; then
+            tar -I zstd -xf "$archive" -C "$CCACHE_DIR"
+            echo 'public ccache merged'
+          else
+            echo 'public ccache absent; continuing with local cache'
+          fi
+
+      - name: Preflight selected profile before source download
+        run: timeout --foreground --kill-after=15s 90s python3 scripts/build.py --workflow --profile "${{ matrix.profile }}" --dry-run
+
+      - name: Build and package selected profile
+        run: |
+          set -euo pipefail
+          sudo sysctl -w vm.max_map_count=1048576
+          mkdir -p "$GITHUB_WORKSPACE/out/${{ matrix.profile }}"
+          timeout --foreground --kill-after=60s 70m \
+            python3 scripts/build.py \
+            --workflow --profile "${{ matrix.profile }}" \
+            --jobs "$(nproc)" \
+            --work "$GITHUB_WORKSPACE/work/${{ matrix.profile }}" \
+            --out "$GITHUB_WORKSPACE/out/${{ matrix.profile }}"
+
+      - name: Verify packaged artifacts
+        run: |
+          set -euo pipefail
+          test -s "out/${{ matrix.profile }}/build-manifest.json"
+          python3 - "out/${{ matrix.profile }}" <<'PY'
+          from pathlib import Path
+          import sys
+          import zipfile
+
+          root = Path(sys.argv[1])
+          archives = sorted(root.glob('*.zip'))
+          if not archives:
+              raise SystemExit('no AK3 archive was produced')
+          for archive in archives:
+              with zipfile.ZipFile(archive) as stream:
+                  bad = stream.testzip()
+                  if bad:
+                      raise SystemExit(f'corrupt archive member: {archive}: {bad}')
+          print('\n'.join(str(path) for path in archives))
+          PY
+
+      - name: Save ccache for this debug run
+        if: ${{ success() && steps.ccache-restore.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: .ccache_ace6
+          key: ccache-ace6-debug-${{ runner.os }}-${{ matrix.profile }}-${{ env.CCACHE_FP }}
+
+      - name: Upload build evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ace6-debug-${{ matrix.profile }}-${{ github.run_id }}
+          path: |
+            out/${{ matrix.profile }}/
+            work/**/build-manifest.json
+            work/**/failure.json
+            work/**/_tmp/ccache.log
+          retention-days: 3
+          if-no-files-found: ignore
+
+  compile_full:
+    name: Full compile set ${{ matrix.profile }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.scope == 'full' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        profile:
+          - ace6-minimal-6.6
+          - ace6-resukisu-manual-6.6
+          - ace6-resukisu-susfs-inline-6.6
+          - ace6-droidspaces-standard-6.6
+          - ace6-droidspaces-resukisu-standard-6.6
+          - ace6-rekernel-experimental
+          - ace6-main-release-compat-6.6
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      ACE6_BUILD_TIMEOUT_SECONDS: '3600'
+      ACE6_CCACHE_ENABLE: 'true'
+      ACE6_RELEASE_ENABLE: 'false'
+      ACE6_CCACHE_UPDATE: 'false'
+      ACE6_CCACHE_DEBUG: 'true'
+      ACE6_DEBUG_SKIP_BUILD: 'false'
+      ACE6_ARTIFACT_MODE: ak3
+      ACE6_INDEPENDENT_MODULES: 'false'
+      ACE6_GHOST_TASK: 'false'
+      ACE6_BUILD_USER: Lingguang
+      ACE6_BUILD_HOST: kernel-builder
+      ACE6_BUILD_TIME: ''
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Install build environment
+        run: |
+          set -euo pipefail
+          timeout --foreground --kill-after=30s 10m sudo apt-get update
+          timeout --foreground --kill-after=30s 10m sudo apt-get install -y \
+            zip unzip zstd patch bc flex bison libssl-dev libncurses-dev \
+            libelf-dev dwarves python3 ccache mkbootimg
+          archive="$GITHUB_WORKSPACE/work/_tmp/clang-r563880c.tar.gz"
+          mkdir -p "$(dirname "$archive")"
+          timeout --foreground --kill-after=30s 8m \
+            gh release download toolchain-AOSP-Clang-21.0.0-r563880c \
+            -p clang-r563880c.tar.gz -R "$GITHUB_REPOSITORY" \
+            -D "$(dirname "$archive")"
+          python3 scripts/build.py --workflow --profile "${{ matrix.profile }}" --verify-toolchain "$archive"
+          mkdir -p clang
+          tar xzf "$archive" -C clang
+          echo "$PWD/clang/bin" >> "$GITHUB_PATH"
+          mkdir -p "$GITHUB_WORKSPACE/work/_tmp/gki"
+          python3 - <<'PY' >"$GITHUB_WORKSPACE/work/_tmp/gki/generate_gki_certificate.py"
+          print('def generate_gki_certificate(*args, **kwargs):')
+          print('    raise SystemExit("GKI signing is not enabled by this workflow")')
+          PY
+          echo "PYTHONPATH=$GITHUB_WORKSPACE/work/_tmp" >> "$GITHUB_ENV"
+
+      - name: Verify toolchain
+        run: clang --version && clang -print-prog-name=ld.lld
+
+      - name: Configure cache and toolchain
+        run: |
+          set -euo pipefail
+          sudo cp -f lib/ccache-ecs /usr/local/bin/ccache
+          sudo chmod +x /usr/local/bin/ccache
+          echo "CCACHE_DIR=$GITHUB_WORKSPACE/.ccache_ace6" >> "$GITHUB_ENV"
+          echo 'CCACHE_MAXSIZE=3G' >> "$GITHUB_ENV"
+          echo 'CCACHE_IS_KERNEL_COMPILING=true' >> "$GITHUB_ENV"
+          mkdir -p "$GITHUB_WORKSPACE/.ccache_ace6"
+          printf '%s\n' \
+            'sloppiness = file_stat_matches,include_file_ctime,include_file_mtime,pch_defines,file_macro,time_macros' \
+            >> "$GITHUB_WORKSPACE/.ccache_ace6/ccache.conf"
+          ccache --version
+
+      - name: Resolve build fingerprint
+        run: python3 scripts/build.py --workflow --profile "${{ matrix.profile }}" --fingerprint
+
+      - name: Load ccache cache
+        id: ccache-restore
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: .ccache_ace6
+          key: ccache-ace6-debug-${{ runner.os }}-${{ matrix.profile }}-${{ env.CCACHE_FP }}
+          restore-keys: |
+            ccache-ace6-debug-${{ runner.os }}-${{ matrix.profile }}-
+            ccache-ace6-O2-FT-${{ runner.os }}-
+
+      - name: Merge public ccache when local cache is empty
+        if: ${{ steps.ccache-restore.outputs.cache-hit != 'true' }}
+        run: |
+          set -euo pipefail
+          archive="$GITHUB_WORKSPACE/work/_tmp/ccache-ace6-O2-FT.tar.zst"
+          if timeout --foreground --kill-after=30s 8m \
+              gh release download ccache-ace6-O2-FT \
+              -p ccache-ace6-O2-FT.tar.zst -R "$GITHUB_REPOSITORY" \
+              -D "$(dirname "$archive")"; then
+            tar -I zstd -xf "$archive" -C "$CCACHE_DIR"
+            echo 'public ccache merged'
+          else
+            echo 'public ccache absent; continuing with local cache'
+          fi
+
+      - name: Preflight selected profile before source download
+        run: timeout --foreground --kill-after=15s 90s python3 scripts/build.py --workflow --profile "${{ matrix.profile }}" --dry-run
+
+      - name: Build and package selected profile
+        run: |
+          set -euo pipefail
+          sudo sysctl -w vm.max_map_count=1048576
+          mkdir -p "$GITHUB_WORKSPACE/out/${{ matrix.profile }}"
+          timeout --foreground --kill-after=60s 70m \
+            python3 scripts/build.py \
+            --workflow --profile "${{ matrix.profile }}" \
+            --jobs "$(nproc)" \
+            --work "$GITHUB_WORKSPACE/work/${{ matrix.profile }}" \
+            --out "$GITHUB_WORKSPACE/out/${{ matrix.profile }}"
+
+      - name: Save ccache for full debug run
+        if: ${{ success() && steps.ccache-restore.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: .ccache_ace6
+          key: ccache-ace6-debug-${{ runner.os }}-${{ matrix.profile }}-${{ env.CCACHE_FP }}
+
+      - name: Upload full-build evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ace6-debug-full-${{ matrix.profile }}-${{ github.run_id }}
+          path: |
+            out/${{ matrix.profile }}/
+            work/**/build-manifest.json
+            work/**/failure.json
+            work/**/_tmp/ccache.log
+          retention-days: 3
+          if-no-files-found: ignore
+
+  drift:
+    name: Upstream drift checks
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.scope == 'full' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Run report-only drift check
+        run: |
+          set -euo pipefail
+          mkdir -p work/_tmp/drift-report
+          timeout --foreground --kill-after=60s 30m ./check_upstream.sh --ci
+
+      - name: Upload drift report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ace6-debug-drift-${{ github.run_id }}
+          path: work/_tmp/drift-report
+          retention-days: 3
+          if-no-files-found: ignore
