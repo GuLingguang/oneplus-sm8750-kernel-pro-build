@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "task": "T22",
+  "status": {
+    "code": "guarded-static-complete",
+    "checker": "report-only-cumulative-profile-check",
+    "build": "script-and-unit-validation-passed",
+    "runtime": "not-applicable",
+    "release_allowed": false
+  },
+  "implementation": {
+    "wrapper": "check_upstream.sh",
+    "engine": "scripts/drift.py",
+    "temporary_root": "work/_tmp",
+    "lock_modified": false,
+    "issue_created": false
+  },
+  "verification": {
+    "shell_syntax": "passed",
+    "python_compile": "passed",
+    "unit_tests": "26/26 passed",
+    "profiles_checked": 8,
+    "profiles_no_observed_drift": 5,
+    "profiles_blocked_by_existing_contract": 3,
+    "blocked_profiles": [
+      "ace6-droidspaces-extend-6.6",
+      "ace6-droidspaces-resukisu-extend-6.6",
+      "ace6-rekernel-experimental"
+    ],
+    "minimal_wrapper_replay": "passed"
+  },
+  "candidate": {
+    "sha": "cb967c26c2c5689108fa28d3c3be2aba6ba71f5f",
+    "expected_locked_sha": "cb967c26c2c5689108fa28d3c3be2aba6ba71f5f",
+    "newer_than_lock": false,
+    "interpretation": "locked-commit replay; not a newer-upstream drift result"
+  },
+  "policy": {
+    "patch_failure_means_upstream_absorption": false,
+    "lock_update": "separate reviewed change only",
+    "issue_draft": "generated locally/artifact-only"
+  }
+}

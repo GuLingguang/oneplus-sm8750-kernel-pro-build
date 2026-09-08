@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "task": "T23",
+  "status": {
+    "code": "report-only-workflow-complete",
+    "workflow": "validated-static-and-local-wrapper",
+    "release_allowed": false
+  },
+  "workflow": {
+    "path": ".github/workflows/upstream-check.yml",
+    "permissions": {
+      "contents": "read",
+      "issues": "not-granted"
+    },
+    "trigger": ["schedule", "workflow_dispatch"],
+    "artifact": "upstream-drift-report",
+    "artifact_uploaded_on_failure": true,
+    "automatic_issue_mutation": false
+  },
+  "local_wrapper": {
+    "path": "check_upstream.sh",
+    "default_report_dir": "work/_tmp/drift-report",
+    "local_replay": "passed",
+    "shell_syntax": "passed"
+  },
+  "temporary_storage": {
+    "drift_snapshots": "work/_tmp",
+    "ci_gki_helper": "work/_tmp/gki",
+    "top_level_tmp_ace6_entries_after_validation": 0
+  },
+  "policy": {
+    "lock_modified": false,
+    "issue_created": false,
+    "release_published": false
+  }
+}
