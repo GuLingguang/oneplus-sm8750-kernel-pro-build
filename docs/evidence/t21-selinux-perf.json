@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "task": "T21",
+  "status": {
+    "code": "guarded-static-complete",
+    "contract": "source-domain-target-type-permission-boundary-reviewed",
+    "build": "module-prop-and-rule-reviewed",
+    "runtime": "controlled-disable-enable-passed-no-avc-delta",
+    "release_allowed": false
+  },
+  "target": {
+    "model": "PLQ110",
+    "device": "OP6113L1",
+    "android_release": "16"
+  },
+  "module": {
+    "id": "selinux_perf",
+    "worktree_version": "1.1",
+    "device_version": "1.1",
+    "worktree_module_prop_sha256": "b779c6270ea3d1b55b56e2cba03e56084d8eff2ba3312e006f1888f578a7c694",
+    "device_module_prop_sha256": "b779c6270ea3d1b55b56e2cba03e56084d8eff2ba3312e006f1888f578a7c694",
+    "sepolicy_rule_sha256": "fed97bdba7f07293cec9b863ba18ed195133012d60c099e115dc26f2f74b5055",
+    "device_rule_matches_reviewed_rule": true,
+    "device_metadata_matches_worktree": true
+  },
+  "rules": [
+    {
+      "source_domain": "vendor_hal_perf_default",
+      "target_type": "ksu",
+      "classes": {
+        "dir": ["search"],
+        "file": ["read", "open", "getattr"]
+      }
+    },
+    {
+      "source_domain": "vendor_hal_perf_default",
+      "target_type": "kernel",
+      "classes": {
+        "dir": ["search"],
+        "file": ["read", "open", "getattr"]
+      }
+    }
+  ],
+  "device_observation": {
+    "selinux": "Enforcing",
+    "logcat_records_sampled": 5000,
+    "vendor_hal_perf_default_avc_matches": 0,
+    "disable_phase": {
+      "module_version": "1.0",
+      "boot_completed": true,
+      "selinux": "Enforcing",
+      "vendor_hal_perf_default_avc_matches_5000": 0
+    },
+    "enable_phase": {
+      "module_version": "1.1",
+      "boot_completed": true,
+      "selinux": "Enforcing",
+      "vendor_hal_perf_default_avc_matches_5000": 0
+    },
+    "perfhal_non_avc_observation": "PERFCTRL poll timeout for /sys/kernel/msm_performance/events/cpu_hotplug",
+    "controlled_disable_enable_comparison": "passed; no matching AVC delta",
+    "causal_effect_proven": false
+  },
+  "next_gate": "no further runtime gate for this narrow rule; performance benefit remains unproven"
+}
