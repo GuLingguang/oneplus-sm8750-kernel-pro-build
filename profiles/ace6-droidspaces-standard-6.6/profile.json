@@ -12,13 +12,11 @@
     "kernel-source",
     "droidspaces-standard"
   ],
-  "blockers": [
-    "T09/T10: container configuration and vendor workaround contract pending"
-  ],
+  "blockers": [],
   "experimental": false,
   "status": {
-    "code": "scaffold",
-    "contract": "not-tested",
+    "code": "source-ready",
+    "contract": "static-verified",
     "build": "not-tested",
     "runtime": "not-tested"
   }

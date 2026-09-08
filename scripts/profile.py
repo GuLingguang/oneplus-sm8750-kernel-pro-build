@@ -17,8 +17,10 @@ import sys
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
+PATH_VALIDATION_ROOT = ROOT / "work" / "_tmp" / "path-validation"
 SHA = re.compile(r"[0-9a-f]{40}\Z")
 DIGEST = re.compile(r"[0-9a-f]{64}\Z")
+MAIN_RELEASE_PROFILE = "ace6-main-release-compat-6.6"
 
 
 class Invalid(ValueError):
@@ -75,7 +77,7 @@ def link_spec(path, sources):
     value = Path(path).read_text(encoding="utf-8").strip()
     source, separator, relative = value.partition(":")
     require(separator and source in sources and relative, f"invalid link spec: {path}")
-    inside(Path('/tmp/ace6-path-validation'), relative)
+    inside(PATH_VALIDATION_ROOT, relative)
     return source, relative
 
 
@@ -137,6 +139,7 @@ def profile(name, root=ROOT, seen=()):
         merged["features"] = {**base["features"], **p["features"]}
         merged["capabilities"] = list(dict.fromkeys(base["capabilities"] + p["capabilities"]))
         merged["blockers"] = list(dict.fromkeys(base["blockers"] + p["blockers"]))
+        merged["warnings"] = list(dict.fromkeys((base.get("warnings") or []) + (p.get("warnings") or [])))
         return merged
     return p
 
@@ -201,8 +204,9 @@ def normalize(raw, selected=None, root=ROOT):
         susfs = values.get("susfs", False)
         ds = values.get("droidspaces", "false")
         require(not susfs or ksu != "none", "SUSFS requires ReSukiSU")
-        require(not susfs or ds == "false", "Droidspaces + SUSFS is unsupported")
-        if values.get("rekernel", False):
+        if susfs and ds == "extend" and values.get("rekernel", False):
+            selected = MAIN_RELEASE_PROFILE
+        elif values.get("rekernel", False):
             selected = "ace6-rekernel-experimental"
         elif ds != "false":
             selected = "ace6-droidspaces-" + ("resukisu-" if ksu != "none" else "") + ds + "-6.6"
@@ -217,12 +221,10 @@ def normalize(raw, selected=None, root=ROOT):
     for field in ("ksu_type", "susfs", "droidspaces", "rekernel"):
         require(f[field] == p["features"][field], f"{field} conflicts with profile {selected}")
     require(not f["susfs"] or f["ksu_type"] != "none", "SUSFS requires ReSukiSU")
-    require(not f["susfs"] or f["droidspaces"] == "false", "Droidspaces + SUSFS is unsupported")
     expected = "susfs-inline" if f["susfs"] else ("manual" if f["ksu_type"] != "none" else "none")
     require(p["hook_mode"] == expected, "implicit or mixed hook mode is forbidden")
     require(not f["ghost_task"] or f["droidspaces"] != "false", "ghost_task requires Droidspaces")
     require(not out["debug_skip_build"] or not (out["release_enable"] or out["ccache_update"]), "debug skip build cannot publish or update public cache")
-    require(not out["release_enable"] or not p["experimental"], "experimental profile cannot be released")
     require(not out["independent_modules"] or f["ksu_type"] != "none", "KSU modules are not applicable without KSU")
     validate_schema(config, read_json(root / "schemas/config.schema.json"))
     return config, p
@@ -244,7 +246,7 @@ def validate_lock(lock, config, p, root=ROOT):
         require(SHA.fullmatch(source["commit"]) is not None, f"unlocked source: {name}")
         require(source["url"].startswith("https://"), f"source must use HTTPS: {name}")
         require(re.fullmatch(r"[a-zA-Z0-9_-]+", name) is not None, "invalid source name")
-        inside(Path('/tmp/ace6-path-validation'), source["directory"])
+        inside(PATH_VALIDATION_ROOT, source["directory"])
         require(source["directory"] not in (".", "manifest.json", "lock.json", "failure.json"), "reserved source directory")
     directories = [Path(s["directory"]) for s in lock["sources"].values()]
     for i, directory in enumerate(directories):
@@ -265,7 +267,7 @@ def validate_lock(lock, config, p, root=ROOT):
         require(step["layer"] in ("upstream", "integration", "feature"), "invalid patch layer")
         require(inventory.get(step["path"]) == step["sha256"], "step absent from hashed inventory")
         if step["operation"] in ("copy", "link"):
-            inside(Path('/tmp/ace6-path-validation'), step["destination"])
+            inside(PATH_VALIDATION_ROOT, step["destination"])
         if step["operation"] == "link":
             link_spec(inside(root, step["path"]), lock["sources"])
     if f["kpm"]:
@@ -275,21 +277,32 @@ def validate_lock(lock, config, p, root=ROOT):
     return lock
 
 
-def preflight(config, p, lock):
+def preflight(config, p, lock, phase="prepare"):
+    require(phase in ("prepare", "build"), "invalid preflight phase")
     blockers = list(p["blockers"]) + list(lock["blockers"])
+    warnings = list(p.get("warnings") or []) + list(lock.get("warnings") or [])
     tasks = {"lz4_zstd": "T14", "lz4kd": "T14", "show_all_algos": "T14", "zram_writeback": "T14/T20",
              "baseband_guard": "T08", "better_net": "T14", "bbr": "T14", "ghost_task": "T10", "kpm": "T17"}
+    # Source preparation intentionally remains conservative: it only describes
+    # the M1 lock and does not apply the optional feature patch chain.  The
+    # common T15 builder applies and records that chain itself, so completed
+    # static contracts are allowed through its separate build preflight.  User-
+    # space/device-only gates and unfinished profiles remain blockers in both.
+    if phase == "build":
+        tasks = {"ghost_task": "T10", "kpm": "T17"}
     for key, task in tasks.items():
         if config["features"][key]:
             blockers.append(f"{key}: integration/configuration contract pending {task}")
     if config["artifacts"]["release_enable"]:
-        blockers.append("release: build/runtime evidence and explicit publication step pending T25-T27")
+        warnings.append("release: requested intent recorded; publication remains disabled until runtime, rollback and handoff gates pass")
     if config["artifacts"]["artifact_mode"] in ("boot", "all"):
         blockers.append("boot.img inputs/packaging contract pending T18")
     return {
         "config_id": digest(config), "lock_id": digest(lock), "profile": p["name"],
         "hook_mode": p["hook_mode"], "prepare_allowed": not blockers,
-        "blockers": list(dict.fromkeys(blockers)), "build_implemented": False,
+        "blockers": list(dict.fromkeys(blockers)), "build_implemented": phase == "build",
+        "warnings": list(dict.fromkeys(warnings)),
+        "phase": phase,
         "runtime_status": "not-tested", "release_allowed": False,
         "notes": ["cve_patch is a compatibility no-op; no extra GhostLock patch"] if config["features"]["cve_patch"] else [],
     }
@@ -309,11 +322,12 @@ def require_clean(source, commit):
     require(all(line.startswith("H ") for line in flags), "external source has skip-worktree/assume-unchanged entries")
 
 
-def prepare(config, p, lock, work, external=None, root=ROOT):
+def prepare(config, p, lock, work, external=None, root=ROOT, phase="prepare", source_urls=None):
     validate_lock(lock, config, p, root)
-    report = preflight(config, p, lock)
+    report = preflight(config, p, lock, phase=phase)
     require(report["prepare_allowed"], "profile blocked: " + "; ".join(report["blockers"]))
     external = external or {}
+    source_urls = source_urls or {}
     require(set(external) <= lock["sources"].keys(), "unknown external source name")
     work = Path(work).absolute()
     require(not work.exists() and not work.is_symlink(), "workspace already exists; choose a new directory")
@@ -334,7 +348,7 @@ def prepare(config, p, lock, work, external=None, root=ROOT):
                 run(["git", "clone", "--no-local", "--no-checkout", external[name], dest])
             else:
                 run(["git", "init", dest])
-                run(["git", "-C", dest, "remote", "add", "origin", source["url"]])
+                run(["git", "-C", dest, "remote", "add", "origin", source_urls.get(name, source["url"])])
                 run(["git", "-C", dest, "fetch", "--depth=1", "origin", source["commit"]])
             run(["git", "-C", dest, "checkout", "--detach", source["commit"]])
             require(run(["git", "-C", dest, "rev-parse", "HEAD"]) == source["commit"], "resolved SHA differs")

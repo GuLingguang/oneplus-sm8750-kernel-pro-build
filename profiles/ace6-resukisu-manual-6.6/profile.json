@@ -12,13 +12,11 @@
     "kernel-source",
     "root-manual"
   ],
-  "blockers": [
-    "T07: version-specific Manual Hook patch set and contract not established"
-  ],
+  "blockers": [],
   "experimental": false,
   "status": {
-    "code": "scaffold",
-    "contract": "not-tested",
+    "code": "source-ready",
+    "contract": "static-verified",
     "build": "not-tested",
     "runtime": "not-tested"
   }

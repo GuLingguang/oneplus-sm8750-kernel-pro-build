@@ -9,13 +9,15 @@
     "droidspaces-extend"
   ],
   "blockers": [
-    "T11: EVDI/userspace dependencies not locked or validated"
+    "T11: EVDI candidate is object-only; full module modpost needs kernel Module.symvers",
+    "T11: create-disp candidate requires DRM_EVDI_SET_POWER_MODE (0x0f), absent from the locked EVDI UAPI",
+    "T11: virtual HCI/systemd-coredump/device userspace contract is not locked"
   ],
   "experimental": true,
   "status": {
-    "code": "scaffold",
-    "contract": "not-tested",
-    "build": "not-tested",
+    "code": "blocked",
+    "contract": "static-partial",
+    "build": "evdi-object-only",
     "runtime": "not-tested"
   }
 }

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "profile": "ace6-droidspaces-standard-6.6",
-  "profile_sha256": "e44ce4bf63ef7f3d64d44a2d22fe707eb778d33b8e0bdb246f2c2fd9df4b4fa4",
+  "profile_sha256": "cdbd3171d796fc32db5d87ff9b0d4140f82a53b5ce14ea69af3cbdf48711a9ae",
   "hook_mode": "none",
   "sources": {
     "kernel": {
@@ -27,6 +27,22 @@
     {
       "path": "patches/split/07_compile_fixes.patch",
       "sha256": "ff1c7105e78fdfe652186c3c0c8c32494691e70b8671cdab51424706398b2b01"
+    },
+    {
+      "path": "patches/integration/ace6-droidspaces-standard-6.6.patch",
+      "sha256": "4d2873e5ef51c6231191b9a7c3518d5fa6efe2961fdd55dd5fdaea05c7a17ce3"
+    },
+    {
+      "path": "patches/extra/drivers/misc/ntsync.c",
+      "sha256": "9c0a02bd6ab3d58b9d84246cd13d98dd284c04e9d7532802d5f6cbcc7e7cc3ac"
+    },
+    {
+      "path": "patches/extra/include/uapi/linux/ntsync.h",
+      "sha256": "006437ee52a3e04f921df77081eb5c21c44c71f598b10ac534c6ef9e78296262"
+    },
+    {
+      "path": "config/config_droidspaces_standard_6.6.fragment",
+      "sha256": "e674ffc5d4e3f81b4034c319d67d946d8a9203f43d0bb102fa09319795232e59"
     },
     {
       "path": "ak3/LICENSE",
@@ -94,7 +110,15 @@
     },
     {
       "path": "scripts/profile.py",
-      "sha256": "32e15ecd448e681bdb121bb82f51dec7662849db888f6134060749adc4b6a75e"
+      "sha256": "832978bcef78e4b086f077f918c8739f679d1caa6b0c1695cf5738c199876752"
+    },
+    {
+      "path": "scripts/build.py",
+      "sha256": "780bef4dbcb60a563c1557364db20b8da8ef185ccc94c996d5b2528f1464b488"
+    },
+    {
+      "path": "manifests/build-features.json",
+      "sha256": "4b7d65d6036e3ede638bcff91d664b3839d285157488ab37b1238f04be02eb67"
     },
     {
       "path": "schemas/config.schema.json",
@@ -106,7 +130,7 @@
     },
     {
       "path": "schemas/lock.schema.json",
-      "sha256": "9cbfa5b1c670a08c6861fbb65140e194eef02b2895288cd30fcc2f46d4228473"
+      "sha256": "1340e074880e38456345d9fbd7fb02d6c7a74f69673a4232b44f7d0e60bd41ef"
     },
     {
       "path": "schemas/manifest.schema.json",
@@ -121,6 +145,30 @@
       "path": "patches/split/07_compile_fixes.patch",
       "sha256": "ff1c7105e78fdfe652186c3c0c8c32494691e70b8671cdab51424706398b2b01",
       "destination": ""
+    },
+    {
+      "source": "kernel",
+      "operation": "patch",
+      "layer": "integration",
+      "path": "patches/integration/ace6-droidspaces-standard-6.6.patch",
+      "sha256": "4d2873e5ef51c6231191b9a7c3518d5fa6efe2961fdd55dd5fdaea05c7a17ce3",
+      "destination": ""
+    },
+    {
+      "source": "kernel",
+      "operation": "copy",
+      "layer": "integration",
+      "path": "patches/extra/drivers/misc/ntsync.c",
+      "sha256": "9c0a02bd6ab3d58b9d84246cd13d98dd284c04e9d7532802d5f6cbcc7e7cc3ac",
+      "destination": "drivers/misc/ntsync.c"
+    },
+    {
+      "source": "kernel",
+      "operation": "copy",
+      "layer": "integration",
+      "path": "patches/extra/include/uapi/linux/ntsync.h",
+      "sha256": "006437ee52a3e04f921df77081eb5c21c44c71f598b10ac534c6ef9e78296262",
+      "destination": "include/uapi/linux/ntsync.h"
     }
   ],
   "resources": {

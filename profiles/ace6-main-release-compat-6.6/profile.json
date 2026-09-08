@@ -1,0 +1,33 @@
+{
+  "name": "ace6-main-release-compat-6.6",
+  "extends": null,
+  "hook_mode": "susfs-inline",
+  "features": {
+    "ksu_type": "resukisu",
+    "susfs": true,
+    "droidspaces": "extend",
+    "rekernel": true
+  },
+  "capabilities": [
+    "kernel-source",
+    "root-inline",
+    "susfs",
+    "droidspaces-standard",
+    "droidspaces-extend",
+    "rekernel",
+    "main-release-feature-composition"
+  ],
+  "blockers": [],
+  "warnings": [
+    "T11: EVDI module/userspace ABI and virtual HCI/systemd-coredump runtime remain unverified",
+    "T13/T26: Re:Kernel userspace counterpart and runtime protocol remain unverified",
+    "T20/T26: ZRAM writeback requires device backing-device validation"
+  ],
+  "experimental": true,
+  "status": {
+    "code": "build-capable-experimental",
+    "contract": "source-locked-runtime-pending",
+    "build": "pending",
+    "runtime": "not-tested"
+  }
+}

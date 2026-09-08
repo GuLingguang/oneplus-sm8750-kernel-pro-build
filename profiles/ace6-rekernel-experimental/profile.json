@@ -8,14 +8,15 @@
   "capabilities": [
     "rekernel"
   ],
-  "blockers": [
-    "T12/T13: Re:Kernel single implementation and protocol contract pending"
+  "blockers": [],
+  "warnings": [
+    "T13/T26: Re:Kernel userspace counterpart/version and runtime protocol validation pending"
   ],
   "experimental": true,
   "status": {
-    "code": "scaffold",
-    "contract": "not-tested",
-    "build": "not-tested",
+    "code": "build-capable-experimental",
+    "contract": "source-locked-runtime-pending",
+    "build": "pending",
     "runtime": "not-tested"
   }
 }

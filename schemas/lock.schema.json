@@ -121,6 +121,12 @@
         "type": "string"
       }
     },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "build_environment": {
       "type": "object",
       "properties": {

@@ -1,0 +1,500 @@
+{
+  "schema_version": 1,
+  "profile": "ace6-main-release-compat-6.6",
+  "profile_sha256": "16e00fff50143fd7543aff9964cc3bd820bef526158722793edcdf264a7cd170",
+  "hook_mode": "susfs-inline",
+  "sources": {
+    "kernel": {
+      "url": "https://github.com/Ace6-Development/android_kernel_oneplus_sm8750.git",
+      "reference": "lineage-23.2",
+      "commit": "cb967c26c2c5689108fa28d3c3be2aba6ba71f5f",
+      "directory": "src"
+    },
+    "modules": {
+      "url": "https://github.com/Ace6-Development/android_kernel_oneplus_sm8750-modules.git",
+      "reference": "lineage-23.2",
+      "commit": "7d5d39a539ddc2b53054e8fa7ae2b5890dccae54",
+      "directory": "sm8750-modules"
+    },
+    "devicetrees": {
+      "url": "https://github.com/LineageOS/android_kernel_oneplus_sm8750-devicetrees.git",
+      "reference": "lineage-23.2",
+      "commit": "ebb25e3526ad84cc5a1090a5a9242f33ff087bf2",
+      "directory": "sm8750-devicetrees"
+    },
+    "resukisu": {
+      "url": "https://github.com/ReSukiSU/ReSukiSU.git",
+      "reference": "main (candidate from historical run; not floating)",
+      "commit": "9d0ff6aea9e25fc7dd26f4643175a41f68375e5e",
+      "directory": "ReSukiSU"
+    },
+    "susfs": {
+      "url": "https://gitlab.com/simonpunk/susfs4ksu.git",
+      "reference": "gki-android15-6.6 / v2.3.0",
+      "commit": "937215cb3a1b1f333d764c366c7a49972fa8e7a0",
+      "directory": "susfs4ksu"
+    }
+  },
+  "local_files": [
+    {
+      "path": "patches/split/07_compile_fixes.patch",
+      "sha256": "ff1c7105e78fdfe652186c3c0c8c32494691e70b8671cdab51424706398b2b01"
+    },
+    {
+      "path": "ak3/LICENSE",
+      "sha256": "df6f65da47d459fdf2a2ef0eadb34f37d838befc91352b64a84f35507bea95cd"
+    },
+    {
+      "path": "ak3/META-INF/com/google/android/update-binary",
+      "sha256": "18bfaca89bdf67115447895e28b65a6127a8ddab6ff2561b214e70cef35f76f9"
+    },
+    {
+      "path": "ak3/META-INF/com/google/android/updater-script",
+      "sha256": "bb624eb9bfdf3b2ee9f5aa1b6b6324fb05cd0408bb98cfd1397d667076072b31"
+    },
+    {
+      "path": "ak3/anykernel.sh",
+      "sha256": "43f993a7b5f3e089880146dfc9d9d6eedaa5b407a3d64afd5240ee839c0d6c0e"
+    },
+    {
+      "path": "ak3/tools/ak3-core.sh",
+      "sha256": "48b18b8b1199cd5994a0b284877cf87807e17d118caa485d6cc5e9fddfa5f2b1"
+    },
+    {
+      "path": "ak3/tools/busybox",
+      "sha256": "4d60ab3f5a59ebb2ca863f2f514e6924401b581e9b64f602665c008177626651"
+    },
+    {
+      "path": "ak3/tools/fec",
+      "sha256": "a486890d0fd713557c55af881a78b3fd11a16ff195e29bd8559b0407de08d60e"
+    },
+    {
+      "path": "ak3/tools/httools_static",
+      "sha256": "9f7285341423ca02e1ff54a05b757db8bb09cfa36802879db3b358ae5a6c96aa"
+    },
+    {
+      "path": "ak3/tools/lptools_static",
+      "sha256": "da1b80e231bb7576d76e6f57bea4e27706805ec86b9b9c6524ac609c3179b969"
+    },
+    {
+      "path": "ak3/tools/magiskboot",
+      "sha256": "0f2f86d782f7304c28e9e20dc3c3ddfe2e77038c7280ed220002ecb83fa96584"
+    },
+    {
+      "path": "ak3/tools/magiskpolicy",
+      "sha256": "3fe64ff00b40460116e8e4da734cf211369122848d7e8fa003ff4f8f20760f59"
+    },
+    {
+      "path": "ak3/tools/snapshotupdater_static",
+      "sha256": "708b431da44619a716011153137d18252841ce4eb7f7ab17fe78df02ad2db55c"
+    },
+    {
+      "path": "config/config_ace6_final.config",
+      "sha256": "5b7fabb4e1a509f46fa66b9098e7a2435aad5aed0c684bf5b776d73aeb1431bf"
+    },
+    {
+      "path": "lib/ccache-ecs",
+      "sha256": "40ecaea37903393fde418ad46fb8668546a04d6ed3b949059cbd4f1a1c148939"
+    },
+    {
+      "path": "lib/libfakestat.so",
+      "sha256": "48453b71186dcd4b596905b990a37453b4b428bf2ab7f4f9e809a405a8be567b"
+    },
+    {
+      "path": "lib/libfaketimeMT.so",
+      "sha256": "edc6c5afefdaf1404c1df91d8cc6b8193b738bcb1f1678752ddfb93b29d7cc95"
+    },
+    {
+      "path": "scripts/profile.py",
+      "sha256": "832978bcef78e4b086f077f918c8739f679d1caa6b0c1695cf5738c199876752"
+    },
+    {
+      "path": "scripts/build.py",
+      "sha256": "780bef4dbcb60a563c1557364db20b8da8ef185ccc94c996d5b2528f1464b488"
+    },
+    {
+      "path": "manifests/build-features.json",
+      "sha256": "4b7d65d6036e3ede638bcff91d664b3839d285157488ab37b1238f04be02eb67"
+    },
+    {
+      "path": "schemas/config.schema.json",
+      "sha256": "c075f1a112c49b60cc371fc81c88d629d840621118b186c7d28e939e33db7e46"
+    },
+    {
+      "path": "schemas/input-fields.json",
+      "sha256": "d132cf8d3e9e516425eebe157cb9bf85d8dfd18d707c34896ebae3ffa5166986"
+    },
+    {
+      "path": "schemas/lock.schema.json",
+      "sha256": "1340e074880e38456345d9fbd7fb02d6c7a74f69673a4232b44f7d0e60bd41ef"
+    },
+    {
+      "path": "schemas/manifest.schema.json",
+      "sha256": "a87a1e5851e72783cee97649c9f6ea5c64539c80d2c1a242a319b612b575fd35"
+    },
+    {
+      "path": "patches/integration/resukisu-kernel.link",
+      "sha256": "8685d7d98ad07743a384b996825c31039adbf424fb2f8e7ff3f12eb3fb329798"
+    },
+    {
+      "path": "patches/integration/ace6-resukisu-drivers.patch",
+      "sha256": "fafaa2cc5a3ebef40f7243308aa76e1eaf3599f6435e360badd6f883c4fa296c"
+    },
+    {
+      "path": "patches/integration/ace6-susfs-6.6.patch",
+      "sha256": "8674dcf9488d94cbe23d6ec7a82b42bd6b9e16e5463006783a0eaa993fd29f62"
+    },
+    {
+      "path": "patches/upstream/susfs/gki-android15-6.6/50_add_susfs_in_gki-android15-6.6.patch",
+      "sha256": "8367a82548d56c4f8d75df25ca218d67a1d7bc27a3b3f2dbdafe7881e8a857c3"
+    },
+    {
+      "path": "patches/upstream/susfs/gki-android15-6.6/fs/susfs.c",
+      "sha256": "c556c644dcb345bbe7814812c6ff084e22762d4d0381c8ee331ada1b25cd6770"
+    },
+    {
+      "path": "patches/upstream/susfs/gki-android15-6.6/include/linux/susfs.h",
+      "sha256": "d9fd277faaeeb9e2e3bf65b0d68223ad20a164342f3baa3ddb48010ddef9cb14"
+    },
+    {
+      "path": "patches/upstream/susfs/gki-android15-6.6/include/linux/susfs_def.h",
+      "sha256": "16d7299fd22c6539dc86fb67f963bbfa3c2422afe9f179e27e04b3168915b4ab"
+    },
+    {
+      "path": "patches/integration/ace6-droidspaces-standard-6.6.patch",
+      "sha256": "4d2873e5ef51c6231191b9a7c3518d5fa6efe2961fdd55dd5fdaea05c7a17ce3"
+    },
+    {
+      "path": "patches/integration/ace6-droidspaces-extend-6.6.patch",
+      "sha256": "e67758bc66e4a97f19f4e27237c8ecae802d4c01c44ebdc2fb86a45d34f32755"
+    },
+    {
+      "path": "patches/extra/drivers/misc/ntsync.c",
+      "sha256": "9c0a02bd6ab3d58b9d84246cd13d98dd284c04e9d7532802d5f6cbcc7e7cc3ac"
+    },
+    {
+      "path": "patches/extra/include/uapi/linux/ntsync.h",
+      "sha256": "006437ee52a3e04f921df77081eb5c21c44c71f598b10ac534c6ef9e78296262"
+    },
+    {
+      "path": "patches/integration/ace6-rekernel-6.6.patch",
+      "sha256": "9384b3efc9a18a0e7e2bcb5f2a938fd20b7482a1cd9e797989b43f093357571f"
+    },
+    {
+      "path": "patches/integration/ace6-rekernel-protocol-6.6.patch",
+      "sha256": "7af3a2463a43425511509aa4354cee0687fc3381d6cc3ae27e39682818a566e1"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/Kconfig",
+      "sha256": "a99a852da9951f2c839f069da3d771d17007b5303290a4f3791083dfccbe6b1d"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/LICENSE",
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/Makefile",
+      "sha256": "02740dab341caca12e8cc2ca7adfea21030b7019fcd7fb5d2302eea77285d9a3"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/dkms.conf",
+      "sha256": "3a1a2da5ba0aa5195b1d1cc1cce5d304d286f34ca844fc8b78667c3bc5d3abd7"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_connector.c",
+      "sha256": "369d0b969a4fbe808dbf42a93872b86e7086da00fa69c567e71549a6e83da126"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_drv.h",
+      "sha256": "e37a9466c7a63621d0fe826d57d8fdd5338349ac81dc206b909d5221826bf442"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_event.c",
+      "sha256": "e1d38b7c88a69b5e153e32d2f1afb0623bced9b8749d1cfc0f93187ed706b79f"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_fb.c",
+      "sha256": "c6d5a4fef50cbcbe2d9da1721400c80f87a2036f912c86c8a770f96a6272af4a"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_gem.c",
+      "sha256": "f0d195fd6b608ba859eb6dfc98bc3d755ffa3b65853581ff61ca306bc2371fbc"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_ioctl.c",
+      "sha256": "fba817969f57a0a40970fd22ceae9dc91d6db81960d2b76f3ad4714828556c05"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_lindroid_drv.c",
+      "sha256": "a154b3956ef7a9e2deadde5f8032b2eae3cda0eb713659788e6933ad9aebd8ff"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_modeset.c",
+      "sha256": "6b9f96f036e7dec019fd980bc3e3d72d17154c89ffd3006cdcd5565a0f33e2da"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_sysfs.c",
+      "sha256": "8a1d787f22b00ccd66dbb6fc68a146622db2b4d76fbeb2cf306cc0a23e861dee"
+    },
+    {
+      "path": "patches/extra/drivers/gpu/drm/evdi/uapi/evdi_drm.h",
+      "sha256": "40cea205c60f4712b3dd5da4ded2d29784a5de9ff7f54f0246043d45c3bf604a"
+    }
+  ],
+  "steps": [
+    {
+      "source": "kernel",
+      "operation": "patch",
+      "layer": "integration",
+      "path": "patches/split/07_compile_fixes.patch",
+      "sha256": "ff1c7105e78fdfe652186c3c0c8c32494691e70b8671cdab51424706398b2b01",
+      "destination": ""
+    },
+    {
+      "source": "kernel",
+      "operation": "link",
+      "layer": "integration",
+      "path": "patches/integration/resukisu-kernel.link",
+      "sha256": "8685d7d98ad07743a384b996825c31039adbf424fb2f8e7ff3f12eb3fb329798",
+      "destination": "drivers/kernelsu"
+    },
+    {
+      "source": "kernel",
+      "operation": "patch",
+      "layer": "integration",
+      "path": "patches/integration/ace6-resukisu-drivers.patch",
+      "sha256": "fafaa2cc5a3ebef40f7243308aa76e1eaf3599f6435e360badd6f883c4fa296c",
+      "destination": ""
+    },
+    {
+      "source": "kernel",
+      "operation": "copy",
+      "layer": "upstream",
+      "path": "patches/upstream/susfs/gki-android15-6.6/fs/susfs.c",
+      "sha256": "c556c644dcb345bbe7814812c6ff084e22762d4d0381c8ee331ada1b25cd6770",
+      "destination": "fs/susfs.c"
+    },
+    {
+      "source": "kernel",
+      "operation": "copy",
+      "layer": "upstream",
+      "path": "patches/upstream/susfs/gki-android15-6.6/include/linux/susfs.h",
+      "sha256": "d9fd277faaeeb9e2e3bf65b0d68223ad20a164342f3baa3ddb48010ddef9cb14",
+      "destination": "include/linux/susfs.h"
+    },
+    {
+      "source": "kernel",
+      "operation": "copy",
+      "layer": "upstream",
+      "path": "patches/upstream/susfs/gki-android15-6.6/include/linux/susfs_def.h",
+      "sha256": "16d7299fd22c6539dc86fb67f963bbfa3c2422afe9f179e27e04b3168915b4ab",
+      "destination": "include/linux/susfs_def.h"
+    },
+    {
+      "source": "kernel",
+      "operation": "patch",
+      "layer": "integration",
+      "path": "patches/integration/ace6-susfs-6.6.patch",
+      "sha256": "8674dcf9488d94cbe23d6ec7a82b42bd6b9e16e5463006783a0eaa993fd29f62",
+      "destination": ""
+    },
+    {
+      "source": "kernel",
+      "operation": "patch",
+      "layer": "integration",
+      "path": "patches/integration/ace6-droidspaces-standard-6.6.patch",
+      "sha256": "4d2873e5ef51c6231191b9a7c3518d5fa6efe2961fdd55dd5fdaea05c7a17ce3",
+      "destination": ""
+    },
+    {
+      "source": "kernel",
+      "operation": "copy",
+      "layer": "integration",
+      "path": "patches/extra/drivers/misc/ntsync.c",
+      "sha256": "9c0a02bd6ab3d58b9d84246cd13d98dd284c04e9d7532802d5f6cbcc7e7cc3ac",
+      "destination": "drivers/misc/ntsync.c"
+    },
+    {
+      "source": "kernel",
+      "operation": "copy",
+      "layer": "integration",
+      "path": "patches/extra/include/uapi/linux/ntsync.h",
+      "sha256": "006437ee52a3e04f921df77081eb5c21c44c71f598b10ac534c6ef9e78296262",
+      "destination": "include/uapi/linux/ntsync.h"
+    },
+    {
+      "source": "kernel",
+      "operation": "patch",
+      "layer": "integration",
+      "path": "patches/integration/ace6-droidspaces-extend-6.6.patch",
+      "sha256": "e67758bc66e4a97f19f4e27237c8ecae802d4c01c44ebdc2fb86a45d34f32755",
+      "destination": ""
+    },
+    {
+      "source": "kernel",
+      "operation": "copy",
+      "layer": "integration",
+      "path": "patches/extra/drivers/gpu/drm/evdi/Kconfig",
+      "sha256": "a99a852da9951f2c839f069da3d771d17007b5303290a4f3791083dfccbe6b1d",
+      "destination": "drivers/gpu/drm/evdi/Kconfig"
+    },
+    {
+      "source": "kernel",
+      "operation": "copy",
+      "layer": "integration",
+      "path": "patches/extra/drivers/gpu/drm/evdi/LICENSE",
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+      "destination": "drivers/gpu/drm/evdi/LICENSE"
+    },
+    {
+      "source": "kernel",
+      "operation": "copy",
+      "layer": "integration",
+      "path": "patches/extra/drivers/gpu/drm/evdi/Makefile",
+      "sha256": "02740dab341caca12e8cc2ca7adfea21030b7019fcd7fb5d2302eea77285d9a3",
+      "destination": "drivers/gpu/drm/evdi/Makefile"
+    },
+    {
+      "source": "kernel",
+      "operation": "copy",
+      "layer": "integration",
+      "path": "patches/extra/drivers/gpu/drm/evdi/dkms.conf",
+      "sha256": "3a1a2da5ba0aa5195b1d1cc1cce5d304d286f34ca844fc8b78667c3bc5d3abd7",
+      "destination": "drivers/gpu/drm/evdi/dkms.conf"
+    },
+    {
+      "source": "kernel",
+      "operation": "copy",
+      "layer": "integration",
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_connector.c",
+      "sha256": "369d0b969a4fbe808dbf42a93872b86e7086da00fa69c567e71549a6e83da126",
+      "destination": "drivers/gpu/drm/evdi/evdi_connector.c"
+    },
+    {
+      "source": "kernel",
+      "operation": "copy",
+      "layer": "integration",
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_drv.h",
+      "sha256": "e37a9466c7a63621d0fe826d57d8fdd5338349ac81dc206b909d5221826bf442",
+      "destination": "drivers/gpu/drm/evdi/evdi_drv.h"
+    },
+    {
+      "source": "kernel",
+      "operation": "copy",
+      "layer": "integration",
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_event.c",
+      "sha256": "e1d38b7c88a69b5e153e32d2f1afb0623bced9b8749d1cfc0f93187ed706b79f",
+      "destination": "drivers/gpu/drm/evdi/evdi_event.c"
+    },
+    {
+      "source": "kernel",
+      "operation": "copy",
+      "layer": "integration",
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_fb.c",
+      "sha256": "c6d5a4fef50cbcbe2d9da1721400c80f87a2036f912c86c8a770f96a6272af4a",
+      "destination": "drivers/gpu/drm/evdi/evdi_fb.c"
+    },
+    {
+      "source": "kernel",
+      "operation": "copy",
+      "layer": "integration",
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_gem.c",
+      "sha256": "f0d195fd6b608ba859eb6dfc98bc3d755ffa3b65853581ff61ca306bc2371fbc",
+      "destination": "drivers/gpu/drm/evdi/evdi_gem.c"
+    },
+    {
+      "source": "kernel",
+      "operation": "copy",
+      "layer": "integration",
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_ioctl.c",
+      "sha256": "fba817969f57a0a40970fd22ceae9dc91d6db81960d2b76f3ad4714828556c05",
+      "destination": "drivers/gpu/drm/evdi/evdi_ioctl.c"
+    },
+    {
+      "source": "kernel",
+      "operation": "copy",
+      "layer": "integration",
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_lindroid_drv.c",
+      "sha256": "a154b3956ef7a9e2deadde5f8032b2eae3cda0eb713659788e6933ad9aebd8ff",
+      "destination": "drivers/gpu/drm/evdi/evdi_lindroid_drv.c"
+    },
+    {
+      "source": "kernel",
+      "operation": "copy",
+      "layer": "integration",
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_modeset.c",
+      "sha256": "6b9f96f036e7dec019fd980bc3e3d72d17154c89ffd3006cdcd5565a0f33e2da",
+      "destination": "drivers/gpu/drm/evdi/evdi_modeset.c"
+    },
+    {
+      "source": "kernel",
+      "operation": "copy",
+      "layer": "integration",
+      "path": "patches/extra/drivers/gpu/drm/evdi/evdi_sysfs.c",
+      "sha256": "8a1d787f22b00ccd66dbb6fc68a146622db2b4d76fbeb2cf306cc0a23e861dee",
+      "destination": "drivers/gpu/drm/evdi/evdi_sysfs.c"
+    },
+    {
+      "source": "kernel",
+      "operation": "copy",
+      "layer": "integration",
+      "path": "patches/extra/drivers/gpu/drm/evdi/uapi/evdi_drm.h",
+      "sha256": "40cea205c60f4712b3dd5da4ded2d29784a5de9ff7f54f0246043d45c3bf604a",
+      "destination": "drivers/gpu/drm/evdi/uapi/evdi_drm.h"
+    },
+    {
+      "source": "kernel",
+      "operation": "patch",
+      "layer": "integration",
+      "path": "patches/integration/ace6-rekernel-6.6.patch",
+      "sha256": "9384b3efc9a18a0e7e2bcb5f2a938fd20b7482a1cd9e797989b43f093357571f",
+      "destination": ""
+    },
+    {
+      "source": "kernel",
+      "operation": "patch",
+      "layer": "integration",
+      "path": "patches/integration/ace6-rekernel-protocol-6.6.patch",
+      "sha256": "7af3a2463a43425511509aa4354cee0687fc3381d6cc3ae27e39682818a566e1",
+      "destination": ""
+    }
+  ],
+  "resources": {
+    "clang": {
+      "version": "AOSP Clang 21.0.0 r563880c",
+      "url": "https://github.com/GuLingguang/oneplus-sm8750-kernel-pro-build/releases/download/toolchain-AOSP-Clang-21.0.0-r563880c/clang-r563880c.tar.gz",
+      "sha256": "ee099045b1323087e0c1d3962d1d8c582fcdef45986976b82886a6177f142763",
+      "size": 1161295162,
+      "verification": "digest supplied by GitHub Release API; archive not downloaded in M1"
+    },
+    "actions": {
+      "actions/checkout": "11d5960a326750d5838078e36cf38b85af677262",
+      "actions/cache": "caa296126883cff596d87d8935842f9db880ef25",
+      "actions/upload-artifact": "ea165f8d65b6e75b540449e92b4886f43607fa02",
+      "actions/download-artifact": "d3f86a106a0bac45b974a628896c90dbdf5c8093",
+      "actions/github-script": "f28e40c7f34bde8b3046d885e986cb6290c5673b"
+    },
+    "kpm": null,
+    "ksu_identity": {
+      "version_code": 35115,
+      "version_name": "v4.2.0-rc1-9d0ff6ae",
+      "status": "recorded from historical log; deterministic build injection pending T15"
+    }
+  },
+  "blockers": [],
+  "build_environment": {
+    "status": "build-capable-runtime-pending",
+    "limitations": [
+      "EVDI userspace ABI, virtual HCI and systemd-coredump are not device-verified",
+      "Re:Kernel userspace receiver and runtime protocol are not device-verified",
+      "ZRAM writeback backing-device behavior is not device-verified",
+      "Publication is disabled locally; release intent is recorded only",
+      "Byte-identical reproduction is not claimed because build time is resolved at build start"
+    ]
+  },
+  "warnings": [
+    "T11: EVDI module/userspace ABI and virtual HCI/systemd-coredump runtime remain unverified",
+    "T13/T26: Re:Kernel userspace counterpart and runtime protocol remain unverified",
+    "T20/T26: ZRAM writeback requires device backing-device validation"
+  ]
+}

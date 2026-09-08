@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "profile": "ace6-droidspaces-resukisu-extend-6.6",
-  "profile_sha256": "fe2fd58f11261c59498aea444f5afde3e26ff884afc54556d7c29166e061b5c6",
+  "profile_sha256": "b3135769ea7fc4cdce930b71c6b9627c792eae7ad868efa674af606b98acf025",
   "hook_mode": "manual",
   "sources": {
     "kernel": {
@@ -100,7 +100,15 @@
     },
     {
       "path": "scripts/profile.py",
-      "sha256": "32e15ecd448e681bdb121bb82f51dec7662849db888f6134060749adc4b6a75e"
+      "sha256": "832978bcef78e4b086f077f918c8739f679d1caa6b0c1695cf5738c199876752"
+    },
+    {
+      "path": "scripts/build.py",
+      "sha256": "780bef4dbcb60a563c1557364db20b8da8ef185ccc94c996d5b2528f1464b488"
+    },
+    {
+      "path": "manifests/build-features.json",
+      "sha256": "4b7d65d6036e3ede638bcff91d664b3839d285157488ab37b1238f04be02eb67"
     },
     {
       "path": "schemas/config.schema.json",
@@ -112,7 +120,7 @@
     },
     {
       "path": "schemas/lock.schema.json",
-      "sha256": "9cbfa5b1c670a08c6861fbb65140e194eef02b2895288cd30fcc2f46d4228473"
+      "sha256": "1340e074880e38456345d9fbd7fb02d6c7a74f69673a4232b44f7d0e60bd41ef"
     },
     {
       "path": "schemas/manifest.schema.json",

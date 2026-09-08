@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "groups": {
+    "lz4_zstd": {
+      "sources": {
+        "lz4": {
+          "url": "https://github.com/lz4/lz4.git",
+          "commit": "ebb370ca83af193212df4dcbadcc5d87bc0de2f0",
+          "version": "1.10.0"
+        },
+        "zstd": {
+          "url": "https://github.com/facebook/zstd.git",
+          "commit": "f8745da6ff1ad1e7bab384bd1f9d742439278e99",
+          "version": "1.5.7"
+        }
+      },
+      "tree_sha256": "9ddb0bac976d9e8da9e57479e6485597dc8a9ca63a747945aa9ddfe031704f69",
+      "files": [
+        {"path": "patches/extra/lib/lz4/lz4.c", "sha256": "9d9e372346f93ded3c91721b6e9e03b17321d201575b786060195c7d4b5571fe"},
+        {"path": "patches/extra/lib/lz4/lz4.h", "sha256": "e1c89be230d9e49979541e0476a682bf3806617155553248d954b174f78585fd"},
+        {"path": "patches/extra/lib/lz4/lz4hc.c", "sha256": "32fe0fef934c87c95e0f3ef1ce8a3264f766cd77d28f3ba9c944643f647e4106"},
+        {"path": "patches/extra/lib/lz4/lz4hc.h", "sha256": "d047a42cfd9407d65821aaf526d07c3a87920c8aaabc01fcfe1c07a24db50e64"},
+        {"path": "patches/extra/lib/zstd/common/allocations.h", "sha256": "06ae0fa61a2e2af2bf051d51239f4918bfc32ea20bb8bd7d79751604fbedd9dd"},
+        {"path": "patches/extra/lib/zstd/common/bits.h", "sha256": "a297f5c2c467f6b83837c31e926deeffc598f917a2c1aa7dac96efa2c0cec96a"},
+        {"path": "patches/extra/lib/zstd/compress/zstd_preSplit.c", "sha256": "daab8cf059168388fb04146aa554d2ba1df6a6257feebab5e623cda262105739"},
+        {"path": "patches/extra/lib/zstd/compress/zstd_preSplit.h", "sha256": "1076ed8d34be618d13ad749de055c3a2cc89f332924a0b9858fb74e0c4a07f05"},
+        {"path": "patches/split/02_lz4.patch", "sha256": "64653a531858b4214986fcbbfe34487fdb54780b793a188640fb42f5b9727a38"},
+        {"path": "patches/split/03_zstd.patch", "sha256": "bf157b55a1254353d11e410e332ebfb3c0015561abfcbc34eff877f30d1aa40e"}
+      ]
+    },
+    "lz4kd": {
+      "sources": {
+        "sukisu_patch": {
+          "url": "https://github.com/ShirkNeko/SukiSU_patch.git",
+          "commit": "547ae94bcaec53d030398f857950c64662043a5d",
+          "version": "pinned candidate"
+        }
+      },
+      "tree_sha256": "87c8db5427f7ef3856d0dfbdfb72b53dcbc3820c7eb0e380b9babaaf3f3c1708",
+      "files": [
+        {"path": "patches/extra/crypto/lz4k.c", "sha256": "cc4086ea7d77085cc05da00cbd9bdcbfabad07a08a11bddc2a62af35166cb173"},
+        {"path": "patches/extra/crypto/lz4kd.c", "sha256": "d033407caef02e6cbd8c747029dc5b7a6d77ad9a532c5d099eea4ee38f1f99c5"},
+        {"path": "patches/extra/include/linux/lz4k.h", "sha256": "bd7671e721d8da43dcdde69e3ca5ef10d9e56cc921f91ef279420b14756e53b1"},
+        {"path": "patches/extra/include/linux/lz4kd.h", "sha256": "bfae66282c709251ac2cf6d73446c16cc88ccb491afe7155efcd5ae9b2a96c35"},
+        {"path": "patches/extra/lib/lz4k/Makefile", "sha256": "8f3bfb34e294e836c1948b2df6d5797289c9678f92fb92f8019ac2c00e416314"},
+        {"path": "patches/extra/lib/lz4k/lz4k_decode.c", "sha256": "e0742a1afcaeb2fcc5eeea59a872477d174d35abf81c02cabaa0837b6a2481df"},
+        {"path": "patches/extra/lib/lz4k/lz4k_encode.c", "sha256": "b04e2f9945c53c0c461782efd70c41d2cfa5680b80e6f0a76ffe36db37e09f24"},
+        {"path": "patches/extra/lib/lz4k/lz4k_encode_private.h", "sha256": "9cb4b41d089f5dfd71730ad49f3fdc6466c5eb55b4351b940923b2fa3d40a7fb"},
+        {"path": "patches/extra/lib/lz4k/lz4k_private.h", "sha256": "be7d09e6a13ef0fc9f2a8f71248c9e0b5fe55e24ce23e9ddc66f4274fb2d8234"},
+        {"path": "patches/extra/lib/lz4kd/Makefile", "sha256": "1ddc00869e6d6db872f1782789872e3f05bb0aaea14b292ff64228190ed2735f"},
+        {"path": "patches/extra/lib/lz4kd/lz4kd_decode.c", "sha256": "13fb36c502017e6875e939b40ea22b7a7f9a8ec4a38a874675d1561952de569d"},
+        {"path": "patches/extra/lib/lz4kd/lz4kd_decode_delta.c", "sha256": "9ec94c7bcb1477420f0e20d5f13695f02bbf5bac59588631de034805bfdab510"},
+        {"path": "patches/extra/lib/lz4kd/lz4kd_encode.c", "sha256": "d496dbc4c9afb0bce67b1d25464a29123d2ba74e04c8a86bfce130294e676706"},
+        {"path": "patches/extra/lib/lz4kd/lz4kd_encode_delta.c", "sha256": "b6ada89a4a0f8186e656ae4c2cb70371829d2b098f1158f94ff0f8e8e6fbecd0"},
+        {"path": "patches/extra/lib/lz4kd/lz4kd_encode_private.h", "sha256": "1c7a33b74d2cc8e8a06359f10b565958524aad8cbbf16b93ac5a9247e66f1c54"},
+        {"path": "patches/extra/lib/lz4kd/lz4kd_private.h", "sha256": "03864ddf7b811b39d86abb88e403ef0efee5a6c8ffadf3d340ae6ba7ed5e6c34"},
+        {"path": "patches/split/04_lz4kd.patch", "sha256": "a3557fe5b8f3b846f33922ab8a7477b32a8429567988abf74dd65697e580be91"}
+      ]
+    },
+    "baseband_guard": {
+      "sources": {
+        "baseband_guard": {
+          "url": "https://github.com/cctv18/Baseband-guard.git",
+          "commit": "a5b57f15d6b597a1bd157c42330fe80020b1d628",
+          "version": "pinned fork"
+        }
+      },
+      "tree_sha256": "183beb1b3537810a8093ee5df11198e9a860b882e1176c50d79314456a360088",
+      "files": [
+        {"path": "patches/extra/Baseband-guard/Kconfig", "sha256": "2407b95f428a1ed4f7737fa5a39d57304598435c097ec2308ed429f0cdf04a98"},
+        {"path": "patches/extra/Baseband-guard/LICENSE", "sha256": "edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6"},
+        {"path": "patches/extra/Baseband-guard/Makefile", "sha256": "77d16360517492884ff0694a2b9ccb28af6f6179e8a90979c06290bd144ee642"},
+        {"path": "patches/extra/Baseband-guard/baseband_guard.c", "sha256": "4b3eeaec356453388d4b98ff601782166773f16d1de85dec448f947a0808ed5f"},
+        {"path": "patches/extra/Baseband-guard/baseband_guard.h", "sha256": "2276db961f43c1a88cb66a0b9f33200f7542fbacc45dd98a25be2d20da7902eb"},
+        {"path": "patches/extra/Baseband-guard/docs/README-en.md", "sha256": "a07a15202c89179072684be3bba86e7bc6da468c2d41e74ace4756ee8f005f6d"},
+        {"path": "patches/extra/Baseband-guard/docs/README.md", "sha256": "4e6df14cf023be7acd75d9b53d3c3098a968e7a29fe6b5f571d3f410c0d56c1b"},
+        {"path": "patches/extra/Baseband-guard/kernel_compat.h", "sha256": "2588fa5814029907f759e4de2261bf3d104679ce25c9265f957456e928110b43"},
+        {"path": "patches/extra/Baseband-guard/sepatch.txt", "sha256": "596edb3e1e76b252077891533936c5c29dd713490d656d229bc7037952641f69"},
+        {"path": "patches/extra/Baseband-guard/setup.sh", "sha256": "efeb4cbeeba59fc6207657a3834fe9850abe9741ac7080f299c8d5fe552bec57"},
+        {"path": "patches/extra/Baseband-guard/tracing/Makefile", "sha256": "9da4290e300c49fd8900d7e515e1eb753aaaba6218e3ec0920c22503d9854ff4"},
+        {"path": "patches/extra/Baseband-guard/tracing/kernel_compat.h", "sha256": "0d1d2d32c2b2d3ed989c4bfb2bbb5b2179b749dec5d870698fe4ade4d3a99b12"},
+        {"path": "patches/extra/Baseband-guard/tracing/tracing.c", "sha256": "92ff295a4f6cb2b79e5ea9b08dd53d4ae4f216d90eba1303c2c75a13816b20e8"},
+        {"path": "patches/extra/Baseband-guard/tracing/tracing.h", "sha256": "171c535b3a20fa8fd73c57c5d939c583239f558fe36fea95238e772d55af1373"},
+        {"path": "patches/split/06_baseband_guard.patch", "sha256": "b61304c1f8c377b299380b6d99ee9d08f892d84b7a0f0e93e3ad72f1bbed9692"}
+      ]
+    }
+  }
+}
