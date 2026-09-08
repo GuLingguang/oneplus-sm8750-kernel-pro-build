@@ -1,0 +1,25 @@
+diff --git a/drivers/gpu/drm/Kconfig b/drivers/gpu/drm/Kconfig
+index a2b4c97bc..e6f8057e4 100644
+--- a/drivers/gpu/drm/Kconfig
++++ b/drivers/gpu/drm/Kconfig
+@@ -265,6 +265,8 @@ source "drivers/gpu/drm/radeon/Kconfig"
+ 
+ source "drivers/gpu/drm/amd/amdgpu/Kconfig"
+ 
++source "drivers/gpu/drm/evdi/Kconfig"
++
+ source "drivers/gpu/drm/nouveau/Kconfig"
+ 
+ source "drivers/gpu/drm/i915/Kconfig"
+diff --git a/drivers/gpu/drm/Makefile b/drivers/gpu/drm/Makefile
+index 215e78e79..1fe05a615 100644
+--- a/drivers/gpu/drm/Makefile
++++ b/drivers/gpu/drm/Makefile
+@@ -139,6 +139,7 @@ obj-$(CONFIG_DRM_MIPI_DBI) += drm_mipi_dbi.o
+ obj-$(CONFIG_DRM_MIPI_DSI) += drm_mipi_dsi.o
+ obj-y			+= arm/
+ obj-y			+= display/
++obj-$(CONFIG_DRM_LINDROID_EVDI)+= evdi/
+ obj-$(CONFIG_DRM_TTM)	+= ttm/
+ obj-$(CONFIG_DRM_SCHED)	+= scheduler/
+ obj-$(CONFIG_DRM_RADEON)+= radeon/

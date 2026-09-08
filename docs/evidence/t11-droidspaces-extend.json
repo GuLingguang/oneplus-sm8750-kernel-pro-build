@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "task": "T11",
+  "status": {
+    "code": "blocked",
+    "contract": "static-partial",
+    "build": "evdi-object-only",
+    "runtime": "not-tested",
+    "release_allowed": false
+  },
+  "profiles": {
+    "extend": {
+      "name": "ace6-droidspaces-extend-6.6",
+      "base": "ace6-droidspaces-standard-6.6",
+      "hook_mode": "none",
+      "susfs": false,
+      "status": "blocked"
+    },
+    "resukisu_extend": {
+      "name": "ace6-droidspaces-resukisu-extend-6.6",
+      "base": "ace6-droidspaces-resukisu-standard-6.6",
+      "hook_mode": "manual",
+      "susfs": false,
+      "status": "blocked"
+    }
+  },
+  "inheritance": {
+    "status": "passed",
+    "checks": [
+      "base capabilities are retained",
+      "all base features except droidspaces are retained",
+      "droidspaces changes from standard to extend",
+      "SUSFS remains disabled"
+    ],
+    "unit_tests_after_t11": "19/19"
+  },
+  "locked_kernel": {
+    "commit": "cb967c26c2c5689108fa28d3c3be2aba6ba71f5f",
+    "modules_commit": "7d5d39a539ddc2b53054e8fa7ae2b5890dccae54",
+    "devicetrees_commit": "ebb25e3526ad84cc5a1090a5a9242f33ff087bf2"
+  },
+  "evdi_source_candidate": {
+    "repository": "https://github.com/Linux-on-droid/lindroid-drm-loopback.git",
+    "commit": "f15bc3ee6e9a90e85e70ef3da057f027c68cbefd",
+    "tree": "e6fa7935a0bbd44f27ccf41e0cf6b2f18feca568",
+    "local_files_compared": 14,
+    "all_local_files_match": true,
+    "operational_extend_lock": false,
+    "reason_not_operational": "userspace ABI and full module/runtime contract are not validated"
+  },
+  "isolated_build": {
+    "config_symbol": "CONFIG_DRM_LINDROID_EVDI=m",
+    "target": "drivers/gpu/drm/evdi/evdi.o",
+    "arch": "arm64",
+    "llvm": true,
+    "status": "passed",
+    "object_sha256": "33c6d03ffa625b963682d8f9d45ec90d8a7f8cd6d6f3c92d2e7b14f2f2d27d1e",
+    "config_sha256": "95d0d7a8540f61c36a9eebe229d47a78571dae4cfad6ebd87adcaf2f51ca639b",
+    "full_kernel": false,
+    "module_link": "blocked: target Module.symvers absent",
+    "runtime": false
+  },
+  "userspace_candidates": {
+    "vendor_lindroid": {
+      "repository": "https://github.com/Linux-on-droid/vendor_lindroid.git",
+      "reference": "lindroid-22.1",
+      "commit": "eadbb70f13209133d96a5355464388db8c6578de",
+      "tree": "8086c1bc0f494813e9f43a6de84ff51c292ec874"
+    },
+    "vendor_extra": {
+      "repository": "https://github.com/Linux-on-droid/vendor_extra.git",
+      "reference": "lindroid-21",
+      "commit": "39da805f20765a245f93f2d4ab6227ba40e1ce35",
+      "tree": "72cbd89e8430ae4845ee1f06205b6cae37a8db03"
+    },
+    "libhybris": {
+      "repository": "https://github.com/Linux-on-droid/libhybris.git",
+      "reference": "lindroid-21",
+      "commit": "29e0fa6da0166261f6b9437582fe2d56bab8530c",
+      "tree": "d24da11be46e70ae6b3a0be34330627c0ba9439f"
+    },
+    "external_lxc": {
+      "repository": "https://github.com/Linux-on-droid/external_lxc.git",
+      "reference": "lindroid-21",
+      "commit": "4e3a3630fff3dc04e0d4a761309f87f248e40b17",
+      "tree": "0e28330902f85c59aced222deb3dada4a555dcf2"
+    },
+    "create_disp": {
+      "repository": "https://github.com/Linux-on-droid/create-disp.git",
+      "reference": "master",
+      "commit": "46c1d0414b3acb28b5902a2cb16b5ee40c1898ce",
+      "tree": "4dff4c8f8d128f6a994b33b4c9b8a07f4a50b18a"
+    },
+    "acceptance": "candidate snapshots only; no Ace6 ROM/framework/rootfs lock"
+  },
+  "uapi_audit": {
+    "kernel_evdi_defines_set_power_mode": false,
+    "userspace_create_disp_defines_set_power_mode": true,
+    "userspace_create_disp_calls_set_power_mode": true,
+    "ioctl_number": "0x0f",
+    "condition": "ifndef TARGET_USES_REAL_HWC",
+    "result": "mismatch"
+  },
+  "dependencies": {
+    "virtual_hci": {
+      "status": "unverified",
+      "evidence": "vendor_lindroid requests VIRTUAL_INPUT_DEVICE and creates uinput devices"
+    },
+    "systemd_coredump": {
+      "status": "not-locked",
+      "required_contract": "systemd version, coredump service/socket, rootfs and kernel.core_pattern"
+    },
+    "device_rom_display_pipeline": "unverified"
+  },
+  "real_device": {
+    "needed_now": false,
+    "reason": "static ABI mismatch must be resolved before device testing",
+    "later_required_checks": [
+      "EVDI card create/destroy and DPMS",
+      "display resolution/frame delivery",
+      "virtual keyboard/touch/mouse input",
+      "container start/stop/network/exit recovery",
+      "coredump capture and restart recovery"
+    ]
+  },
+  "artifacts": []
+}
