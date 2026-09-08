@@ -1,6 +1,6 @@
-# SUSFS Inline contract for Ace6 6.6
+# SUSFS Inline rules for Ace6 6.6
 
-This document records the source-level contract used by profile
+This document records the source-level rules used by profile
 `ace6-resukisu-susfs-inline-6.6`. It covers the locked source preparation
 stage. Kernel compilation, boot images, and runtime mount hiding remain later
 tasks (T25/T26).
@@ -24,7 +24,7 @@ profile.
 
 ## Interface and data-flow table
 
-| Layer and location | Contract / type | Producer, consumer, and ownership rule |
+| Layer and location | Type or setting | Producer, consumer, and ownership rule |
 | --- | --- | --- |
 | `include/linux/susfs_def.h` | Defines `TIF_PROC_UMOUNTED=33`, `TIF_PROC_NO_SU=34`, and `TIF_PROC_UMOUNTED_FOR_ZYGOTE_NEXT=35`, with inline test/set/clear helpers. | The helpers operate on the current task's thread flags and are shared by ReSukiSU and patched VFS code. |
 | ReSukiSU `kernel/hook/setuid_hook.c::handle_zygote_next_setresuid` | Sets `no_su`, `umounted`, and `umounted_for_zygote_next` for isolated processes, eligible app UIDs, and the configured webview zygote path. | This is the producer of the per-process state; the hook keeps the existing conditional webview behavior and then enters the SUSFS work path. |

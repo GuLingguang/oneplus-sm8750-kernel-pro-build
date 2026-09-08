@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "task": "T10",
+  "status": {
+    "code": "disabled",
+    "contract": "rejected",
+    "build": "kernel-pid-object-only",
+    "runtime": "not-tested",
+    "release_allowed": false
+  },
+  "decision": {
+    "action": "deactivate",
+    "reason": "No locked-source/vendor correlation or reproducible fault evidence; the workaround returns a fabricated task_struct from a globally shared PID lookup.",
+    "profile_effect": "ghost_task=true remains blocked before source preparation",
+    "generic_container_claim": false
+  },
+  "locked_sources": {
+    "kernel": {
+      "commit": "cb967c26c2c5689108fa28d3c3be2aba6ba71f5f",
+      "ghost_task_symbol_found": false,
+      "oplus_bsp_midas_found": false
+    },
+    "modules": {
+      "commit": "7d5d39a539ddc2b53054e8fa7ae2b5890dccae54",
+      "ghost_task_symbol_found": false,
+      "oplus_bsp_midas_found": false
+    },
+    "devicetrees": {
+      "commit": "ebb25e3526ad84cc5a1090a5a9242f33ff087bf2"
+    }
+  },
+  "candidate": {
+    "path": "patches/split/05_droidspaces.patch",
+    "sha256": "ddf0aff68fa4e10cc405812b3191960b29a2c99c278a3c975f77e44ca25935eb",
+    "applied_path_only": "kernel/pid.c",
+    "unconditional_kconfig_gate": false,
+    "global_lookup_hook": "find_task_by_vpid",
+    "module_name_filter": "oplus_bsp_midas",
+    "fallback_before_init": "&init_task"
+  },
+  "source_and_fault_evidence": {
+    "original_fault_trace_found": false,
+    "device_rom_scope_found": false,
+    "search_scope": "repository plus exact locked kernel/modules/devicetree source trees"
+  },
+  "semantic_audit": {
+    "find_task_by_vpid_files_including_definition": 16,
+    "non_definition_consumers": 15,
+    "consumer_files": [
+      "drivers/soc/qcom/mpam/cpu_mpam.c",
+      "kernel/capability.c",
+      "kernel/cgroup/cgroup.c",
+      "kernel/events/core.c",
+      "kernel/futex/syscalls.c",
+      "kernel/kcmp.c",
+      "kernel/msm_sysstats.c",
+      "kernel/sched/core.c",
+      "kernel/sched/core_sched.c",
+      "kernel/signal.c",
+      "kernel/sys.c",
+      "kernel/taskstats.c",
+      "kernel/trace/trace_output.c",
+      "net/core/net_namespace.c",
+      "security/tomoyo/common.c"
+    ],
+    "critical_invariants": [
+      "real PID/RCU lifetime",
+      "task reference ownership",
+      "task-list and PID linkage",
+      "signal/sighand/mm/files/fs/nsproxy state"
+    ],
+    "critical_consumer_examples": [
+      "kernel/futex/syscalls.c: get_task_struct and signal/robust-list access",
+      "kernel/kcmp.c: signal lock and put_task_struct",
+      "net/core/net_namespace.c: task_lock and nsproxy access"
+    ]
+  },
+  "isolated_build": {
+    "status": "passed",
+    "scope": "kernel/pid.o only",
+    "arch": "arm64",
+    "llvm": true,
+    "output": "/tmp/ace6-t09-out/kernel/pid.o",
+    "sha256": "9eca08c6d0853e9e079d88eccda92249460a59e4e16b93fb9e4b3244efaba6c6",
+    "symbols_observed": [
+      "ghost_task",
+      "init_ghost_task",
+      "find_task_by_vpid"
+    ],
+    "full_kernel": false,
+    "runtime": false
+  },
+  "preflight": {
+    "ghost_task_true": {
+      "prepare_allowed": false,
+      "blocker": "ghost_task: integration/configuration contract pending T10"
+    }
+  },
+  "artifacts": []
+}

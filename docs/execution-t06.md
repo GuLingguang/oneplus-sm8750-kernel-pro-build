@@ -1,7 +1,7 @@
 # Ace6 T06 执行记录：SUSFS Inline 6.6
 
 日期：2026-09-05。此记录承接 `docs/execution-m1.md` 的 T01–T05
-框架结果，范围只到 SUSFS Inline 的锁定源树准备和静态契约核验。
+框架结果，范围只到 SUSFS Inline 的锁定源树准备和静态接口核验。
 
 ## 结果
 
@@ -38,7 +38,7 @@
 可能漂移的 adapter。官方 `KernelSU/10_enable_susfs_for_ksu.patch` 和旧的
 `02_ksu.patch` 都没有进入此 profile。
 
-## 契约核验
+## 接口核验
 
 - `fs/open.c::do_faccessat` 使用 `getname_flags()` 得到
   `struct filename *`，将 `&fname` 传给 `ksu_handle_faccessat`，再执行
@@ -70,6 +70,6 @@
   `runtime_status=not-tested`。
 
 完整 hash、准备树 ID、步骤日志和静态断言见
-`docs/evidence/t06-susfs-inline-preparation.json`；契约表见
-`docs/susfs-inline-contract.md`。本阶段没有生成、发布或宣称可刷入的内核
+`docs/evidence/t06-susfs-inline-preparation.json`；接口说明见
+`docs/susfs-inline-rules.md`。本阶段没有生成、发布或宣称可刷入的内核
 产物。

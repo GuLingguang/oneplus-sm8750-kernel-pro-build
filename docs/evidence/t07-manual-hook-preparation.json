@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "task": "T07",
+  "profile": "ace6-resukisu-manual-6.6",
+  "profile_status_at_evidence": {
+    "code": "source-ready",
+    "contract": "static-verified",
+    "build": "not-tested",
+    "runtime": "not-tested",
+    "release_allowed": false
+  },
+  "lock_id": "58dba9148352d94a18b6c282ec2d63f88c5276fabf38584a6391dc90dfc20dc9",
+  "manifest_id": "ec37996612f59d96219d2c10b84cdbacb0903b44a6ca682952f1c8f489406764",
+  "transport": {
+    "source_identity": "official locked repository URLs in the lock",
+    "fetch_mirror_used": "https://v4.gh-proxy.org/",
+    "mirror_changes_source_identity": false
+  },
+  "locked_sources": {
+    "kernel": {
+      "commit": "cb967c26c2c5689108fa28d3c3be2aba6ba71f5f",
+      "tree": "774dea2b01bf6e8ea22ef5b4ae3fce66236edd77",
+      "prepared_tree": "2e24e32ca7736bd791b08e56a62cc0e23d0039b1"
+    },
+    "modules": {
+      "commit": "7d5d39a539ddc2b53054e8fa7ae2b5890dccae54",
+      "tree": "6b84b5d6c9903bbac416688f92f511807a0a0f46",
+      "prepared_tree": "6b84b5d6c9903bbac416688f92f511807a0a0f46"
+    },
+    "devicetrees": {
+      "commit": "ebb25e3526ad84cc5a1090a5a9242f33ff087bf2",
+      "tree": "1a25439eec3ba89a9cf62e7625684f9f95597555",
+      "prepared_tree": "1a25439eec3ba89a9cf62e7625684f9f95555"
+    },
+    "resukisu": {
+      "commit": "9d0ff6aea9e25fc7dd26f4643175a41f68375e5e",
+      "tree": "9cdadcc8d9daf21adb10d83355b58a3ee837f031",
+      "prepared_tree": "9cdadcc8d9daf21adb10d83355b58a3ee837f031"
+    }
+  },
+  "steps": [
+    {
+      "index": 0,
+      "path": "patches/split/07_compile_fixes.patch",
+      "sha256": "ff1c7105e78fdfe652186c3c0c8c32494691e70b8671cdab51424706398b2b01",
+      "status": "applied"
+    },
+    {
+      "index": 1,
+      "path": "patches/integration/resukisu-kernel.link",
+      "sha256": "8685d7d98ad07743a384b996825c31039adbf424fb2f8e7ff3f12eb3fb329798",
+      "status": "applied",
+      "target": "resukisu:kernel"
+    },
+    {
+      "index": 2,
+      "path": "patches/integration/ace6-resukisu-drivers.patch",
+      "sha256": "fafaa2cc5a3ebef40f7243308aa76e1eaf3599f6435e360badd6f883c4fa296c",
+      "status": "applied"
+    },
+    {
+      "index": 3,
+      "path": "patches/integration/ace6-resukisu-manual-6.6.patch",
+      "sha256": "ee32a44d40dce64a8015d463aa5307ca51f740d4a6f0c0cae4f742d43627fea5",
+      "status": "applied"
+    }
+  ],
+  "contract": {
+    "cumulative_git_apply_check": "passed",
+    "prepared_tree_git_diff_check": "passed",
+    "manual_hook_checker": {
+      "source": "ReSukiSU/kernel/tools/manual_hook_check.mk",
+      "kernel_version": "6.6",
+      "automatic_option_combinations_tested": 8,
+      "passed": 8
+    },
+    "static_export_checker": {
+      "source": "ReSukiSU/kernel/tools/static_export_check.mk",
+      "required_6_6_exports": [
+        "write_op",
+        "sel_handle_status_ops",
+        "security_dump_masked_av",
+        "context_struct_compute_av"
+      ],
+      "passed": 4
+    },
+    "incompatible_markers": "not-found"
+  },
+  "build": "not-run",
+  "runtime": "not-tested",
+  "artifacts": []
+}
