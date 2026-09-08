@@ -1,0 +1,177 @@
+{
+  "schema_version": 1,
+  "task": "T14",
+  "status": {
+    "code": "static-complete",
+    "contract": "source-and-config-verified",
+    "build": "object-only",
+    "runtime": "not-tested",
+    "release_allowed": false
+  },
+  "sources": {
+    "kernel": {
+      "url": "https://github.com/Ace6-Development/android_kernel_oneplus_sm8750.git",
+      "commit": "cb967c26c2c5689108fa28d3c3be2aba6ba71f5f",
+      "clean": true
+    },
+    "lz4": {
+      "url": "https://github.com/lz4/lz4.git",
+      "tag": "v1.10.0",
+      "commit": "ebb370ca83af193212df4dcbadcc5d87bc0de2f0",
+      "clean": true
+    },
+    "zstd": {
+      "url": "https://github.com/facebook/zstd.git",
+      "tag": "v1.5.7",
+      "commit": "f8745da6ff1ad1e7bab384bd1f9d742439278e99",
+      "clean": true
+    },
+    "lz4kd": {
+      "url": "https://github.com/ShirkNeko/SukiSU_patch.git",
+      "commit": "547ae94bcaec53d030398f857950c64662043a5d",
+      "clean": true,
+      "candidate_origin": true
+    }
+  },
+  "patches": {
+    "patches/split/02_lz4.patch": {
+      "sha256": "64653a531858b4214986fcbbfe34487fdb54780b793a188640fb42f5b9727a38",
+      "line_count": 2711,
+      "diff_file_count": 10,
+      "version": "LZ4 1.10.0",
+      "requires_before": "patches/split/07_compile_fixes.patch"
+    },
+    "patches/split/03_zstd.patch": {
+      "sha256": "bf157b55a1254353d11e410e332ebfb3c0015561abfcbc34eff877f30d1aa40e",
+      "line_count": 23004,
+      "diff_file_count": 57,
+      "version": "zstd 1.5.7"
+    },
+    "patches/split/04_lz4kd.patch": {
+      "sha256": "a3557fe5b8f3b846f33922ab8a7477b32a8429567988abf74dd65697e580be91",
+      "line_count": 214,
+      "diff_file_count": 5,
+      "version": "LZ4K/LZ4KD 6.6 integration"
+    }
+  },
+  "source_comparison": {
+    "lz4_upstream_files_exact": 0,
+    "lz4_upstream_files_compared": 4,
+    "zstd_extra_files_exact": 0,
+    "zstd_extra_files_compared": 4,
+    "lz4kd_extra_files_exact": 16,
+    "lz4kd_extra_files_compared": 16,
+    "note": "LZ4/zstd files are kernel adaptations; LZ4KD extra files match the pinned candidate exactly."
+  },
+  "configuration": {
+    "matrix": {
+      "base-off": {
+        "config_sha256": "d0648e1ef7a6015c7acc45b0e75d8ec2440ee4ed0cbfa03ab0d2f6ff67f92b83",
+        "default_compressor": "lzo-rle",
+        "bbr": false,
+        "better_net": false,
+        "writeback": false,
+        "lz4hc": false,
+        "842": false
+      },
+      "base-all": {
+        "config_sha256": "192891b84217a01fb55151656548e29b1e7caaeec3917c377f9bcd3741ce7808",
+        "default_compressor": "lzo-rle",
+        "bbr": true,
+        "better_net": true,
+        "writeback": true,
+        "lz4hc": true,
+        "842": true
+      },
+      "patched-off": {
+        "config_sha256": "e3289738ecbe0f376b2f9fa5ee70c2fc80e23c7eb64ef0edbbe203293eee7cfb",
+        "default_compressor": "lzo-rle",
+        "bbr": false,
+        "better_net": false,
+        "writeback": false,
+        "lz4hc": false,
+        "842": false
+      },
+      "patched-kd": {
+        "config_sha256": "70908f8e3c062b2326608cc686bb2a2355291fa6aea493b9cbee2cab6c2f980c",
+        "default_compressor": "lz4kd",
+        "bbr": false,
+        "better_net": false,
+        "writeback": false,
+        "lz4hc": false,
+        "842": false
+      },
+      "patched-all": {
+        "config_sha256": "d42a23674db7eb328ec6c2cb4aaddbd2a0099038b803bfaab75cd354c664eba3",
+        "default_compressor": "lz4kd",
+        "bbr": true,
+        "better_net": true,
+        "writeback": true,
+        "lz4hc": true,
+        "842": true
+      }
+    },
+    "disabled_symbols": [
+      "CONFIG_TCP_CONG_BBR",
+      "CONFIG_DEFAULT_BBR",
+      "CONFIG_IP_SET",
+      "CONFIG_BPF_STREAM_PARSER",
+      "CONFIG_IP6_NF_NAT",
+      "CONFIG_ZRAM_WRITEBACK",
+      "CONFIG_ZRAM_MEMORY_TRACKING",
+      "CONFIG_ZRAM_TRACK_ENTRY_ACTIME",
+      "CONFIG_CRYPTO_LZ4HC",
+      "CONFIG_CRYPTO_842"
+    ],
+    "lz4kd_false_symbols": [
+      "CONFIG_CRYPTO_LZ4K",
+      "CONFIG_CRYPTO_LZ4KD",
+      "CONFIG_LZ4K_COMPRESS",
+      "CONFIG_LZ4K_DECOMPRESS",
+      "CONFIG_LZ4KD_COMPRESS",
+      "CONFIG_LZ4KD_DECOMPRESS"
+    ],
+    "registration_names": [
+      "lzo",
+      "lzo-rle",
+      "lz4",
+      "lz4hc",
+      "lz4k",
+      "lz4kd",
+      "deflate",
+      "842",
+      "zstd"
+    ]
+  },
+  "objects": {
+    "crypto/lz4.o": "6ecec0d9937c81a5decfcf84f259f620101880363a0e51ffdd70f0444f3397a0",
+    "crypto/lz4hc.o": "cfd2b61d932b5b8e1b3009f4f2a7cbcb45670588b9ffea7f5866d8dab3948c7e",
+    "crypto/lz4k.o": "8f1aa2e4ba2be954f2818cee822c0c374a48057af281bcbb0f699550638116d8",
+    "crypto/lz4kd.o": "e984bac8f61248e5a3445adace5a6239b76b57daab32fd2f5e89e5c46be84b2c",
+    "crypto/zstd.o": "5f7bfa23eaa0c153d041f26031dcf951c388c2dfe395e8db9c424818dbc83ae0",
+    "drivers/block/zram/zcomp.o": "922c4be050190b5c9462e1d65e4f5ec9643e0f0cd36c5789def7bca108e6de45",
+    "lib/lz4/lz4.o": "314f2459d91b5a5b1ebe930b566eeb46048d9e832d387a9f676a9eed929e39d8",
+    "lib/lz4/lz4hc.o": "78d0f6133f57ac8789603f9e90ab38823ee6d2cdeeefc043916be472a22bf1af",
+    "lib/lz4k/lz4k_encode.o": "dad286c8bd0129e3c8707e074ad61f5d3ade883d12243b79207a9f29629eef12",
+    "lib/lz4k/lz4k_decode.o": "5c80591ed1913aae6a51ddb6fee588d8e9a3f8b40614249dc9546ed43ab396f1",
+    "lib/lz4kd/lz4kd_encode.o": "1b6e4c0bebbf25194a9c0deb5322dbd99cb927f330b742fedb69bda8268471d5",
+    "lib/lz4kd/lz4kd_decode.o": "dade085c8b4814552c424770ea1403098e7a3f7975970df3846bb11758fde001",
+    "lib/zstd/zstd_compress_module.o": "d7a1fc01671f14dfe8c65a5f2856226ac19559b5cbc8381a8b23342912727f15",
+    "lib/zstd/zstd_decompress_module.o": "3f7aea339a5e274555500fb16a0ad3ff7d10977be38b51e1836c2c89e113e37b"
+  },
+  "validation": {
+    "cumulative_patch_order": [
+      "07_compile_fixes.patch",
+      "02_lz4.patch",
+      "03_zstd.patch",
+      "04_lz4kd.patch"
+    ],
+    "olddefconfig": true,
+    "representative_object_build": true,
+    "full_kernel_link": false,
+    "runtime_crypto_roundtrip": false,
+    "real_device": false,
+    "release_allowed": false,
+    "next_gate": "T15/T25/T26"
+  }
+}
