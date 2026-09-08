@@ -1,6 +1,11 @@
 # Legacy interface mapping
 
-The old workflow and reproduce.sh remain available. M1 supplies the following shared input adapter; final .config, naming and packaging behavior is migrated in T14–T18. Defaults below are normalizer defaults; an explicit profile supplies its own core feature defaults.
+The workflow and `reproduce.sh` remain available as adapters around the shared
+`scripts/build.py` entry. M1 supplies the input adapter; T14/T15 own the final
+configuration, source preparation, Image verification and current package path.
+Naming and the artifact/release details are recorded in T18, T25, T26, and T27.
+Defaults below are normalizer defaults; an explicit profile supplies its own
+core feature defaults.
 
 | Canonical input | Layer | Default | Actions aliases | Local feature/identity flag |
 | --- | --- | --- | --- | --- |
@@ -36,10 +41,10 @@ The old workflow and reproduce.sh remain available. M1 supplies the following sh
 | --- | --- |
 | `--out`, `OUT_DIR`, `--clean`, `WORK_DIR` | Legacy execution controls remain; new preparer uses a fresh `--work` and never deletes an existing tree |
 | `REPO_BASE` | Legacy download-origin control remains; new preparer requires explicit locked source URLs |
-| `KERNEL_SRC` | New preparer accepts a clean exact-HEAD provider and clones it; legacy reproduce still mutates in place until T15 |
-| azram-backing | Separate KSU module retained; device/partition checks pending T20 |
-| tcp-config / WebUI | Separate module retained; permission boundary and clean build pending T19 |
-| selinux_perf | Separate module retained; rule/effect review pending T21 |
-| AK3 / Image / boot.img / all | Output intent retained, actual output contract pending T18; no M1 kernel output |
+| `KERNEL_SRC` | Common preparer/build entry accepts a clean exact-HEAD provider and clones it into a fresh workspace; the provider is never mutated |
+| azram-backing | Separate KSU module retained; on the main profile it binds `/dev/block/sda13` to zram's writable `backing_dev` only; Scene still owns size/algorithm/swapon and ZramWritebackBoost owns scheduling |
+| tcp-config / WebUI | Separate module retained; unauthenticated TCP fallback removed, v1.1 boot/UI/direct-apply checks passed; the display-only follow-up remains local |
+| selinux_perf | Separate module retained; narrow rule reviewed in T21; controlled disable/enable comparison passed with no matching AVC delta |
+| AK3 / Image / boot.img / all | T18 allows AK3 candidates and local raw Image output; boot.img/all remain blocked without target boot inputs |
 | Release and public ccache updates | Inputs retained; no publication in the new entry; debug cannot request either |
 | GhostLock/CVE compatibility switch | Explicit no-op note, no nonexistent 08 patch |
