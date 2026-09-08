@@ -16,6 +16,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import signal
 import subprocess
 import sys
 
@@ -48,17 +49,46 @@ def hash_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _stop_process_group(process):
+    if os.name == "posix":
+        try:
+            os.killpg(process.pid, signal.SIGTERM)
+        except ProcessLookupError:
+            process.wait()
+            return
+        try:
+            process.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            pass
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+    else:
+        process.kill()
+    process.wait()
+
+
 def run_command(argv, cwd=None, env=None, capture=False, timeout=None):
     command = [str(item) for item in argv]
-    result = subprocess.run(
+    options = {
+        "cwd": str(cwd) if cwd else None,
+        "env": env,
+        "text": True,
+        "start_new_session": os.name == "posix",
+    }
+    if capture:
+        options.update(stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process = subprocess.Popen(
         command,
-        cwd=str(cwd) if cwd else None,
-        env=env,
-        text=True,
-        capture_output=capture,
-        timeout=timeout,
-        check=False,
+        **options,
     )
+    try:
+        stdout, stderr = process.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired as exc:
+        _stop_process_group(process)
+        raise BuildError(f"{command[0]} timed out after {timeout}s") from exc
+    result = subprocess.CompletedProcess(command, process.returncode, stdout, stderr)
     if result.returncode:
         detail = ((result.stderr or "") + (result.stdout or ""))[-6000:]
         raise BuildError(f"{command[0]} failed ({result.returncode}): {detail}")
@@ -673,6 +703,18 @@ def build_path(value, default):
     return path.expanduser() if path.is_absolute() else (ROOT / path).resolve()
 
 
+def build_timeout_seconds():
+    value = os.environ.get("ACE6_BUILD_TIMEOUT_SECONDS", "")
+    if not value:
+        return None
+    try:
+        timeout = int(value)
+    except ValueError as exc:
+        raise BuildError("ACE6_BUILD_TIMEOUT_SECONDS must be a positive integer") from exc
+    require(timeout > 0, "ACE6_BUILD_TIMEOUT_SECONDS must be a positive integer")
+    return timeout
+
+
 def build(args):
     config, selected, lock, report = resolve(args)
     feature_lock = validate_feature_lock(config)
@@ -741,8 +783,10 @@ def build(args):
             debug_dir = work / "_tmp"
             debug_dir.mkdir(parents=True, exist_ok=True)
             env.setdefault("CCACHE_LOGFILE", str(debug_dir / "ccache.log"))
-        print(f"building Image with {jobs} jobs")
-        run_command(make, cwd=kernel, env=env)
+        timeout = build_timeout_seconds()
+        timeout_note = f"; timeout={timeout}s" if timeout else ""
+        print(f"building Image with {jobs} jobs{timeout_note}")
+        run_command(make, cwd=kernel, env=env, timeout=timeout)
         build_status = "built"
     image_record = verify_image(kernel) if build_status == "built" else {
         "path": "arch/arm64/boot/Image", "sha256": hash_file(kernel / "arch/arm64/boot/Image"),

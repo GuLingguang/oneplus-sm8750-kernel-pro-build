@@ -132,7 +132,7 @@
     },
     {
       "path": "scripts/build.py",
-      "sha256": "12776c69481269652c70d350f03302b42337df2389a2b447b972140b7af7852b"
+      "sha256": "dbbd8ec1fc6f8e1c1aeef9abb614b883c16078aa8ccb3665cf597471a3dd8924"
     },
     {
       "path": "manifests/build-features.json",
