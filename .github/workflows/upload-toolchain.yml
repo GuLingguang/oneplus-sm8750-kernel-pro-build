@@ -19,8 +19,9 @@ jobs:
           git sparse-checkout set clang-r563880c
           cd ..
           # package the toolchain
-          tar czf clang-r563880c.tar.gz -C clang-prebuilts/clang-r563880c .
-          ls -lh clang-r563880c.tar.gz
+          mkdir -p work/_tmp
+          tar czf work/_tmp/clang-r563880c.tar.gz -C clang-prebuilts/clang-r563880c .
+          ls -lh work/_tmp/clang-r563880c.tar.gz
 
       - name: Create Release
         env:
@@ -47,4 +48,4 @@ jobs:
           MD
           gh release create "toolchain-AOSP-Clang-21.0.0-r563880c" \
             --notes-file notes.md \
-            clang-r563880c.tar.gz
+            work/_tmp/clang-r563880c.tar.gz
