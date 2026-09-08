@@ -114,17 +114,23 @@ function setLang(l) {
 document.getElementById('lang').onclick = function () { setLang(lang === 'zh' ? 'en' : 'zh'); };
 
 async function load() {
-  const s = await TCPC.getStatus();
-  document.getElementById('cur_algo').textContent = s.algo;
-  document.getElementById('cur_qdisc').textContent = s.qdisc;
-  const dflt = document.getElementById('dflt_algo');
-  dflt.textContent = s.dflt + (s.dflt === s.algo ? I18N[lang].m_dflt_note : '');
-  // restore the last saved selection (radio + qdisc), if any
-  if (s.state_algo) {
-    const radio = document.querySelector('input[name=algo][value="' + s.state_algo + '"]');
-    if (radio) radio.checked = true;
+  try {
+    const s = await TCPC.getStatus();
+    document.getElementById('cur_algo').textContent = s.algo;
+    document.getElementById('cur_qdisc').textContent = s.qdisc;
+    const dflt = document.getElementById('dflt_algo');
+    dflt.textContent = s.dflt + (s.dflt === s.algo ? I18N[lang].m_dflt_note : '');
+    // restore the last saved selection (radio + qdisc), if any
+    if (s.state_algo) {
+      const radio = document.querySelector('input[name=algo][value="' + s.state_algo + '"]');
+      if (radio) radio.checked = true;
+    }
+    if (s.state_qdisc) document.getElementById('qdisc').value = s.state_qdisc;
+  } catch (e) {
+    const msg = document.getElementById('msg');
+    msg.textContent = I18N[lang].m_reqfail + e;
+    msg.className = 'err';
   }
-  if (s.state_qdisc) document.getElementById('qdisc').value = s.state_qdisc;
 }
 async function doApply() {
   const checked = document.querySelector('input[name=algo]:checked');

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "esbuild src/index.js --bundle --minify --format=iife --global-name=TCPC --outfile=../webroot/index.js"
   },
   "keywords": [],
   "author": "",

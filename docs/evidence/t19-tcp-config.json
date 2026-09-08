@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "task": "T19",
+  "status": {
+    "code": "security-static-complete",
+    "contract": "privileged-channel-and-clean-build-verified",
+    "build": "webui-built",
+    "runtime": "v1.1-installed-boot-restored-listener-absent-ui-passed-display-fix-pending",
+    "release_allowed": false
+  },
+  "module": {
+    "name": "tcp-config",
+    "version": "v1.1",
+    "version_code": 2,
+    "privileged_channel": "KernelSU WebUI kernelsu.exec",
+    "tcp_listener": false,
+    "removed_files": [
+      "modules/tcp-config/webroot/handler.sh"
+    ],
+    "state_file": {
+      "path": "/data/adb/tcpcfg.state",
+      "format": "ALGO/QDISC allowlisted lines",
+      "write_mode": "atomic temporary file + rename",
+      "mode": "0600",
+      "shell_source": false
+    },
+    "allowlist": {
+      "algorithm": ["cubic", "bbr", "kerneldflt"],
+      "qdisc": ["fq", "fq_codel", "pfifo_fast"]
+    }
+  },
+  "validation": {
+    "npm_ci_from_lockfile": "passed",
+    "npm_run_build": "passed",
+    "shell_syntax": "passed",
+    "generated_js_syntax": "passed",
+    "tracked_node_modules_pending_removal": 0,
+    "device_install_and_webui": "module-install-and-boot-restore-passed;-direct-apply-and-real-ui-cubic-fq-passed"
+  },
+  "device_observation": {
+    "installed_version": "v1.1",
+    "legacy_version": "v1.0",
+    "worktree_version": "v1.1",
+    "legacy_listener": "*:8090",
+    "legacy_listener_process": "busybox",
+    "state_file": "ALGO=cubic\\nQDISC=fq",
+    "runtime_algorithm": "cubic",
+    "allowed_algorithms": "reno cubic",
+    "runtime_qdisc": "fq",
+    "interpretation": "old state requested unavailable bbr; the replacement rejected that stale state, then the reviewed apply path set supported cubic/fq with mode 0600 persistence"
+  },
+  "device_remediation": {
+    "backup": "work/_tmp/device-backup-20260907/tcp-config",
+    "disable_marker": false,
+    "listener_stopped": true,
+    "reboot_performed": true,
+    "boot_completed": true,
+    "new_module_installed": true,
+    "direct_apply": "cubic/fq passed",
+    "webui_page_tested": true,
+    "webui_click": "cubic/fq success message and device state verified",
+    "webui_screenshot": "work/_tmp/webui-screen-after-20260907.png",
+    "followup_source_fix": "kernel-default display parser corrected locally",
+    "followup_candidate_installed": false
+  },
+  "next_gate": "install regenerated display-fix candidate and repeat visual check"
+}
