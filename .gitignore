@@ -1,8 +1,17 @@
 # Build artifacts
 work/
 out/
+.toolchains/
+.ace6-toolchain.env
+.ace6-toolchain.fish
+.ccache_ace6/
 *.zip
 *.img
+.build-*.log
+clang-r*.tar.gz
+ccache-*.tar.zst
+drift-report/
+release_zips/
 
 # System files
 .DS_Store
@@ -10,3 +19,6 @@ out/
 # Profile tooling
 __pycache__/
 *.py[cod]
+
+# Module WebUI dependencies are installed from the lockfile for local builds.
+modules/tcp-config/webui-src/node_modules/

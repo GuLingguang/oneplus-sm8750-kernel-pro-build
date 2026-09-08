@@ -1,0 +1,50 @@
+name: Repository CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: repository-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    name: Contract and repository checks
+    runs-on: ubuntu-24.04
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONPYCACHEPREFIX: ${{ github.workspace }}/work/_tmp/pycache
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Run repository CI gate
+        run: python3 scripts/ci.py
+
+  webui:
+    name: Build tcp-config WebUI
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: modules/tcp-config/webui-src
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Verify Node and npm
+        run: node --version && npm --version
+
+      - name: Install locked WebUI dependencies
+        env:
+          NPM_CONFIG_ALLOW_REMOTE: all
+        run: npm ci --no-audit --no-fund
+
+      - name: Rebuild checked-in WebUI bundle
+        run: npm run build
+
+      - name: Reject stale generated bundle
+        working-directory: .
+        run: git diff --exit-code -- modules/tcp-config/webroot/index.js
