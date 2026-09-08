@@ -18,11 +18,11 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 TMP = ROOT / "work" / "_tmp" / "ci"
 sys.path.insert(0, str(ROOT / "scripts"))
-import profile as contract  # noqa: E402
+import profile as profile_rules  # noqa: E402
 
 
 class CIError(RuntimeError):
-    """A repository CI contract failed."""
+    """A repository CI check failed."""
 
 
 def run(command, *, cwd=ROOT, capture=False):
@@ -53,11 +53,11 @@ def check_profiles_and_locks():
 
     for profile_path in profiles:
         name = profile_path.parent.name
-        config, profile = contract.normalize({}, name)
-        lock = contract.read_json(ROOT / "manifests" / "locks" / f"{name}.lock.json")
-        contract.validate_lock(lock, config, profile)
-        report = contract.preflight(config, profile, lock, phase="build")
-        if report["profile"] != name or report["config_id"] != contract.digest(config):
+        config, profile = profile_rules.normalize({}, name)
+        lock = profile_rules.read_json(ROOT / "manifests" / "locks" / f"{name}.lock.json")
+        profile_rules.validate_lock(lock, config, profile)
+        report = profile_rules.preflight(config, profile, lock, phase="build")
+        if report["profile"] != name or report["config_id"] != profile_rules.digest(config):
             raise CIError(f"preflight identity mismatch: {name}")
 
 

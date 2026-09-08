@@ -2,7 +2,7 @@
 """Ace6 profile preflight and isolated source preparation (Python stdlib only).
 
 This is the M1 entry point, not a kernel builder or publisher. Existing build
-entry points are migrated in T15 after hook/configuration contracts are ready.
+entry points are migrated in T15 after hook/configuration rules are ready.
 """
 import argparse
 import copy
@@ -156,15 +156,15 @@ def parse_value(value, spec, adapter=False):
 
 def legacy_arguments(arguments, root=ROOT):
     """Translate reproduce.sh's feature/identity flags without invoking a shell."""
-    contract = read_json(root / "schemas/input-fields.json")
-    flags = {s["legacy_cli"]: f for f, s in contract.items() if s["legacy_cli"]}
+    field_specs = read_json(root / "schemas/input-fields.json")
+    flags = {s["legacy_cli"]: f for f, s in field_specs.items() if s["legacy_cli"]}
     values = {}
     i = 0
     while i < len(arguments):
         flag = arguments[i]
         require(flag in flags, f"unknown legacy feature/identity flag: {flag}")
         field = flags[flag]
-        if contract[field]["type"] == "boolean":
+        if field_specs[field]["type"] == "boolean":
             value = flag != "--no-attribution"
         else:
             i += 1
@@ -178,14 +178,14 @@ def legacy_arguments(arguments, root=ROOT):
 
 def normalize(raw, selected=None, root=ROOT):
     require(isinstance(raw, dict), "input must be a JSON object")
-    contract = read_json(root / "schemas/input-fields.json")
+    field_specs = read_json(root / "schemas/input-fields.json")
     values = {}
     if "schema_version" in raw:
         validate_schema(raw, read_json(root / "schemas/config.schema.json"))
         selected_from_input = raw["version"]["profile"]
         require(selected is None or selected == selected_from_input, "conflicting profile selection")
         selected = selected_from_input
-        for field, spec in contract.items():
+        for field, spec in field_specs.items():
             values[field] = parse_value(raw[spec["layer"]][field], spec)
     else:
         for key, value in raw.items():
@@ -193,10 +193,10 @@ def normalize(raw, selected=None, root=ROOT):
                 require(selected is None or selected == value, "conflicting profile selection")
                 selected = value
                 continue
-            found = [f for f, s in contract.items() if key == f or key in s["aliases"]]
+            found = [f for f, s in field_specs.items() if key == f or key in s["aliases"]]
             require(len(found) == 1, f"unknown input: {key}")
             field = found[0]
-            parsed = parse_value(value, contract[field], adapter=True)
+            parsed = parse_value(value, field_specs[field], adapter=True)
             require(field not in values or values[field] == parsed, f"conflicting aliases: {field}")
             values[field] = parsed
     if selected is None:
@@ -214,7 +214,7 @@ def normalize(raw, selected=None, root=ROOT):
             selected = "ace6-resukisu-susfs-inline-6.6" if susfs else ("ace6-resukisu-manual-6.6" if ksu != "none" else "ace6-minimal-6.6")
     p = profile(selected, root)
     config = {"schema_version": 1, "version": {"profile": selected}}
-    for field, spec in contract.items():
+    for field, spec in field_specs.items():
         value = values.get(field, p["features"].get(field, spec["default"]))
         config.setdefault(spec["layer"], {})[field] = value
     f, out = config["features"], config["artifacts"]
@@ -286,17 +286,17 @@ def preflight(config, p, lock, phase="prepare"):
     # Source preparation intentionally remains conservative: it only describes
     # the M1 lock and does not apply the optional feature patch chain.  The
     # common T15 builder applies and records that chain itself, so completed
-    # static contracts are allowed through its separate build preflight.  User-
+    # static rules are allowed through its separate build preflight.  User-
     # space/device-only gates and unfinished profiles remain blockers in both.
     if phase == "build":
         tasks = {"ghost_task": "T10", "kpm": "T17"}
     for key, task in tasks.items():
         if config["features"][key]:
-            blockers.append(f"{key}: integration/configuration contract pending {task}")
+            blockers.append(f"{key}: integration/configuration rule pending {task}")
     if config["artifacts"]["release_enable"]:
         warnings.append("release: requested intent recorded; publication remains disabled until runtime, rollback and handoff gates pass")
     if config["artifacts"]["artifact_mode"] in ("boot", "all"):
-        blockers.append("boot.img inputs/packaging contract pending T18")
+        blockers.append("boot.img inputs/packaging rule pending T18")
     return {
         "config_id": digest(config), "lock_id": digest(lock), "profile": p["name"],
         "hook_mode": p["hook_mode"], "prepare_allowed": not blockers,

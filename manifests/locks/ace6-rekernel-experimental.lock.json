@@ -120,11 +120,11 @@
     },
     {
       "path": "scripts/profile.py",
-      "sha256": "832978bcef78e4b086f077f918c8739f679d1caa6b0c1695cf5738c199876752"
+      "sha256": "1b5db4c95590ee5f412167e5d23fe6427cbf2c0131f81d105ec6f607918eca3a"
     },
     {
       "path": "scripts/build.py",
-      "sha256": "780bef4dbcb60a563c1557364db20b8da8ef185ccc94c996d5b2528f1464b488"
+      "sha256": "12776c69481269652c70d350f03302b42337df2389a2b447b972140b7af7852b"
     },
     {
       "path": "manifests/build-features.json",

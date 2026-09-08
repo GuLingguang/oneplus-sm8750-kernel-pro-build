@@ -142,7 +142,7 @@ class ConfigTests(unittest.TestCase):
             with self.assertRaisesRegex(p.Invalid,'duplicate'):p.read_json(path)
 
 
-class CompressionContractTests(unittest.TestCase):
+class CompressionRuleTests(unittest.TestCase):
     def test_compression_patches_are_real_and_versioned(self):
         lz4 = (p.ROOT/'patches/split/02_lz4.patch').read_text()
         zstd = (p.ROOT/'patches/split/03_zstd.patch').read_text()
@@ -174,7 +174,7 @@ class CompressionContractTests(unittest.TestCase):
         self.assertIn('scripts/build.py', (p.ROOT/'reproduce.sh').read_text())
         self.assertIn('scripts/build.py', (p.ROOT/'.github/workflows/build.yml').read_text())
 
-    def test_zram_registration_contract_names_all_backends(self):
+    def test_zram_registration_rule_names_all_backends(self):
         patch = (p.ROOT/'patches/split/04_lz4kd.patch').read_text()
         for name in ('lzo', 'lzo-rle', 'lz4', 'lz4hc', 'lz4k', 'lz4kd',
                      'deflate', '842', 'zstd'):

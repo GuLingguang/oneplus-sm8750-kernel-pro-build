@@ -30,7 +30,7 @@ refuse() { log "REFUSE: $*"; exit 1; }
 # ---- userspace ownership gate ----
 # Scene owns zram rebuild/sizing/swapon. This module is only allowed to set a
 # backing before Scene observes it. If Scene is configured to rebuild zram or
-# manage writeback itself, there is no safe hand-off contract, so refuse.
+# manage writeback itself, there is no safe hand-off rule, so refuse.
 [ -d "$SCENE_MOD" ] || refuse "scene_swap_controller is not installed"
 [ -f "$SCENE_CONFIG" ] || refuse "Scene config is missing"
 SCENE_ZRAM=$(sed -n 's/^zram=//p' "$SCENE_CONFIG" | head -n 1)

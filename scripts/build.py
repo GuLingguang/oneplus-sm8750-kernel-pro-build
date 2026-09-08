@@ -21,10 +21,10 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-import profile as contract  # noqa: E402
+import profile as profile_rules  # noqa: E402
 
 
-class BuildError(contract.Invalid):
+class BuildError(profile_rules.Invalid):
     """A build stopped before it could make a success claim."""
 
 
@@ -111,7 +111,7 @@ def strict_bool(value, field):
 
 
 def workflow_input():
-    fields = contract.read_json(ROOT / "schemas/input-fields.json")
+    fields = profile_rules.read_json(ROOT / "schemas/input-fields.json")
     raw = {}
     for field, spec in fields.items():
         key = "ACE6_" + field.upper()
@@ -142,7 +142,7 @@ def legacy_input(args):
             tokens.append(flag)
     if hasattr(args, "no_attribution"):
         tokens.append("--no-attribution")
-    return contract.legacy_arguments(tokens)
+    return profile_rules.legacy_arguments(tokens)
 
 
 def resolve_inputs(args):
@@ -150,10 +150,10 @@ def resolve_inputs(args):
     if args.workflow:
         raw = workflow_input()
     elif args.inputs:
-        raw = contract.read_json(args.inputs)
+        raw = profile_rules.read_json(args.inputs)
     else:
         raw = legacy_input(args)
-    return contract.normalize(raw, args.profile)
+    return profile_rules.normalize(raw, args.profile)
 
 
 def parse_sources(items, lock, kernel_src=None):
@@ -218,7 +218,7 @@ def source_patch_record(path, operation="patch", **extra):
 
 def validate_feature_lock(config):
     lock_path = ROOT / "manifests/build-features.json"
-    lock = contract.read_json(lock_path)
+    lock = profile_rules.read_json(lock_path)
     selected = {}
     for feature, group in FEATURE_PATCHES.items():
         if not config["features"][feature]:
@@ -416,7 +416,7 @@ def configure_kernel(kernel, config, lock):
     run_command(["make", "LLVM=1", "LLVM_IAS=1", "ARCH=arm64", "olddefconfig"], cwd=kernel, capture=True,
                 env={**os.environ, "LLVM": "1", "LLVM_IAS": "1"})
     expected = '"lz4kd"' if features["lz4kd"] else '"lzo-rle"'
-    require(read_config(config_path, "ZRAM_DEF_COMP") == expected, "default zram compressor contract failed")
+    require(read_config(config_path, "ZRAM_DEF_COMP") == expected, "default zram compressor check failed")
     require_config(config_path, "KSU", "y" if features["ksu_type"] != "none" else "n")
     require_config(config_path, "KSU_SUSFS", "y" if features["susfs"] else "n")
     require_config(config_path, "REKERNEL", "y" if features["rekernel"] else "n")
@@ -595,10 +595,10 @@ def emit_env(name, value):
 
 def resolve(args):
     config, selected = resolve_inputs(args)
-    lock = contract.read_json(ROOT / "manifests/locks" / (selected["name"] + ".lock.json"))
-    contract.validate_lock(lock, config, selected)
+    lock = profile_rules.read_json(ROOT / "manifests/locks" / (selected["name"] + ".lock.json"))
+    profile_rules.validate_lock(lock, config, selected)
     validate_feature_lock(config)
-    report = contract.preflight(config, selected, lock, phase="build")
+    report = profile_rules.preflight(config, selected, lock, phase="build")
     require(report["prepare_allowed"], "build blocked: " + "; ".join(report["blockers"]))
     if config["features"]["kpm"]:
         require(lock["resources"].get("kpm"), "KPM is not pinned for this profile; stop before build (T17)")
@@ -608,11 +608,11 @@ def resolve(args):
 def fingerprint(args):
     config, selected, lock, _ = resolve(args)
     payload = {
-        "config_id": contract.digest(config), "lock_id": contract.digest(lock),
+        "config_id": profile_rules.digest(config), "lock_id": profile_rules.digest(lock),
         "kernel_commit": lock["sources"]["kernel"]["commit"],
         "toolchain_sha256": lock["resources"]["clang"]["sha256"],
     }
-    payload["fingerprint"] = contract.digest(payload)
+    payload["fingerprint"] = profile_rules.digest(payload)
     emit_env("SRC_COMMIT", payload["kernel_commit"])
     emit_env("ACE6_CONFIG_ID", payload["config_id"])
     emit_env("ACE6_LOCK_ID", payload["lock_id"])
@@ -639,10 +639,10 @@ def dry_run(args):
         if config["features"][feature]:
             optional.extend(source_patch_record(ROOT / path) for path in paths)
     result = {
-        "profile": selected["name"], "config_id": contract.digest(config), "lock_id": contract.digest(lock),
+        "profile": selected["name"], "config_id": profile_rules.digest(config), "lock_id": profile_rules.digest(lock),
         "sources": {name: {"commit": value["commit"], "url": value["url"]} for name, value in lock["sources"].items()},
         "optional_patches": optional, "localversion": "-4k-" + (config["identity"]["kernel_suffix"] or "g" + lock["sources"]["kernel"]["commit"][:12]),
-        "feature_lock_id": contract.digest(feature_lock),
+        "feature_lock_id": profile_rules.digest(feature_lock),
         "default_compressor": "lz4kd" if config["features"]["lz4kd"] else "lzo-rle",
         "identity": {
             "display": identity,
@@ -683,9 +683,9 @@ def build(args):
     require(not work.exists() and not work.is_symlink(), f"work directory already exists: {work}; choose a fresh path or --clean")
     external = parse_sources(args.source, lock, args.kernel_src)
     work.parent.mkdir(parents=True, exist_ok=True)
-    print(f"profile={selected['name']} config={contract.digest(config)} lock={contract.digest(lock)}")
+    print(f"profile={selected['name']} config={profile_rules.digest(config)} lock={profile_rules.digest(lock)}")
     print(f"preparing exact sources in {work}")
-    source_manifest = contract.prepare(
+    source_manifest = profile_rules.prepare(
         config, selected, lock, work, external=external, root=ROOT, phase="build",
         source_urls=source_url_overrides(
             lock, args.repo_base or os.environ.get("ACE6_REPO_BASE") or os.environ.get("REPO_BASE")
@@ -767,10 +767,10 @@ def build(args):
     resolved_build_time = identity["build_time"] if identity["build_time"] and identity["build_time"].lower() != "n" else build_started
     manifest = {
         "schema_version": 1, "manifest_type": "build", "phase": "debug-skipped" if build_status == "skipped" else "built",
-        "config": config, "config_id": contract.digest(config), "profile": selected["name"],
-        "profile_id": contract.digest(selected), "lock_id": contract.digest(lock),
+        "config": config, "config_id": profile_rules.digest(config), "profile": selected["name"],
+        "profile_id": profile_rules.digest(selected), "lock_id": profile_rules.digest(lock),
         "source_manifest_id": source_manifest["manifest_id"], "sources": final_sources,
-        "feature_lock_id": contract.digest(feature_lock), "feature_sources": feature_lock,
+        "feature_lock_id": profile_rules.digest(feature_lock), "feature_sources": feature_lock,
         "steps": records, "toolchain": toolchain, "final_config": config_record,
         "build": {"status": build_status, "started_utc": build_started, "kernel_release": image_record.get("release"),
                    "image": image_record},
@@ -798,9 +798,9 @@ def build(args):
             },
         },
     }
-    manifest["manifest_id"] = contract.digest(manifest)
+    manifest["manifest_id"] = profile_rules.digest(manifest)
     manifest_path = work / "build-manifest.json"
-    contract.write_json(manifest_path, manifest)
+    profile_rules.write_json(manifest_path, manifest)
     out_manifest = out / "build-manifest.json"
     require(not out_manifest.exists(), f"artifact already exists: {out_manifest}")
     shutil.copyfile(manifest_path, out_manifest)
@@ -829,7 +829,7 @@ def main():
         else:
             build(args)
         return 0
-    except (contract.Invalid, BuildError, OSError, KeyError, TypeError, subprocess.TimeoutExpired) as exc:
+    except (profile_rules.Invalid, BuildError, OSError, KeyError, TypeError, subprocess.TimeoutExpired) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
 

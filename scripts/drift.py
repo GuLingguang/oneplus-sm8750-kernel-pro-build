@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PROJECT_TMP = ROOT / "work" / "_tmp"
 sys.path.insert(0, str(ROOT / "scripts"))
 import build as common_build  # noqa: E402
-import profile as contract  # noqa: E402
+import profile as profile_rules  # noqa: E402
 
 
 def command(argv, cwd=None):
@@ -138,11 +138,11 @@ def apply_steps(kernel: Path, lock, config, source_roots):
         if config["features"].get(feature):
             steps.extend({
                 "source": "kernel", "operation": "patch", "layer": "feature",
-                "path": path, "sha256": contract.file_hash(ROOT / path), "destination": "",
+                "path": path, "sha256": profile_rules.file_hash(ROOT / path), "destination": "",
             } for path in paths)
     for step in steps:
         patch = ROOT / step["path"]
-        if not patch.is_file() or contract.file_hash(patch) != step["sha256"]:
+        if not patch.is_file() or profile_rules.file_hash(patch) != step["sha256"]:
             records.append(step_record(step, "failed", "local-input-drift", "local input missing or hash differs"))
             return records, "failed"
         if step["source"] != "kernel":
@@ -169,7 +169,7 @@ def apply_steps(kernel: Path, lock, config, source_roots):
             records.append(step_record(step, "applied"))
             continue
         if step["operation"] == "link":
-            source_name, relative = contract.link_spec(patch, lock["sources"])
+            source_name, relative = profile_rules.link_spec(patch, lock["sources"])
             origin_root = source_roots.get(source_name)
             if origin_root is None:
                 records.append(step_record(step, "incomplete", "missing-source-provider", f"provider not supplied: {source_name}"))
@@ -191,7 +191,7 @@ def apply_steps(kernel: Path, lock, config, source_roots):
     return records, "passed"
 
 
-def contract_checks(kernel: Path, config):
+def rule_checks(kernel: Path, config):
     makefile = kernel / "Makefile"
     text = makefile.read_text(encoding="utf-8", errors="replace") if makefile.is_file() else ""
     version = {
@@ -219,7 +219,7 @@ def check_variant(config, lock, profile, source: Path, source_roots, label, temp
     snapshot = temp_root / label
     copy_snapshot(source, snapshot)
     steps, status = apply_steps(snapshot, lock, config, source_roots)
-    checks = contract_checks(snapshot, config) if status == "passed" and not profile["blockers"] else {}
+    checks = rule_checks(snapshot, config) if status == "passed" and not profile["blockers"] else {}
     if status == "passed" and profile["blockers"]:
         status = "blocked"
     if status == "passed" and any(item.get("status") == "failed" for item in checks.values()):
@@ -247,13 +247,13 @@ def profile_result(name, profile, baseline, candidate):
     if baseline["status"] in ("failed", "incomplete"):
         classes.append("locked-baseline-check-incomplete-or-failed")
     elif baseline["status"] == "blocked":
-        classes.append("profile-blocked-by-existing-contract")
+        classes.append("profile-blocked-by-existing-rule")
     if candidate["status"] == "failed":
         classes.append("patch-apply-failure-needs-review")
     elif candidate["status"] == "incomplete":
         classes.append("missing-source-provider")
     elif candidate["status"] == "blocked":
-        classes.append("profile-blocked-by-existing-contract")
+        classes.append("profile-blocked-by-existing-rule")
     elif baseline["status"] == "passed" and candidate["status"] == "passed":
         classes.append("no-observed-drift")
         if candidate["identity_category"] != "none":
@@ -281,7 +281,7 @@ def markdown(report):
         "", "## Interpretation", "",
         "A patch failure is only a review trigger. It is not evidence that upstream",
         "absorbed the change; compare the semantic consumer and configuration",
-        "contracts before dropping or adapting a patch.", "", "## Reproduction", "",
+        "rules before dropping or adapting a patch.", "", "## Reproduction", "",
         "```sh",
         "./check_upstream.sh --local /absolute/candidate/kernel --baseline /absolute/locked/kernel",
         "```",
@@ -302,7 +302,7 @@ def issue_draft(report):
         "", "## Required review", "",
         "- classify each failed patch as context/API/type/configuration drift or",
         "  equivalent upstream implementation only after semantic inspection;",
-        "- attach the cumulative check log and affected consumer/config contract;",
+        "- attach the cumulative check log and affected consumer/configuration rule;",
         "- update a lock only in a separate explicitly reviewed change.", "",
     ])
     return "\n".join(lines)
@@ -339,9 +339,9 @@ def main():
     try:
         selected = []
         for name in names:
-            config, profile = contract.normalize({}, name)
-            lock = contract.read_json(ROOT / "manifests/locks" / f"{name}.lock.json")
-            contract.validate_lock(lock, config, profile)
+            config, profile = profile_rules.normalize({}, name)
+            lock = profile_rules.read_json(ROOT / "manifests/locks" / f"{name}.lock.json")
+            profile_rules.validate_lock(lock, config, profile)
             selected.append((name, config, lock, profile))
         kernel_commits = {lock["sources"]["kernel"]["commit"] for _, _, lock, _ in selected}
         if len(kernel_commits) != 1:
@@ -366,7 +366,7 @@ def main():
         for _, _, lock, _ in selected:
             for step in lock["steps"]:
                 if step["operation"] == "link":
-                    source_name, _ = contract.link_spec(ROOT / step["path"], lock["sources"])
+                    source_name, _ = profile_rules.link_spec(ROOT / step["path"], lock["sources"])
                     link_sources.add(source_name)
         for source_name in sorted(link_sources - provider_roots.keys()):
             if not args.fetch_candidate:
@@ -419,6 +419,6 @@ def main():
 if __name__ == "__main__":
     try:
         raise SystemExit(main())
-    except (OSError, RuntimeError, ValueError, KeyError, contract.Invalid) as exc:
+    except (OSError, RuntimeError, ValueError, KeyError, profile_rules.Invalid) as exc:
         print(f"drift-check error: {exc}", file=sys.stderr)
         raise SystemExit(2)
