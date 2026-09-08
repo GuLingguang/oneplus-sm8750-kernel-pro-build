@@ -17,18 +17,36 @@ At the chosen ReSukiSU commit, `kernel/feature/sucompat.h` declares SUSFS
 path takes `const char __user **`. `kernel/Kconfig` declares the mutually
 exclusive hook choice. Official SUSFS `README.md` describes its inline integration
 and warns that patches are based primarily on official KernelSU. These are
-selection inputs. T06 now records a source-level contract and a clean
+selection inputs. T06 now records source-level rules and a clean
 preparation run for the selected pairing; build and runtime acceptance remain
 separate gates.
 
 T06 reconstructed the official kernel patch plus the explicit ReSukiSU adaptation
 on this kernel, including filename ownership/error paths, no_su and zygote_next
-consumers. T07 must still verify every applicable signature, guard and consumer
-before a build claim. The old legacy adapter is never applied automatically to
-this candidate. The SUSFS profile is source-preparation-ready, while its build
-and runtime gates remain open.
+consumers. T07 now records the separate non-SUSFS Manual Hook rules and its
+version-specific patch sequence. The old legacy adapter is never applied
+automatically to this candidate. Both KSU profiles are source-preparation-ready;
+their build and runtime gates remain open.
 
-T06 has been executed with static evidence; T07 and the known faccessat runtime
-risk remain unresolved until their dedicated checks.
+T06 and T07 have source-level static evidence. The known faccessat runtime risk,
+kernel compilation, and device behavior remain unresolved until their dedicated
+checks.
 The original legacy checkpoint remains available for comparison, not for a claim
 of runtime safety or a verified flash-recovery package.
+
+T09 adds a separate Droidspaces standard path. The no-SUSFS variant uses the
+42-option 6.6 configuration fragment, a target-specific SYSVIPC Android-kABI
+adaptation and NTSYNC. The ReSukiSU container variant reuses the T07 Manual Hook
+path and explicitly selects `CONFIG_KSU_SUSFS=n`; it does not inherit the SUSFS
+Inline implementation. EVDI and the `ghost_task` vendor workaround remain
+separate T11/T10 decisions. T11 pins the legacy EVDI files to a matching
+upstream candidate and compiles the object in isolation, but leaves extend
+blocked because the current `create-disp` UAPI/userspace candidate is not aligned
+with the kernel candidate and HCI/systemd-coredump/device inputs are not locked.
+
+T12 now gives the Re:Kernel experimental path one built-in implementation,
+formal Kconfig/Makefile wiring and shared Binder/binder_alloc/signal symbols.
+T13 fixes the signal direction, Binder allocator reference and message-length
+handling, and records a v1 wire definition. The profile remains blocked because
+no pinned NoActive userspace receiver or runtime evidence is available; the
+object build is not a full kernel or runtime claim.

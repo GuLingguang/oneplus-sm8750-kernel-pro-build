@@ -4,19 +4,24 @@
 `ace6-kernel-task-plan.md`。执行范围遵循计划第 8 节的首批任务；
 原材料作为历史规划保留，本文件登记实际进度。
 
+> 历史说明：本文件记录 T01–T05 完成时的截面，后续 T06–T27 的状态不在
+> 这张首批表格中回写。当前主 Release 组合、构建器和发布闸门以
+> `docs/execution-main-release-compat-6.6.md`、`docs/compatibility.md` 和
+> 当前源码/锁文件为准；避免把下文“未开始”误读为当前状态。
+
 ## 状态结论
 
 | 任务 | 本批结果 | 目标 / 输出 | 未完成事项 |
 | --- | --- | --- | --- |
 | T01 | 完成 | 下文检查点、`interface-map.md`、legacy inventory、历史日志摘录 | 无新增真机证据；历史问题继续保留 |
-| T02 | 首批契约实现完成 | 四层 schema、字段映射、规范化配置、source-preparation manifest、样例 | 真正 build manifest 在 T15/T18 扩展；不冒充已完成构建身份 |
+| T02 | 首批规则实现完成 | 四层 schema、字段映射、规范化配置、source-preparation manifest、样例 | build manifest 由 T15 继续扩展；不冒充已完成构建身份 |
 | T03 | **部分完成** | kernel/modules/devicetrees/ReSukiSU/SUSFS 精确 SHA，Clang digest，Actions pin，vendored hash | 宿主环境、apt/mkbootimg、KPM 二进制、部分功能原始上游出处未锁全；完整构建不可复现 |
-| T04 | profile 骨架及组合规则完成 | 8 个 profile、standard→extend 继承、兼容矩阵和早期拒绝 | Manual/SUSFS/容器/Re:Kernel 的功能契约及构建/真机未通过 |
+| T04 | profile 骨架及组合规则完成 | 8 个 profile、standard→extend 继承、兼容性表和早期拒绝 | Manual/SUSFS/容器/Re:Kernel 的功能规则及构建/真机未通过 |
 | T05 | 共用框架实现并通过测试 | `scripts/profile.py`，精确解析、隔离源码、累计 patch/copy、失败记录和 manifest | 目标 SUSFS/可选功能 patch set 未建立；相应 profile 继续受阻 |
 | T06–T27 | 未开始 | 按原计划依赖继续 | 没有把首批框架成果计入功能修复、CI 编译或真机验收 |
 
-M1 的完整出口条件尚未满足，主要受 T03 和目标集成契约约束。
-本批交付可审阅、可测试的框架；不是宣称 T01–T05 所有最终验收条件已经满足。
+M1 的完整出口条件尚未满足，主要受 T03 和目标集成规则限制。
+本批交付的是可审阅、可测试的框架，T01–T05 的最终验收条件仍有未完成项。
 
 ## T01：历史检查点和差异
 
@@ -51,9 +56,10 @@ Actions 风格 JSON 和本地 feature/identity flags 进入同一 normalizer；
 缺 KPM pin、实验发布、debug 发布及无 KSU 的模块输出。
 standard/extend 的继承在代码中合并并测试；Re:Kernel 明确依附 Manual 基础 profile。
 
-具体字段、优先级、命令、manifest 身份和输出边界见 `profile-contract.md`；
-各 profile 的当前门槛见 `compatibility.md`。旧 workflow/reproduce.sh 仍是 legacy
-构建入口，只有 Actions 引用在本批固定；新规则尚未接管旧入口，T15 再统一。
+具体字段、优先级、命令、manifest 身份和输出边界见 `profile-rules.md`；
+各 profile 的当前门槛见 `compatibility.md`。T15 已将 workflow/reproduce.sh
+收敛为 `scripts/build.py` 的环境/参数适配器；本文件的 M1 结果仍只代表
+source-preparation，不代表完整 Image 或运行时验收。
 
 ## T03：版本选择及缺口
 
@@ -70,11 +76,12 @@ standard/extend 的继承在代码中合并并测试；Re:Kernel 明确依附 Ma
 | 功能上游候选 | `manifests/upstream-candidates-2026-09-05.json`，仅登记候选；未冒认旧 patch 的原始出处 |
 
 Clang 压缩包大小 1,161,295,162 字节；本批没有下载并本地校验它。
-KSU version code `35115` 仅作为历史明确输入登记，实际确定性注入待 T15。
+KSU version code `35115` 由 T15 的构建 manifest 和包命名使用；完整构建仍待
+锁定工具链实际执行验证。
 apt 包版本、runner image digest、mkbootimg 及 KPM binary 仍未锁定。
 `build_environment.status=not-fully-locked`，字节级可复现结论保持 false。
 
-ReSukiSU/SUSFS 只是选定候选，没有通过配对契约。
+ReSukiSU/SUSFS 只是选定候选，配对规则尚未通过。
 已确认候选 ReSukiSU 的 SUSFS faccessat 参数类型为 `struct filename **`；
 必须在 T06 重建整套适配后再由 T07 检验，不能据此直接启用旧 patch。
 
@@ -100,13 +107,14 @@ hash 校验先行；外部源码必须干净且 HEAD 匹配，补丁仅作用于
 kernelFwUpdate/Kconfig 和设备树 vendor 链接有实际目标。
 这里只应用 `07_compile_fixes.patch`，不包含旧 KSU/SUSFS 或可选功能补丁。
 
-没有执行内核编译、olddefconfig、CI dispatch、刷机或 runtime test；
-没有生成/发布 Image、AK3、boot.img 或 Release。T14/T15 仍需证明 minimal
-最终配置确实关闭各功能，不能从这里的规范化 false 值推断内核配置已关闭。
+本批没有执行内核编译、CI dispatch、刷机或 runtime test；T15 已实现
+olddefconfig/校验/打包路径，但当前主机没有锁定的 AOSP Clang 21 与 `zip`，
+因此没有生成/发布 Image、AK3、boot.img 或 Release。T14/T15 的静态结果不能
+替代 T25/T26 的完整构建和真机证据。
 
 ## 续接入口
 
 先收齐 T03 的构建环境和所需资源证据，明确选定配对的补丁序列；
 随后按 T06/T07 重建并验证 SUSFS Inline。Manual/容器/Re:Kernel 等 profile
-继续保持各自 blocker。构建矩阵由 T25 执行，真机由 T26 独立验收。
+继续保持各自 blocker。构建组合由 T25 执行，真机由 T26 独立验收。
 后续不得把本文件的框架测试结果当成旧功能风险已经解决的证据。
