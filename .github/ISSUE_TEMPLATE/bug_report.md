@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report a problem with a build — the more of the checklist you fill, the faster it can be debugged
+about: Report a build problem with the inputs and logs needed for diagnosis
 title: "[Bug] "
 labels: bug
 assignees: ''
@@ -9,12 +9,13 @@ assignees: ''
 
 **Describe the problem**
 
-What happened vs what you expected. Include anything unusual during flash or boot.
+Describe the observed behavior and the expected behavior. Include unusual
+events during flashing or boot.
 
 > **English** | [中文模板](bug_report_zh.md)
 
-> Fill in what you can — the three fields that matter are ROM, workflow toggles, and logs.
-> A one-line "it bootlooped" with those three answers is more useful than a paragraph without them.
+> Provide the ROM, workflow inputs, and logs whenever possible. These fields
+> are required to reproduce or narrow down a build problem.
 
 **Build details (required)**
 
@@ -32,8 +33,8 @@ What happened vs what you expected. Include anything unusual during flash or boo
 
 **Environment**
 
-- Stock boot backed up? (`boot.img` — you did back it up, right?)
-- What you flashed before this (previous kernel, stock, etc.)
+- Stock boot backed up? (`boot.img`)
+- Previous flashed image or kernel (previous kernel, stock image, etc.)
 
 **Checklist**
 
