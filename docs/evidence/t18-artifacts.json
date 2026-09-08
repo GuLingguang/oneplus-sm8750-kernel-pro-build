@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "task": "T18",
+  "status": {
+    "code": "guarded-static-complete",
+    "contract": "artifact-mode-and-module-distribution-boundary-defined",
+    "build": "ak3-manifests-and-module-packaging-smoke-passed",
+    "runtime": "not-applicable-to-packaging-only-check",
+    "release_allowed": false
+  },
+  "mapping": {
+    "ak3": {
+      "preflight": "allowed",
+      "output": "AnyKernel3 zip containing Image",
+      "flashable_claim": "candidate only; target/runtime gate required"
+    },
+    "image": {
+      "preflight": "allowed",
+      "output": "raw Image",
+      "flashable_claim": false
+    },
+    "boot": {
+      "preflight": "blocked",
+      "reason": "target boot input set with ramdisk, DTB and AVB metadata is not supplied"
+    },
+    "all": {
+      "preflight": "blocked",
+      "reason": "includes the unsupported boot.img path"
+    },
+    "independent_modules": {
+      "preflight": "allowed with KSU",
+      "distribution": "one standalone zip per self-authored module; never inserted into AK3"
+    }
+  },
+  "packaging_smoke": {
+    "passed": true,
+    "artifact_count": 4,
+    "kinds": ["ak3", "ksu-module", "ksu-module", "ksu-module"],
+    "modules": ["azram-backing", "selinux_perf", "tcp-config"],
+    "excluded": ["webui-src", "node_modules"]
+  },
+  "existing_ak3_manifests": [
+    {
+      "profile": "ace6-minimal-6.6",
+      "manifest_id": "4f69c4095705c14e2985b897daa013ccb4051861675c62622c76f20bac997712",
+      "artifact": "Kernel-Ace6-Lingguang-20260906.zip",
+      "sha256": "d9a93a69c06e2b583edf768394e06cadfd5e2add356521555e6bd7c60ef15628"
+    },
+    {
+      "profile": "ace6-resukisu-susfs-inline-6.6",
+      "manifest_id": "cfcb6d1f9e331390c8d32e9fb1b6ef505841de30f50b5b4f37bb0aafef474bc9",
+      "artifact": "Kernel-Ace6-Lingguang-ksu35115-20260906.zip",
+      "sha256": "e6fbc2e0b11357a1bd7fcc8aba631b7fa8c25fc3acdcc46f68b773a612c64233"
+    },
+    {
+      "profile": "ace6-resukisu-manual-6.6",
+      "manifest_id": "acf62a04d5dd7424436837de531710739d608fa49a91f0d1262d65ab7b6f305d",
+      "artifact": "Kernel-Ace6-Lingguang-ksu35115-20260906.zip",
+      "sha256": "c73185fc98085bd27aabb84ba7a5bc10152d581a160de94dd127672d8bacecac"
+    },
+    {
+      "profile": "ace6-droidspaces-standard-6.6",
+      "manifest_id": "16bfb5967b23dd93e6dbd41b002e44c24aab1eb861106b47430b14b220729139",
+      "artifact": "Kernel-Ace6-Lingguang-20260906.zip",
+      "sha256": "7b7ee0731a1bb20daf13590cbcfa4b2d8843b946735fe4f8465b8ec40f4a63fb"
+    },
+    {
+      "profile": "ace6-droidspaces-resukisu-standard-6.6",
+      "manifest_id": "8f7bd8ab46c5018da40a8cab1751c961bdadf7583b8c926cbd5b193283153951",
+      "artifact": "Kernel-Ace6-Lingguang-ksu35115-20260906.zip",
+      "sha256": "383cd67bccf49468f5a55595b51bfd63929e44052a6789f9e7e34a39f5ddb266"
+    }
+  ],
+  "publication": {
+    "performed": false,
+    "reason": "release gate remains pending T25-T27"
+  }
+}
