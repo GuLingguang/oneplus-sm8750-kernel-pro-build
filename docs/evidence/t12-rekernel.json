@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "task": "T12",
+  "status": {
+    "code": "static-complete",
+    "contract": "single-implementation-and-formal-config",
+    "build": "object-only",
+    "runtime": "not-tested",
+    "release_allowed": false
+  },
+  "profile": {
+    "name": "ace6-rekernel-experimental",
+    "base": "ace6-resukisu-manual-6.6",
+    "hook_mode": "manual",
+    "rekernel": true,
+    "experimental": true,
+    "remaining_blocker": "T13 event direction, task lifetime and userspace protocol"
+  },
+  "locked_kernel": {
+    "commit": "cb967c26c2c5689108fa28d3c3be2aba6ba71f5f",
+    "arch": "arm64",
+    "llvm": true,
+    "source_preparation_context": "T09 ReSukiSU prepared tree"
+  },
+  "integration_patch": {
+    "path": "patches/integration/ace6-rekernel-6.6.patch",
+    "sha256": "9384b3efc9a18a0e7e2bcb5f2a938fd20b7482a1cd9e797989b43f093357571f",
+    "forward_apply_check": true,
+    "reverse_apply_check": true,
+    "legacy_patch_changed": false
+  },
+  "formal_config": {
+    "symbol": "CONFIG_REKERNEL=y",
+    "dependencies": {
+      "CONFIG_ANDROID_BINDER_IPC": "y",
+      "CONFIG_NET": "y",
+      "CONFIG_PROC_FS": "y",
+      "CONFIG_FREEZER": "y"
+    },
+    "olddefconfig": "passed",
+    "config_sha256": "e2f5c264ad6a794a7ebb8b58993d3c61dbca65ed4574be55ea7f8b5e5b438384"
+  },
+  "objects": {
+    "drivers/rekernel/rekernel.o": "b6c9654cd7444046546676912fab6944dcf041cfdca2b8d59deaad3cb7f709f2",
+    "drivers/android/binder.o": "d2e6078b70df3c8d292c18489e649ae3b9bff352e4c7959568cc70f74b6c583a",
+    "drivers/android/binder_alloc.o": "784e27c31e794d3b9add291edd3de0527c01fe0b9a28c642b3f2402b302b4399",
+    "kernel/signal.o": "b2ca6544eea9257dd513f32954d6d98804cbeea2514d4780d626f6faebada971"
+  },
+  "shared_symbol_check": {
+    "implementation_object": "drivers/rekernel/rekernel.o",
+    "defined_once": [
+      "rekernel_server_start",
+      "rekernel_send_netlink",
+      "rekernel_line_is_frozen"
+    ],
+    "callers": [
+      "drivers/android/binder.o",
+      "drivers/android/binder_alloc.o",
+      "kernel/signal.o"
+    ],
+    "single_mutex": "rekernel_server_lock"
+  },
+  "lifecycle_static_checks": {
+    "concurrent_initialization_lock": true,
+    "socket_failure_cleanup": true,
+    "proc_directory_failure_cleanup": true,
+    "proc_entry_failure_cleanup": true,
+    "retry_state_after_failure": true,
+    "runtime_stress_or_fault_injection": false
+  },
+  "deferred_t13": {
+    "signal_sender_target_fields": "not-fixed",
+    "binder_allocator_task_reference": "not-fixed",
+    "noactive_protocol_version": "not-locked",
+    "port_and_packet_contract": "not-locked"
+  },
+  "real_device": {
+    "needed_now": false,
+    "reason": "T13 semantic/protocol checks and full build remain open",
+    "later_required": [
+      "NoActive event receive and response behavior",
+      "Binder frozen-target events",
+      "signal direction and exit races",
+      "concurrent initialization and recovery",
+      "repeated freeze/unfreeze lifecycle"
+    ]
+  },
+  "artifacts": []
+}

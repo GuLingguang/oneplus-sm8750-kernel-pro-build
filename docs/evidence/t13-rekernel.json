@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "task": "T13",
+  "status": {
+    "code": "static-complete",
+    "contract": "kernel-side-v1-recorded-userspace-unverified",
+    "build": "object-only",
+    "runtime": "not-tested",
+    "release_allowed": false
+  },
+  "patch": {
+    "path": "patches/integration/ace6-rekernel-protocol-6.6.patch",
+    "sha256": "7af3a2463a43425511509aa4354cee0687fc3381d6cc3ae27e39682818a566e1",
+    "applies_after": "patches/integration/ace6-rekernel-6.6.patch",
+    "apply_check": true,
+    "legacy_patch_changed": false
+  },
+  "semantic_fixes": {
+    "signal_frozen_target": "p",
+    "signal_sender": "current",
+    "signal_destination": "p",
+    "binder_allocator_lookup": "find_get_task_by_vpid",
+    "binder_allocator_release": "put_task_struct",
+    "snprintf_required_length_checked": true,
+    "maximum_payload_bytes": 127
+  },
+  "protocol": {
+    "identity": "ace6-rekernel-kv/v1",
+    "source_constant": "REKERNEL_PROTOCOL_VERSION=1",
+    "netlink_unit_range": "22..25",
+    "unit_discovery": "/proc/rekernel/<unit>",
+    "userspace_port": 100,
+    "direction": "kernel-to-userspace-unicast",
+    "payload": "comma-separated key=value text terminated by semicolon, no NUL",
+    "receiver_source_found": false,
+    "receiver_version_locked": false
+  },
+  "locked_kernel": {
+    "commit": "cb967c26c2c5689108fa28d3c3be2aba6ba71f5f",
+    "arch": "arm64",
+    "llvm": true,
+    "config_symbol": "CONFIG_REKERNEL=y",
+    "config_sha256": "e2f5c264ad6a794a7ebb8b58993d3c61dbca65ed4574be55ea7f8b5e5b438384"
+  },
+  "objects": {
+    "drivers/rekernel/rekernel.o": "f75f138d781d30133b3f4a612573c14bc1681a8cb66eba95083dc0e44eef1f0a",
+    "drivers/android/binder.o": "ed7b5f1c341de4acf2c907157d20ca9814293b8a1810c0e3ae5b3689e3f4c586",
+    "drivers/android/binder_alloc.o": "5a50d053427bc921b8aff878ca2f69689ce00249ec494c11796ab7d7cb89a192",
+    "kernel/signal.o": "d56dc46324f74524c162e6c15c9ac66569f69759899761d1f39b533e0b6345c4"
+  },
+  "runtime": {
+    "stress_or_fault_injection": false,
+    "noactive_interaction": false,
+    "real_device": false,
+    "next_gate": "T25/T26 with named NoActive userspace and device logs"
+  },
+  "artifacts": []
+}

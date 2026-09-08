@@ -1,0 +1,121 @@
+diff --git a/drivers/rekernel/rekernel.h b/drivers/rekernel/rekernel.h
+--- a/drivers/rekernel/rekernel.h
++++ b/drivers/rekernel/rekernel.h
+@@ -8,6 +8,8 @@ struct task_struct;
+ #define REKERNEL_NETLINK_MIN 22
+ #define REKERNEL_USER_PORT 100
+ #define REKERNEL_PACKET_SIZE 128
++#define REKERNEL_PROTOCOL_VERSION 1
++#define REKERNEL_MAX_PAYLOAD (REKERNEL_PACKET_SIZE - 1)
+ #define REKERNEL_MIN_USERAPP_UID 10000
+ #define REKERNEL_MAX_SYSTEM_UID 2000
+ #define REKERNEL_WARN_AHEAD_SPACE (1U << 17)
+diff --git a/drivers/rekernel/rekernel.c b/drivers/rekernel/rekernel.c
+--- a/drivers/rekernel/rekernel.c
++++ b/drivers/rekernel/rekernel.c
+@@ -132,4 +132,4 @@ int rekernel_send_netlink(const char *message, size_t length)
+ 	int ret;
+ 
+-	if (!message || !length || length > REKERNEL_PACKET_SIZE)
++	if (!message || !length || length > REKERNEL_MAX_PAYLOAD)
+ 		return -EMSGSIZE;
+diff --git a/drivers/android/binder.c b/drivers/android/binder.c
+--- a/drivers/android/binder.c
++++ b/drivers/android/binder.c
+@@ -3308,15 +3308,17 @@
+ 		trace_android_vh_binder_reply(target_proc, proc, thread, tr);
+ #ifdef CONFIG_REKERNEL
+ 		if (rekernel_server_start() == 0) {
+ 			if (target_proc
+ 				&& (NULL != target_proc->tsk)
+ 				&& (NULL != proc->tsk)
+ 				&& (task_uid(target_proc->tsk).val <= REKERNEL_MAX_SYSTEM_UID)
+ 				&& (proc->pid != target_proc->pid)
+ 				&& rekernel_line_is_frozen(target_proc->tsk)) {
++				int binder_kmsg_len;
+ 				char binder_kmsg[REKERNEL_PACKET_SIZE];
+-				snprintf(binder_kmsg, sizeof(binder_kmsg), "type=Binder,bindertype=reply,oneway=0,from_pid=%d,from=%d,target_pid=%d,target=%d;", proc->pid, task_uid(proc->tsk).val, target_proc->pid, task_uid(target_proc->tsk).val);
+-				rekernel_send_netlink(binder_kmsg, strlen(binder_kmsg));
++				binder_kmsg_len = snprintf(binder_kmsg, sizeof(binder_kmsg), "type=Binder,bindertype=reply,oneway=0,from_pid=%d,from=%d,target_pid=%d,target=%d;", proc->pid, task_uid(proc->tsk).val, target_proc->pid, task_uid(target_proc->tsk).val);
++				if (binder_kmsg_len > 0 && binder_kmsg_len < sizeof(binder_kmsg))
++					rekernel_send_netlink(binder_kmsg, binder_kmsg_len);
+ 			}
+ 		}
+ #endif
+@@ -3376,15 +3380,17 @@
+ 		e->to_node = target_node->debug_id;
+ #ifdef CONFIG_REKERNEL
+ 		if (rekernel_server_start() == 0) {
+ 			if (target_proc
+ 				&& (NULL != target_proc->tsk)
+ 				&& (NULL != proc->tsk)
+ 				&& (task_uid(target_proc->tsk).val > REKERNEL_MIN_USERAPP_UID)
+ 				&& (proc->pid != target_proc->pid)
+ 				&& rekernel_line_is_frozen(target_proc->tsk)) {
++				int binder_kmsg_len;
+ 				char binder_kmsg[REKERNEL_PACKET_SIZE];
+-				snprintf(binder_kmsg, sizeof(binder_kmsg), "type=Binder,bindertype=transaction,oneway=%d,from_pid=%d,from=%d,target_pid=%d,target=%d;", tr->flags & TF_ONE_WAY, proc->pid, task_uid(proc->tsk).val, target_proc->pid, task_uid(target_proc->tsk).val);
+-				rekernel_send_netlink(binder_kmsg, strlen(binder_kmsg));
++				binder_kmsg_len = snprintf(binder_kmsg, sizeof(binder_kmsg), "type=Binder,bindertype=transaction,oneway=%d,from_pid=%d,from=%d,target_pid=%d,target=%d;", tr->flags & TF_ONE_WAY, proc->pid, task_uid(proc->tsk).val, target_proc->pid, task_uid(target_proc->tsk).val);
++				if (binder_kmsg_len > 0 && binder_kmsg_len < sizeof(binder_kmsg))
++					rekernel_send_netlink(binder_kmsg, binder_kmsg_len);
+ 			}
+ 		}
+ #endif
+diff --git a/drivers/android/binder_alloc.c b/drivers/android/binder_alloc.c
+--- a/drivers/android/binder_alloc.c
++++ b/drivers/android/binder_alloc.c
+@@ -19,6 +19,7 @@
+ #ifdef CONFIG_REKERNEL
+ #include "../rekernel/rekernel.h"
+ #endif
+ #include <linux/sched.h>
++#include <linux/sched/task.h>
+ #include <linux/list_lru.h>
+ #include <linux/ratelimit.h>
+@@ -464,17 +465,19 @@ static struct binder_buffer *binder_alloc_new_buf_locked(
+ 	if (is_async && alloc->free_async_space < size) {
+ #ifdef CONFIG_REKERNEL
+ 		if (alloc->free_async_space < 3 * (size + sizeof(struct binder_buffer))
+ 			|| (alloc->free_async_space < REKERNEL_WARN_AHEAD_SPACE)) {
+ 			struct task_struct *proc_task = NULL;
+-			rcu_read_lock();
+-			proc_task = find_task_by_vpid(alloc->pid);
+-			rcu_read_unlock();
+-			if (proc_task != NULL && rekernel_server_start() == 0) {
+-				if (rekernel_line_is_frozen(proc_task)) {
++			proc_task = find_get_task_by_vpid(alloc->pid);
++			if (proc_task != NULL) {
++				if (rekernel_server_start() == 0 &&
++				    rekernel_line_is_frozen(proc_task)) {
++					int binder_kmsg_len;
+ 					char binder_kmsg[REKERNEL_PACKET_SIZE];
+-					snprintf(binder_kmsg, sizeof(binder_kmsg), "type=Binder,bindertype=free_buffer_full,oneway=1,from_pid=%d,from=%d,target_pid=%d,target=%d;", current->pid, task_uid(current).val, proc_task->pid, task_uid(proc_task).val);
+-					rekernel_send_netlink(binder_kmsg, strlen(binder_kmsg));
++					binder_kmsg_len = snprintf(binder_kmsg, sizeof(binder_kmsg), "type=Binder,bindertype=free_buffer_full,oneway=1,from_pid=%d,from=%d,target_pid=%d,target=%d;", current->pid, task_uid(current).val, proc_task->pid, task_uid(proc_task).val);
++					if (binder_kmsg_len > 0 && binder_kmsg_len < sizeof(binder_kmsg))
++						rekernel_send_netlink(binder_kmsg, binder_kmsg_len);
+ 				}
++				put_task_struct(proc_task);
+ 			}
+ 		}
+ #endif
+diff --git a/kernel/signal.c b/kernel/signal.c
+--- a/kernel/signal.c
++++ b/kernel/signal.c
+@@ -1326,9 +1326,11 @@ int do_send_sig_info(int sig, struct kernel_siginfo *info, struct task_struct *p
+ #ifdef CONFIG_REKERNEL
+ 	if (rekernel_server_start() == 0) {
+-		if (rekernel_line_is_frozen(current) && (sig == SIGKILL || sig == SIGTERM || sig == SIGABRT || sig == SIGQUIT)) {
+-			char signal_kmsg[REKERNEL_PACKET_SIZE];
+-			snprintf(signal_kmsg, sizeof(signal_kmsg), "type=Signal,signal=%d,killer_pid=%d,killer=%d,dst_pid=%d,dst=%d;", sig, task_tgid_nr(p), task_uid(p).val, task_tgid_nr(current), task_uid(current).val);
+-			rekernel_send_netlink(signal_kmsg, strlen(signal_kmsg));
++		if (rekernel_line_is_frozen(p) && (sig == SIGKILL || sig == SIGTERM || sig == SIGABRT || sig == SIGQUIT)) {
++			int signal_kmsg_len;
++			char signal_kmsg[REKERNEL_PACKET_SIZE];
++			signal_kmsg_len = snprintf(signal_kmsg, sizeof(signal_kmsg), "type=Signal,signal=%d,killer_pid=%d,killer=%d,dst_pid=%d,dst=%d;", sig, task_tgid_nr(current), task_uid(current).val, task_tgid_nr(p), task_uid(p).val);
++			if (signal_kmsg_len > 0 && signal_kmsg_len < sizeof(signal_kmsg))
++				rekernel_send_netlink(signal_kmsg, signal_kmsg_len);
+ 		}
+ 	}
+ #endif

@@ -1,0 +1,370 @@
+diff --git a/drivers/Kconfig b/drivers/Kconfig
+--- a/drivers/Kconfig
++++ b/drivers/Kconfig
+@@ -243,5 +243,6 @@ source "drivers/hte/Kconfig"
+ 
+ source "drivers/cdx/Kconfig"
+ 
++source "drivers/rekernel/Kconfig"
+ source "drivers/kernelsu/Kconfig"
+ endmenu
+diff --git a/drivers/Makefile b/drivers/Makefile
+--- a/drivers/Makefile
++++ b/drivers/Makefile
+@@ -200,3 +200,4 @@ obj-$(CONFIG_CDX_BUS)		+= cdx/
+ 
+ obj-$(CONFIG_S390)		+= s390/
+ obj-$(CONFIG_KSU) += kernelsu/
++obj-$(CONFIG_REKERNEL)	+= rekernel/
+diff --git a/drivers/android/binder.c b/drivers/android/binder.c
+--- a/drivers/android/binder.c
++++ b/drivers/android/binder.c
+@@ -44,6 +44,9 @@
+ 
+ #include <linux/fdtable.h>
+ #include <linux/file.h>
++#ifdef CONFIG_REKERNEL
++#include "../rekernel/rekernel.h"
++#endif
+ #include <linux/freezer.h>
+ #include <linux/fs.h>
+ #include <linux/list.h>
+@@ -3288,6 +3291,20 @@ static void binder_transaction(struct binder_proc *proc,
+ 		target_proc->tmp_ref++;
+ 		binder_inner_proc_unlock(target_thread->proc);
+ 		trace_android_vh_binder_reply(target_proc, proc, thread, tr);
++#ifdef CONFIG_REKERNEL
++		if (rekernel_server_start() == 0) {
++			if (target_proc
++				&& (NULL != target_proc->tsk)
++				&& (NULL != proc->tsk)
++				&& (task_uid(target_proc->tsk).val <= REKERNEL_MAX_SYSTEM_UID)
++				&& (proc->pid != target_proc->pid)
++				&& rekernel_line_is_frozen(target_proc->tsk)) {
++				char binder_kmsg[REKERNEL_PACKET_SIZE];
++				snprintf(binder_kmsg, sizeof(binder_kmsg), "type=Binder,bindertype=reply,oneway=0,from_pid=%d,from=%d,target_pid=%d,target=%d;", proc->pid, task_uid(proc->tsk).val, target_proc->pid, task_uid(target_proc->tsk).val);
++				rekernel_send_netlink(binder_kmsg, strlen(binder_kmsg));
++			}
++		}
++#endif
+ 	} else {
+ 		if (tr->target.handle) {
+ 			struct binder_ref *ref;
+@@ -3342,6 +3359,20 @@ static void binder_transaction(struct binder_proc *proc,
+ 			goto err_dead_binder;
+ 		}
+ 		e->to_node = target_node->debug_id;
++#ifdef CONFIG_REKERNEL
++		if (rekernel_server_start() == 0) {
++			if (target_proc
++				&& (NULL != target_proc->tsk)
++				&& (NULL != proc->tsk)
++				&& (task_uid(target_proc->tsk).val > REKERNEL_MIN_USERAPP_UID)
++				&& (proc->pid != target_proc->pid)
++				&& rekernel_line_is_frozen(target_proc->tsk)) {
++				char binder_kmsg[REKERNEL_PACKET_SIZE];
++				snprintf(binder_kmsg, sizeof(binder_kmsg), "type=Binder,bindertype=transaction,oneway=%d,from_pid=%d,from=%d,target_pid=%d,target=%d;", tr->flags & TF_ONE_WAY, proc->pid, task_uid(proc->tsk).val, target_proc->pid, task_uid(target_proc->tsk).val);
++				rekernel_send_netlink(binder_kmsg, strlen(binder_kmsg));
++			}
++		}
++#endif
+ 		if (WARN_ON(proc == target_proc)) {
+ 			binder_txn_error("%d:%d self transactions not allowed\n",
+ 				thread->pid, proc->pid);
+diff --git a/drivers/android/binder_alloc.c b/drivers/android/binder_alloc.c
+--- a/drivers/android/binder_alloc.c
++++ b/drivers/android/binder_alloc.c
+@@ -16,6 +16,9 @@
+ #include <linux/seq_file.h>
+ #include <linux/vmalloc.h>
+ #include <linux/slab.h>
++#ifdef CONFIG_REKERNEL
++#include "../rekernel/rekernel.h"
++#endif
+ #include <linux/sched.h>
+ #include <linux/list_lru.h>
+ #include <linux/ratelimit.h>
+@@ -459,6 +462,22 @@ static struct binder_buffer *binder_alloc_new_buf_locked(
+ 	}
+ 
+ 	if (is_async && alloc->free_async_space < size) {
++#ifdef CONFIG_REKERNEL
++		if (alloc->free_async_space < 3 * (size + sizeof(struct binder_buffer))
++			|| (alloc->free_async_space < REKERNEL_WARN_AHEAD_SPACE)) {
++			struct task_struct *proc_task = NULL;
++			rcu_read_lock();
++			proc_task = find_task_by_vpid(alloc->pid);
++			rcu_read_unlock();
++			if (proc_task != NULL && rekernel_server_start() == 0) {
++				if (rekernel_line_is_frozen(proc_task)) {
++					char binder_kmsg[REKERNEL_PACKET_SIZE];
++					snprintf(binder_kmsg, sizeof(binder_kmsg), "type=Binder,bindertype=free_buffer_full,oneway=1,from_pid=%d,from=%d,target_pid=%d,target=%d;", current->pid, task_uid(current).val, proc_task->pid, task_uid(proc_task).val);
++					rekernel_send_netlink(binder_kmsg, strlen(binder_kmsg));
++				}
++			}
++		}
++#endif
+ 		binder_alloc_debug(BINDER_DEBUG_BUFFER_ALLOC,
+ 			     "%d: binder_alloc_buf size %zd failed, no async space left\n",
+ 			      alloc->pid, size);
+diff --git a/kernel/signal.c b/kernel/signal.c
+--- a/kernel/signal.c
++++ b/kernel/signal.c
+@@ -21,6 +21,9 @@
+ #include <linux/sched/task_stack.h>
+ #include <linux/sched/cputime.h>
+ #include <linux/file.h>
++#ifdef CONFIG_REKERNEL
++#include "../drivers/rekernel/rekernel.h"
++#endif
+ #include <linux/fs.h>
+ #include <linux/mm.h>
+ #include <linux/proc_fs.h>
+@@ -1320,6 +1323,15 @@ int do_send_sig_info(int sig, struct kernel_siginfo *info, struct task_struct *p
+ 	unsigned long flags;
+ 	int ret = -ESRCH;
+ 	trace_android_vh_do_send_sig_info(sig, current, p);
++#ifdef CONFIG_REKERNEL
++	if (rekernel_server_start() == 0) {
++		if (rekernel_line_is_frozen(current) && (sig == SIGKILL || sig == SIGTERM || sig == SIGABRT || sig == SIGQUIT)) {
++			char signal_kmsg[REKERNEL_PACKET_SIZE];
++			snprintf(signal_kmsg, sizeof(signal_kmsg), "type=Signal,signal=%d,killer_pid=%d,killer=%d,dst_pid=%d,dst=%d;", sig, task_tgid_nr(p), task_uid(p).val, task_tgid_nr(current), task_uid(current).val);
++			rekernel_send_netlink(signal_kmsg, strlen(signal_kmsg));
++		}
++	}
++#endif
+ 	if (lock_task_sighand(p, &flags)) {
+ 		ret = send_signal_locked(sig, info, p, type);
+ 		unlock_task_sighand(p, &flags);
+diff --git a/drivers/rekernel/Kconfig b/drivers/rekernel/Kconfig
+new file mode 100644
+--- /dev/null
++++ b/drivers/rekernel/Kconfig
+@@ -0,0 +1,15 @@
++# SPDX-License-Identifier: GPL-2.0-only
++
++config REKERNEL
++	bool "Re:Kernel event netlink bridge"
++	depends on ANDROID_BINDER_IPC
++	depends on NET
++	depends on PROC_FS
++	depends on FREEZER
++	default n
++	help
++	  Build the Re:Kernel event bridge used by the experimental NoActive
++	  integration.  The implementation is built in because binder, binder_alloc
++	  and signal call its API directly.  The ReSukiSU Manual profile supplies
++	  the surrounding root/hook contract; it is not a dependency of this
++	  driver.  Userspace protocol and runtime behavior are validated separately.
+diff --git a/drivers/rekernel/Makefile b/drivers/rekernel/Makefile
+new file mode 100644
+--- /dev/null
++++ b/drivers/rekernel/Makefile
+@@ -0,0 +1,3 @@
++# SPDX-License-Identifier: GPL-2.0-only
++
++obj-$(CONFIG_REKERNEL)	+= rekernel.o
+diff --git a/drivers/rekernel/rekernel.h b/drivers/rekernel/rekernel.h
+new file mode 100644
+--- /dev/null
++++ b/drivers/rekernel/rekernel.h
+@@ -0,0 +1,21 @@
++/* SPDX-License-Identifier: GPL-2.0-only */
++#ifndef _DRIVERS_REKERNEL_H
++#define _DRIVERS_REKERNEL_H
++
++#include <linux/types.h>
++
++struct task_struct;
++
++#define REKERNEL_NETLINK_MAX 26
++#define REKERNEL_NETLINK_MIN 22
++#define REKERNEL_USER_PORT 100
++#define REKERNEL_PACKET_SIZE 128
++#define REKERNEL_MIN_USERAPP_UID 10000
++#define REKERNEL_MAX_SYSTEM_UID 2000
++#define REKERNEL_WARN_AHEAD_SPACE (1U << 17)
++
++int rekernel_server_start(void);
++int rekernel_send_netlink(const char *message, size_t length);
++bool rekernel_line_is_frozen(struct task_struct *task);
++
++#endif /* _DRIVERS_REKERNEL_H */
+diff --git a/drivers/rekernel/rekernel.c b/drivers/rekernel/rekernel.c
+new file mode 100644
+--- /dev/null
++++ b/drivers/rekernel/rekernel.c
+@@ -0,0 +1,173 @@
++// SPDX-License-Identifier: GPL-2.0-only
++/* Re:Kernel netlink server and proc status endpoint. */
++
++#include <linux/errno.h>
++#include <linux/freezer.h>
++#include <linux/kernel.h>
++#include <linux/mutex.h>
++#include <linux/netlink.h>
++#include <linux/proc_fs.h>
++#include <linux/seq_file.h>
++#include <linux/slab.h>
++#include <linux/string.h>
++#include <net/net_namespace.h>
++#include <net/sock.h>
++
++#include "rekernel.h"
++
++enum rekernel_server_state {
++	REKERNEL_SERVER_DOWN,
++	REKERNEL_SERVER_STARTING,
++	REKERNEL_SERVER_READY,
++};
++
++static DEFINE_MUTEX(rekernel_server_lock);
++static enum rekernel_server_state rekernel_state = REKERNEL_SERVER_DOWN;
++static struct sock *rekernel_netlink;
++static struct proc_dir_entry *rekernel_dir;
++static struct proc_dir_entry *rekernel_unit_entry;
++static unsigned int rekernel_netlink_unit = REKERNEL_NETLINK_MIN;
++
++static void rekernel_server_cleanup_locked(void)
++{
++	if (rekernel_unit_entry) {
++		proc_remove(rekernel_unit_entry);
++		rekernel_unit_entry = NULL;
++	}
++	if (rekernel_dir) {
++		proc_remove(rekernel_dir);
++		rekernel_dir = NULL;
++	}
++	if (rekernel_netlink) {
++		netlink_kernel_release(rekernel_netlink);
++		rekernel_netlink = NULL;
++	}
++	rekernel_state = REKERNEL_SERVER_DOWN;
++}
++
++static void rekernel_netlink_rcv(struct sk_buff *skb)
++{
++	/* Re:Kernel is a one-way event channel; userspace owns the protocol. */
++	(void)skb;
++}
++
++static struct netlink_kernel_cfg rekernel_netlink_cfg = {
++	.input = rekernel_netlink_rcv,
++};
++
++static int rekernel_unit_show(struct seq_file *m, void *v)
++{
++	seq_printf(m, "%u\n", READ_ONCE(rekernel_netlink_unit));
++	return 0;
++}
++
++static int rekernel_unit_open(struct inode *inode, struct file *file)
++{
++	return single_open(file, rekernel_unit_show, NULL);
++}
++
++static const struct proc_ops rekernel_unit_fops = {
++	.proc_open = rekernel_unit_open,
++	.proc_read = seq_read,
++	.proc_lseek = seq_lseek,
++	.proc_release = single_release,
++};
++
++static int rekernel_create_netlink_locked(void)
++{
++	for (rekernel_netlink_unit = REKERNEL_NETLINK_MIN;
++	     rekernel_netlink_unit < REKERNEL_NETLINK_MAX;
++	     rekernel_netlink_unit++) {
++		rekernel_netlink = netlink_kernel_create(&init_net,
++				rekernel_netlink_unit, &rekernel_netlink_cfg);
++		if (rekernel_netlink)
++			return 0;
++	}
++
++	return -ENODEV;
++}
++
++int rekernel_server_start(void)
++{
++	char unit_name[sizeof("4294967295")];
++	int ret;
++
++	mutex_lock(&rekernel_server_lock);
++	if (rekernel_state == REKERNEL_SERVER_READY) {
++		ret = 0;
++		goto out;
++	}
++
++	rekernel_state = REKERNEL_SERVER_STARTING;
++	ret = rekernel_create_netlink_locked();
++	if (ret)
++		goto fail;
++
++	rekernel_dir = proc_mkdir("rekernel", NULL);
++	if (!rekernel_dir) {
++		ret = -ENOMEM;
++		goto fail;
++	}
++
++	scnprintf(unit_name, sizeof(unit_name), "%u", rekernel_netlink_unit);
++	rekernel_unit_entry = proc_create(unit_name, 0444, rekernel_dir,
++					   &rekernel_unit_fops);
++	if (!rekernel_unit_entry) {
++		ret = -ENOMEM;
++		goto fail;
++	}
++
++	rekernel_state = REKERNEL_SERVER_READY;
++	ret = 0;
++	goto out;
++
++fail:
++	rekernel_server_cleanup_locked();
++out:
++	mutex_unlock(&rekernel_server_lock);
++	return ret;
++}
++
++int rekernel_send_netlink(const char *message, size_t length)
++{
++	struct sk_buff *skb;
++	struct nlmsghdr *nlh;
++	int ret;
++
++	if (!message || !length || length > REKERNEL_PACKET_SIZE)
++		return -EMSGSIZE;
++
++	mutex_lock(&rekernel_server_lock);
++	if (rekernel_state != REKERNEL_SERVER_READY || !rekernel_netlink) {
++		ret = -ENOTCONN;
++		goto out;
++	}
++
++	skb = nlmsg_new(length, GFP_ATOMIC);
++	if (!skb) {
++		ret = -ENOMEM;
++		goto out;
++	}
++
++	nlh = nlmsg_put(skb, 0, 0, rekernel_netlink_unit, length, 0);
++	if (!nlh) {
++		nlmsg_free(skb);
++		ret = -EMSGSIZE;
++		goto out;
++	}
++
++	memcpy(nlmsg_data(nlh), message, length);
++	ret = netlink_unicast(rekernel_netlink, skb, REKERNEL_USER_PORT,
++				      MSG_DONTWAIT);
++out:
++	mutex_unlock(&rekernel_server_lock);
++	return ret;
++}
++
++bool rekernel_line_is_frozen(struct task_struct *task)
++{
++	if (!task)
++		return false;
++
++	return frozen(task->group_leader) || freezing(task->group_leader);
++}
