@@ -96,6 +96,25 @@ class ConfigTests(unittest.TestCase):
             self.assertEqual(extend_config['features']['droidspaces'], 'extend')
             self.assertTrue(set(base_profile['capabilities']) <= set(extend_profile['capabilities']))
 
+    def test_extend_profiles_are_buildable_with_runtime_warnings(self):
+        for name in ['ace6-droidspaces-extend-6.6', 'ace6-droidspaces-resukisu-extend-6.6']:
+            config, profile = p.normalize({}, name)
+            lock = p.read_json(p.ROOT / 'manifests/locks' / (name + '.lock.json'))
+            report = p.preflight(config, profile, lock, phase='build')
+            self.assertTrue(report['prepare_allowed'])
+            self.assertFalse(report['blockers'])
+            self.assertTrue(any('T11' in warning for warning in report['warnings']))
+            self.assertEqual(lock['resources']['evdi']['commit'],
+                             'd3b85f3251beae4bc8481538f37d13b7f30abde0')
+            self.assertTrue(any(step['path'].endswith('ace6-droidspaces-extend-6.6.patch')
+                                for step in lock['steps']))
+            self.assertEqual(sum('drivers/gpu/drm/evdi/' in step['destination']
+                                 for step in lock['steps']), 14)
+            incomplete = copy.deepcopy(lock)
+            incomplete['resources'].pop('evdi')
+            with self.assertRaisesRegex(p.Invalid, 'EVDI'):
+                p.validate_lock(incomplete, config, profile)
+
     def test_rekernel_keeps_normalized_toggle_and_manual_base(self):
         config, profile = p.normalize({}, 'ace6-rekernel-experimental')
         self.assertTrue(config['features']['rekernel'])
