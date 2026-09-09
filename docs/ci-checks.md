@@ -12,9 +12,9 @@ The repository has three automation layers:
    Its `fast` scope checks every normalized feature combination, all profile
    preflight results, the WebUI bundle, and the upstream checker entrypoint.
    Its `compile` scope builds three representative profiles; `full` builds all
-   seven profiles currently allowed through build preflight and runs the
+   nine profiles currently allowed through build preflight and runs the
    report-only drift check. The two standalone Droidspaces `extend` profiles
-   are checked as expected blockers and are not sent to the compiler.
+   are included in that full compile set and retain runtime warnings.
 
 The debug compiler uses `ACE6_BUILD_TIMEOUT_SECONDS` inside
 `scripts/build.py`. The command starts each compiler invocation in its own

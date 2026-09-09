@@ -39,10 +39,9 @@ T09 adds a separate Droidspaces standard path. The no-SUSFS variant uses the
 adaptation and NTSYNC. The ReSukiSU container variant reuses the T07 Manual Hook
 path and explicitly selects `CONFIG_KSU_SUSFS=n`; it does not inherit the SUSFS
 Inline implementation. EVDI and the `ghost_task` vendor workaround remain
-separate T11/T10 decisions. T11 pins the legacy EVDI files to a matching
-upstream candidate and compiles the object in isolation, but leaves extend
-blocked because the current `create-disp` UAPI/userspace candidate is not aligned
-with the kernel candidate and HCI/systemd-coredump/device inputs are not locked.
+separate T11/T10 decisions. T11 now pins the EVDI files and power-mode UAPI,
+adds that integration to both extend locks, and leaves userspace,
+systemd-coredump and device checks as runtime warnings.
 
 T12 now gives the Re:Kernel experimental path one built-in implementation,
 formal Kconfig/Makefile wiring and shared Binder/binder_alloc/signal symbols.

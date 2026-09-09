@@ -91,8 +91,7 @@ not a kernel-preparation input.
 ## Acceptance boundary
 
 T09 evidence covers cumulative source preparation, `olddefconfig`, the 42
-fragment settings, NTSYNC object compilation and profile inheritance. The main
-composite additionally records the EVDI integration and keeps the EVDI ABI,
-module modpost, full Image, boot, container creation, namespace isolation, NAT
-connectivity, rootfs behavior, device modules and release publication as
-separate gates.
+fragment settings, NTSYNC object compilation and profile inheritance. The
+extend locks additionally record the EVDI integration. Full Image, boot,
+container creation, namespace isolation, NAT connectivity, rootfs behavior,
+device modules and release publication remain separate gates.

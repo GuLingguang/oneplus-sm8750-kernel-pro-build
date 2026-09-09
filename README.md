@@ -119,7 +119,7 @@ Measured on **OnePlus Ace 6 (`ktm`), Project Infinity X / Android 16** during th
 Remaining verification gaps:
 
 - **Re:Kernel** is source/build-capable but remains experimental because the NoActive userspace protocol and runtime gate are unverified; no release claim is made
-- **Droidspaces extend/EVDI** has kernel-side evidence, but container lifecycle, display userspace and frame submission were not tested
+- **Droidspaces extend/EVDI** now has a source-locked build path; container lifecycle, display userspace and frame submission were not tested
 - **KPM/KPN** remains disabled and has not been exercised on a real device
 - **LineageOS** (official Ace6 builds) remains unverified; the test device runs Project Infinity X
 
@@ -259,12 +259,12 @@ The **Debug build** workflow is manual and has three scopes:
 
 - `fast` runs the repository gate, every feature-input combination, all profile dry-runs, the upstream checker entrypoint, and the WebUI build. It downloads no kernel source.
 - `compile` builds three representative profiles with a compiler timeout and isolated evidence artifacts.
-- `full` builds all seven profiles currently allowed through build preflight and adds the report-only upstream drift check.
+- `full` builds all nine profiles currently allowed through build preflight and adds the report-only upstream drift check.
 
-The two standalone Droidspaces `extend` profiles remain expected blockers. The
-fast job checks that they stop before source download; they are excluded from
-the compile sets. Build jobs run at most two profiles at once and never update
-the public ccache or publish a Release.
+The two standalone Droidspaces `extend` profiles now enter the full compile
+set. Their build path carries T11 runtime warnings; the fast job still checks
+that every profile dry-run completes. Build jobs run at most two profiles at
+once and never update the public ccache or publish a Release.
 
 For the same local combination check:
 
@@ -353,9 +353,9 @@ python3 scripts/ci.py                   # repository-only CI gate
 by Actions. The common entry resolves the exact profile/source lock, clones
 `KERNEL_SRC` into an isolated workspace instead of modifying it, applies the
 ordered patches, runs `olddefconfig`, verifies the actual Image release string,
-and writes a build manifest beside the AK3 output. Re:Kernel and the main
-extend composition are build-capable with explicit runtime warnings; KPM remains
-hard-blocked until its pinned resource is complete. See
+and writes a build manifest beside the AK3 output. Re:Kernel and both
+Droidspaces extend compositions are build-capable with explicit runtime
+warnings; KPM remains hard-blocked until its pinned resource is complete. See
 `./reproduce.sh --help` and `docs/execution-t15.md`.
 
 **Requirements**: the locked AOSP Clang 21 archive/toolchain, git, patch, zip,

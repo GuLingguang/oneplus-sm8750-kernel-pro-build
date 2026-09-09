@@ -10,9 +10,9 @@ that needs userspace, device or handoff evidence.
 | `ace6-resukisu-manual-6.6` | Ace6 + fixed ReSukiSU candidate | Manual | off | off | T25 AK3 built and checked; device/runtime gate remains separate |
 | `ace6-resukisu-susfs-inline-6.6` | Ace6 + fixed ReSukiSU/SUSFS candidates | SUSFS Inline | on | off | T25 AK3 built; T26 boot/root/smoke/5-minute soak partial-pass |
 | `ace6-droidspaces-standard-6.6` | Ace6 | none | off | standard | T25 AK3 built and checked; container runtime remains untested |
-| `ace6-droidspaces-extend-6.6` | inherits standard | none | off | extend | blocked T11 ABI/userspace; experimental |
+| `ace6-droidspaces-extend-6.6` | inherits standard | none | off | extend | build-capable; T11 userspace/device warning |
 | `ace6-droidspaces-resukisu-standard-6.6` | inherits standard + ReSukiSU | Manual | off | standard | T25 AK3 built and checked; container runtime remains untested |
-| `ace6-droidspaces-resukisu-extend-6.6` | inherits ReSukiSU standard | Manual | off | extend | blocked T11 ABI/userspace; experimental |
+| `ace6-droidspaces-resukisu-extend-6.6` | inherits ReSukiSU standard | Manual | off | extend | build-capable; T11 userspace/device warning |
 | `ace6-rekernel-experimental` | inherits ReSukiSU Manual | Manual | off | off | build-capable; T13/T26 userspace protocol/runtime warning |
 | `ace6-main-release-compat-6.6` | ReSukiSU + SUSFS + Droidspaces extend + Re:Kernel | SUSFS Inline | on | extend | build-capable; T20 backing/single-writeback verified, T11/T13 userspace warnings remain |
 
@@ -38,13 +38,12 @@ would fabricate a `task_struct` at a globally shared PID lookup. The independent
 in any profile lock. See `docs/ghost-task-rules.md` and
 `docs/execution-t10.md`.
 
-The extend profiles merge standard capabilities and inheritance is tested. The
-main composite has a source-locked EVDI Kconfig/Makefile and checked-in EVDI
-tree, but the current `create-disp` candidate calls an EVDI power-mode ioctl
-absent from that kernel UAPI. EVDI module linking, userspace HCI,
-systemd-coredump and Ace6 device/display compatibility therefore remain
-warnings. T09's standard patch still does not include EVDI or `ghost_task`; the
-main lock adds EVDI separately. See `docs/droidspaces-extend-rules.md`.
+The extend profiles merge standard capabilities and inheritance is tested. Their
+locks now carry the EVDI Kconfig/Makefile integration and the UAPI used by the
+selected `create-disp` candidate. Userspace HCI, systemd-coredump and Ace6
+device/display compatibility remain warnings. T09's standard patch still does
+not include EVDI or `ghost_task`; the extend locks add EVDI separately. See
+`docs/droidspaces-extend-rules.md`.
 
 T09's standard profile and its ReSukiSU Manual variant have passed locked source
 preparation, `olddefconfig`, and NTSYNC object checks. The 42-option kernel
