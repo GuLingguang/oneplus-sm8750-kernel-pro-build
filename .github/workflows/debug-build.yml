@@ -68,16 +68,12 @@ jobs:
                   raise SystemExit(f'missing combination status: {status}')
           if len(report['profiles']) != 9:
               raise SystemExit('all nine profiles were not checked')
-          expected_blocked = {
-              'ace6-droidspaces-extend-6.6',
-              'ace6-droidspaces-resukisu-extend-6.6',
-          }
           actual_blocked = {
               item['profile'] for item in report['profiles']
               if item['status'] == 'blocked'
           }
-          if actual_blocked != expected_blocked:
-              raise SystemExit(f'unexpected blocked profiles: {sorted(actual_blocked)}')
+          if actual_blocked:
+              raise SystemExit(f'profiles still blocked: {sorted(actual_blocked)}')
           print(report['status_counts'])
           PY
 
@@ -85,17 +81,6 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p work/_tmp/profile-plans
-          blocked_profiles=(
-            ace6-droidspaces-extend-6.6
-            ace6-droidspaces-resukisu-extend-6.6
-          )
-          is_expected_blocked() {
-            local candidate="$1"
-            for blocked in "${blocked_profiles[@]}"; do
-              [[ "$candidate" == "$blocked" ]] && return 0
-            done
-            return 1
-          }
           for path in profiles/*/profile.json; do
             profile="${path#profiles/}"
             profile="${profile%/profile.json}"
@@ -103,13 +88,7 @@ jobs:
                 python3 scripts/build.py --profile "$profile" --dry-run \
                 >"work/_tmp/profile-plans/$profile.json" \
                 2>"work/_tmp/profile-plans/$profile.error"; then
-              if is_expected_blocked "$profile"; then
-                echo "profile unexpectedly became buildable: $profile"
-                exit 1
-              fi
               echo "profile dry-run passed: $profile"
-            elif is_expected_blocked "$profile"; then
-              echo "profile blocked as expected: $profile"
             else
               cat "work/_tmp/profile-plans/$profile.error"
               echo "unexpected profile dry-run failure: $profile"
@@ -324,6 +303,8 @@ jobs:
           - ace6-resukisu-susfs-inline-6.6
           - ace6-droidspaces-standard-6.6
           - ace6-droidspaces-resukisu-standard-6.6
+          - ace6-droidspaces-extend-6.6
+          - ace6-droidspaces-resukisu-extend-6.6
           - ace6-rekernel-experimental
           - ace6-main-release-compat-6.6
     env:
