@@ -369,12 +369,20 @@ def require_config(path: Path, symbol: str, expected="y"):
         require(actual == expected, f"CONFIG_{symbol} expected {expected}, found {actual}")
 
 
+def fragment_config_symbols(path: Path):
+    return [
+        line[7:-2]
+        for line in Path(path).read_text().splitlines()
+        if line.startswith("CONFIG_") and line.endswith("=y")
+    ]
+
+
 def configure_kernel(kernel, config, lock):
     config_path = kernel / ".config"
     copy_file(ROOT / "config/config_ace6_final.config", config_path)
     features = config["features"]
     identity = config["identity"]
-    if features["droidspaces"] == "standard":
+    if features["droidspaces"] in ("standard", "extend"):
         merge = kernel / "scripts/kconfig/merge_config.sh"
         fragment = ROOT / "config/config_droidspaces_standard_6.6.fragment"
         run_command(["bash", merge, "-m", config_path, fragment], cwd=kernel, capture=True)
@@ -450,12 +458,14 @@ def configure_kernel(kernel, config, lock):
     require_config(config_path, "KSU", "y" if features["ksu_type"] != "none" else "n")
     require_config(config_path, "KSU_SUSFS", "y" if features["susfs"] else "n")
     require_config(config_path, "REKERNEL", "y" if features["rekernel"] else "n")
+    if features["droidspaces"] in ("standard", "extend"):
+        fragment = ROOT / "config/config_droidspaces_standard_6.6.fragment"
+        for symbol in fragment_config_symbols(fragment):
+            require_config(config_path, symbol)
     if features["droidspaces"] == "extend":
         for symbol in ("SYSVIPC", "NTSYNC", "DRM_LINDROID_EVDI"):
             require_config(config_path, symbol)
     elif features["droidspaces"] == "standard":
-        for symbol in ("SYSVIPC", "NTSYNC"):
-            require_config(config_path, symbol)
         require_config(config_path, "DRM_LINDROID_EVDI", "n")
     else:
         for symbol in ("SYSVIPC", "NTSYNC", "DRM_LINDROID_EVDI"):
