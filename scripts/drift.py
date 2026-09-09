@@ -37,12 +37,23 @@ def command(argv, cwd=None):
 def source_identity(path: Path):
     sha = ""
     dirty = None
-    code, output = command(["git", "-C", path, "rev-parse", "HEAD"])
+    if git_root(path) == path.resolve():
+        code, output = command(["git", "-C", path, "rev-parse", "HEAD"])
+    else:
+        code, output = 1, ""
     if code == 0:
         sha = output.strip().splitlines()[-1] if output.strip() else ""
         code, status = command(["git", "-C", path, "status", "--porcelain", "--untracked-files=all"])
         dirty = code != 0 or bool(status.strip())
     return {"path": str(path), "sha": sha or None, "dirty": dirty}
+
+
+def git_root(path: Path):
+    code, output = command(["git", "-C", path, "rev-parse", "--show-toplevel"])
+    if code != 0 or not output.strip():
+        return None
+    root = Path(output.strip()).resolve()
+    return root if root == path.resolve() else None
 
 
 def safe_extract_tar(archive: Path, destination: Path):
@@ -100,11 +111,20 @@ def parse_source_args(values):
     return result
 
 
+def collect_source_specs(selected):
+    result = {}
+    for _, _, lock, _ in selected:
+        for name, source in lock["sources"].items():
+            if name in result and result[name] != source:
+                raise RuntimeError(f"source lock differs between selected profiles: {name}")
+            result[name] = source
+    return result
+
+
 def copy_snapshot(source: Path, destination: Path):
     if not source.is_dir():
         raise RuntimeError(f"source tree is missing: {source}")
-    code, _ = command(["git", "-C", source, "rev-parse", "--git-dir"])
-    if code == 0:
+    if git_root(source) == source.resolve():
         code, output = command([
             "git", "clone", "--local", "--shared", "--no-checkout", "--quiet",
             source, destination,
@@ -131,6 +151,19 @@ def step_record(step, status, category=None, detail=""):
     return value
 
 
+def apply_patch(kernel: Path, patch: Path, check=False):
+    kernel = kernel.resolve()
+    try:
+        directory = kernel.relative_to(ROOT)
+    except ValueError as exc:
+        raise RuntimeError(f"snapshot is outside project root: {kernel}") from exc
+    mode = "--check" if check else "--verbose"
+    return command(
+        ["git", "apply", mode, f"--directory={directory}", str(patch)],
+        cwd=ROOT,
+    )
+
+
 def apply_steps(kernel: Path, lock, config, source_roots):
     records = []
     steps = list(lock["steps"])
@@ -149,11 +182,11 @@ def apply_steps(kernel: Path, lock, config, source_roots):
             records.append(step_record(step, "incomplete", "unsupported-source-step", "only kernel target steps are supported by this checker"))
             return records, "incomplete"
         if step["operation"] == "patch":
-            code, output = command(["git", "apply", "--check", str(patch)], cwd=kernel)
+            code, output = apply_patch(kernel, patch, check=True)
             if code != 0:
                 records.append(step_record(step, "failed", "patch-apply-failure-needs-review", output))
                 return records, "failed"
-            code, output = command(["git", "apply", "--verbose", str(patch)], cwd=kernel)
+            code, output = apply_patch(kernel, patch)
             if code != 0:
                 records.append(step_record(step, "failed", "patch-apply-failure-needs-review", output))
                 return records, "failed"
@@ -361,6 +394,7 @@ def main():
                 baseline = candidate
             if candidate is None:
                 raise RuntimeError("candidate source is required (use --candidate-kernel, --local, or --fetch-candidate)")
+        source_specs = collect_source_specs(selected)
         provider_roots = dict(source_args)
         link_sources = set()
         for _, _, lock, _ in selected:
@@ -371,7 +405,7 @@ def main():
         for source_name in sorted(link_sources - provider_roots.keys()):
             if not args.fetch_candidate:
                 continue
-            source_spec = selected[0][2]["sources"][source_name]
+            source_spec = source_specs[source_name]
             repo = source_spec["url"].split("github.com/")[-1].removesuffix(".git")
             provider_roots[source_name] = fetch_archive(
                 repo, source_spec["commit"], temp_root / f"provider-{source_name}", args.mirror_prefix,
