@@ -489,29 +489,14 @@ int evdi_ioctl_connect(struct drm_device *dev, void *data, struct drm_file *file
 	return 0;
 }
 
-static __always_inline u64 evdi_swap_mailbox_seq_current(struct evdi_device *evdi,
-							 int display_id)
-{
-	if (unlikely(!evdi))
-		return 0;
-	if (unlikely(display_id < 0 || display_id >= LINDROID_MAX_CONNECTORS))
-		return 0;
-
-	return (u64)atomic64_read(&evdi->swap_mailbox[display_id].seq);
-}
-
 static __always_inline bool evdi_swap_mailbox_read_stable(struct evdi_device *evdi,
 							 int display_id,
-							 u64 *seq,
 							 u64 *payload,
 							 int *poll_id,
 							 struct drm_file **owner)
 {
 	struct evdi_swap_mailbox *mb;
-	u64 s1, s2, p;
-	int pid;
-	struct drm_file *o;
-	int tries = 0;
+	u64 v;
 
 	if (unlikely(!evdi))
 		return false;
@@ -521,31 +506,18 @@ static __always_inline bool evdi_swap_mailbox_read_stable(struct evdi_device *ev
 
 	mb = &evdi->swap_mailbox[display_id];
 
-	for (;;) {
-		s1 = (u64)atomic64_read(&mb->seq);
-		if (s1 & 1)
-			goto retry;
+	v = smp_load_acquire(&mb->payload.counter);
+	if (evdi_swap_is_locked(v))
+		return false;
 
-		evdi_smp_rmb();
-		p = (u64)atomic64_read(&mb->payload);
-		pid = atomic_read(&mb->poll_id);
-		o = READ_ONCE(mb->owner);
-		evdi_smp_rmb();
+	*poll_id = atomic_read(&mb->poll_id);
+	*owner = READ_ONCE(mb->owner);
 
-		s2 = (u64)atomic64_read(&mb->seq);
-		if (likely(s1 == s2 && !(s2 & 1)))
-			break;
+	//Re-read if write occurred mid read (cheaper than a seq counter)
+	if (atomic64_read(&mb->payload) != v)
+		return false;
 
-retry:
-		if (++tries >= 8)
-			return false;
-		cpu_relax();
-	}
-
-	*seq = s2;
-	*payload = p;
-	*poll_id = pid;
-	*owner = o;
+	*payload = v;
 	return true;
 }
 
@@ -558,9 +530,9 @@ static __always_inline bool evdi_swap_try_dequeue_display(struct evdi_device *ev
 {
 	struct drm_file *owner;
 	int poll_id;
-	u64 seq, payload, latest;
+	u64 payload;
 
-	if (!evdi_swap_mailbox_read_stable(evdi, d, &seq, &payload, &poll_id,
+	if (!evdi_swap_mailbox_read_stable(evdi, d, &payload, &poll_id,
 					   &owner))
 		return false;
 
@@ -569,14 +541,12 @@ static __always_inline bool evdi_swap_try_dequeue_display(struct evdi_device *ev
 		return false;
 	}
 
-	if (seq == priv->last_swap_seq[d]) {
-		latest = evdi_swap_mailbox_seq_current(evdi, d);
-		if (!(latest & 1) && latest == seq)
-			clear_bit(d, &priv->pending_swaps);
+	if (payload == priv->last_swap_payload[d]) {
+		clear_bit(d, &priv->pending_swaps);
 		return false;
 	}
 
-	priv->last_swap_seq[d] = seq;
+	priv->last_swap_payload[d] = payload;
 	priv->swap_rr = (u8)(d + 1);
 	if (priv->swap_rr >= LINDROID_MAX_CONNECTORS)
 		priv->swap_rr = 0;
@@ -585,10 +555,7 @@ static __always_inline bool evdi_swap_try_dequeue_display(struct evdi_device *ev
 	out->display_id = (int)(u32)payload;
 	*out_poll_id = poll_id;
 
-	latest = evdi_swap_mailbox_seq_current(evdi, d);
-	if (!(latest & 1) && latest == seq)
-		clear_bit(d, &priv->pending_swaps);
-
+	clear_bit(d, &priv->pending_swaps);
 	return true;
 }
 
@@ -800,173 +767,6 @@ out_req_put:
 	return ret;
 }
 
-static inline void evdi_file_track_buffer(struct drm_file *file, int id)
-{
-	struct evdi_file_priv *priv;
-	int ret = 0;
-	u32 handle = 0;
-	void *entry;
-
-	if (unlikely(!file || id <= 0))
-		return;
-
-	priv = file->driver_priv;
-	if (unlikely(!priv))
-		return;
-
-	mutex_lock(&priv->lock);
-
-#ifdef EVDI_HAVE_XARRAY
-#ifdef EVDI_HAVE_XA_ALLOC_CYCLIC
-	entry = xa_load(&priv->bufid_to_handle, id);
-	if (entry)
-		goto out_unlock;
-
-	ret = xa_alloc_cyclic(&priv->handle_to_bufid, &handle,
-			      xa_mk_value((unsigned long)id),
-			      XA_LIMIT(1, INT_MAX),
-			      &priv->next_handle, GFP_KERNEL);
-	if (ret)
-		goto out_unlock;
-
-	ret = xa_err(xa_store(&priv->bufid_to_handle, id,
-			      xa_mk_value((unsigned long)handle),
-			      GFP_KERNEL));
-	if (ret) {
-		xa_erase(&priv->handle_to_bufid, (unsigned long)handle);
-		goto out_unlock;
-	}
-#else
-	{
-		u32 start;
-
-		entry = xa_load(&priv->bufid_to_handle, id);
-		if (entry)
-			goto out_unlock;
-
-		start = READ_ONCE(priv->next_handle);
-		if (unlikely(!start))
-			start = 1;
-
-		handle = start;
-		ret = xa_alloc(&priv->handle_to_bufid, &handle,
-			       xa_mk_value((unsigned long)id),
-			       XA_LIMIT(start, INT_MAX), GFP_KERNEL);
-		if (ret == -EBUSY && start > 1) {
-			handle = 1;
-			ret = xa_alloc(&priv->handle_to_bufid, &handle,
-				       xa_mk_value((unsigned long)id),
-				       XA_LIMIT(1, INT_MAX), GFP_KERNEL);
-		}
-		if (ret)
-			goto out_unlock;
-
-		ret = xa_err(xa_store(&priv->bufid_to_handle, id,
-				      xa_mk_value((unsigned long)handle),
-				      GFP_KERNEL));
-		if (ret) {
-			xa_erase(&priv->handle_to_bufid, (unsigned long)handle);
-			goto out_unlock;
-		}
-
-		WRITE_ONCE(priv->next_handle, handle + 1);
-	}
-#endif
-#else
-	{
-		int start;
-		int hret;
-
-		entry = idr_find(&priv->bufid_to_handle, id);
-		if (entry)
-			goto out_unlock;
-
-		start = (int)READ_ONCE(priv->next_handle);
-		if (start <= 0)
-			start = 1;
-
-		hret = idr_alloc(&priv->handle_to_bufid, (void *)(uintptr_t)id,
-				 start, INT_MAX, GFP_KERNEL);
-		if (hret == -ENOSPC && start > 1)
-			hret = idr_alloc(&priv->handle_to_bufid,
-					 (void *)(uintptr_t)id,
-					 1, INT_MAX, GFP_KERNEL);
-		if (hret < 0) {
-			ret = hret;
-			goto out_unlock;
-		}
-
-		handle = (u32)hret;
-		ret = idr_alloc(&priv->bufid_to_handle,
-				(void *)(uintptr_t)handle,
-				id, id + 1, GFP_KERNEL);
-		if (ret != id) {
-			if (ret >= 0)
-				ret = -EINVAL;
-			idr_remove(&priv->handle_to_bufid, handle);
-			goto out_unlock;
-		}
-
-		WRITE_ONCE(priv->next_handle, handle + 1);
-		ret = 0;
-	}
-#endif
-
-out_unlock:
-	mutex_unlock(&priv->lock);
-
-	if (unlikely(ret))
-		evdi_warn("Failed to track buffer %d (%d)", id, ret);
-}
-
-static inline void evdi_file_untrack_buffer(struct drm_file *file, int id)
-{
-	struct evdi_file_priv *priv;
-	void *entry;
-	u32 handle;
-
-
-	if (unlikely(!file || id <= 0))
-		return;
-
-	priv = file->driver_priv;
-	if (unlikely(!priv))
-		return;
-
-	mutex_lock(&priv->lock);
-
-#ifdef EVDI_HAVE_XARRAY
-#ifdef EVDI_HAVE_XA_ALLOC_CYCLIC
-	entry = xa_load(&priv->bufid_to_handle, id);
-	if (!entry)
-		goto out_unlock;
-
-	handle = (u32)xa_to_value(entry);
-	xa_erase(&priv->bufid_to_handle, id);
-	xa_erase(&priv->handle_to_bufid, (unsigned long)handle);
-#else
-	entry = xa_load(&priv->bufid_to_handle, id);
-	if (!entry)
-		goto out_unlock;
-
-	handle = (u32)xa_to_value(entry);
-	xa_erase(&priv->bufid_to_handle, id);
-	xa_erase(&priv->handle_to_bufid, (unsigned long)handle);
-#endif
-#else
-	entry = idr_find(&priv->bufid_to_handle, id);
-	if (!entry)
-		goto out_unlock;
-
-	handle = (u32)(uintptr_t)entry;
-	idr_remove(&priv->bufid_to_handle, id);
-	idr_remove(&priv->handle_to_bufid, handle);
-#endif
-
-out_unlock:
-	mutex_unlock(&priv->lock);
-}
-
 int evdi_ioctl_gbm_create_buff(struct drm_device *dev, void *data, struct drm_file *file)
 {
 	struct evdi_device *evdi = dev->dev_private;
@@ -1024,8 +824,6 @@ int evdi_ioctl_gbm_create_buff(struct drm_device *dev, void *data, struct drm_fi
 			return -EFAULT;
 		}
 	}
-
-	evdi_file_track_buffer(file, req->reply.create.id);
 
 	if (u_stride) {
 		if (evdi_copy_to_user_allow_partial(u_stride, &req->reply.create.stride, sizeof(*u_stride))) {
@@ -1151,9 +949,6 @@ int evdi_ioctl_gbm_del_buff(struct drm_device *dev, void *data, struct drm_file 
 	long ret;
 
 	ret = evdi_queue_destroy_event(evdi, cmd->id, file);
-	if (!ret)
-		evdi_file_untrack_buffer(file, cmd->id);
-
 	return ret;
 }
 
@@ -1195,6 +990,9 @@ int evdi_queue_swap_event(struct evdi_device *evdi, int id, int display_id,
 	if (unlikely(!READ_ONCE(evdi->displays[display_id].connected)))
 		return -ENODEV;
 
+	if (unlikely(!READ_ONCE(evdi->displays[display_id].power_mode)))
+		return -ENODEV;
+
 	current_generation = READ_ONCE(evdi->displays[display_id].generation);
 	if (unlikely(current_generation != generation))
 		return -ESTALE;
@@ -1212,12 +1010,10 @@ int evdi_queue_swap_event(struct evdi_device *evdi, int id, int display_id,
 	poll_id = atomic_inc_return(&evdi->events.next_poll_id);
 	priv = owner ? owner->driver_priv : NULL;
 
-	atomic64_inc(&mb->seq); // odd
+	atomic64_set(&mb->payload, evdi_swap_pack_locked(id, display_id));
 	WRITE_ONCE(mb->owner, owner);
 	atomic_set(&mb->poll_id, poll_id);
-	atomic64_set(&mb->payload, payload);
-	evdi_smp_wmb();
-	atomic64_inc(&mb->seq); // even
+	smp_store_release(&mb->payload.counter, payload);
 
 	EVDI_PERF_INC64(&evdi_perf.swap_updates);
 
@@ -1228,6 +1024,28 @@ int evdi_queue_swap_event(struct evdi_device *evdi, int id, int display_id,
 
 	// Swap events do not use the standard event queue, so use a mailbox-specific helper
 	evdi_wakeup_mailbox_pollers(evdi);
+
+	return 0;
+}
+
+int evdi_ioctl_set_power_mode(struct drm_device *dev,
+			      void *data,
+			      struct drm_file *file)
+{
+	struct evdi_device *evdi = dev->dev_private;
+	struct drm_evdi_set_power_mode *args = data;
+
+	if (unlikely(args->display_id < 0 ||
+		     args->display_id >= LINDROID_MAX_CONNECTORS))
+		return -EINVAL;
+
+	if (args->power_mode != 0 && args->power_mode != 1)
+		return -EINVAL;
+
+	mutex_lock(&evdi->config_mutex);
+	WRITE_ONCE(evdi->displays[args->display_id].power_mode,
+		   args->power_mode);
+	mutex_unlock(&evdi->config_mutex);
 
 	return 0;
 }
@@ -1270,6 +1088,9 @@ int evdi_ioctl_vsync(struct drm_device *dev,
 		return -ENODEV;
 
 	slot = vs->display_id;
+
+	if (unlikely(!READ_ONCE(evdi->displays[slot].power_mode)))
+		return 0;
 
 	if (slot < 0 || slot >= LINDROID_MAX_CONNECTORS)
 		return -EINVAL;

@@ -64,14 +64,14 @@ static struct evdi_gem_object *evdi_gem_cache_alloc(gfp_t gfp)
 
 static void evdi_gem_vm_open(struct vm_area_struct *vma)
 {
-	struct evdi_gem_object *obj = to_evdi_bo(vma->vm_private_data);
+	struct evdi_gem_object *obj = to_evdi_gem(vma->vm_private_data);
 	drm_gem_vm_open(vma);
 	evdi_pin_pages(obj);
 }
 
 static void evdi_gem_vm_close(struct vm_area_struct *vma)
 {
-	struct evdi_gem_object *obj = to_evdi_bo(vma->vm_private_data);
+	struct evdi_gem_object *obj = to_evdi_gem(vma->vm_private_data);
 	evdi_unpin_pages(obj);
 	drm_gem_vm_close(vma);
 }
@@ -85,13 +85,13 @@ const struct vm_operations_struct evdi_gem_vm_ops = {
 #if KERNEL_VERSION(5, 11, 0) <= LINUX_VERSION_CODE
 static int evdi_prime_pin(struct drm_gem_object *obj)
 {
-	struct evdi_gem_object *bo = to_evdi_bo(obj);
+	struct evdi_gem_object *bo = to_evdi_gem(obj);
 	return evdi_pin_pages(bo);
 }
 
 static void evdi_prime_unpin(struct drm_gem_object *obj)
 {
-	struct evdi_gem_object *bo = to_evdi_bo(obj);
+	struct evdi_gem_object *bo = to_evdi_gem(obj);
 	evdi_unpin_pages(bo);
 }
 
@@ -111,24 +111,6 @@ static bool evdi_drm_gem_object_use_import_attach(struct drm_gem_object *obj)
 		return false;
 
 	return true;
-}
-
-uint32_t evdi_gem_object_handle_lookup(struct drm_file *filp, struct drm_gem_object *obj)
-{
-	uint32_t it_handle = 0;
-	struct drm_gem_object *it_obj = NULL;
-
-	spin_lock(&filp->table_lock);
-	idr_for_each_entry(&filp->object_idr, it_obj, it_handle) {
-		if (it_obj == obj)
-			break;
-	}
-	spin_unlock(&filp->table_lock);
-
-	if (!it_obj)
-		it_handle = 0;
-
-	return it_handle;
 }
 
 struct evdi_gem_object *evdi_gem_alloc_object(struct drm_device *dev, size_t size)
@@ -260,7 +242,7 @@ int evdi_gem_fault(struct vm_fault *vmf)
 {
 	struct vm_area_struct *vma = vmf->vma;
 #endif
-	struct evdi_gem_object *obj = to_evdi_bo(vma->vm_private_data);
+	struct evdi_gem_object *obj = to_evdi_gem(vma->vm_private_data);
 	struct page *page;
 	pgoff_t page_offset;
 	loff_t num_pages;
@@ -430,33 +412,22 @@ static int evdi_export_id_as_fd(int id, uint32_t flags, int *out_fd)
 	return 0;
 }
 
-static int evdi_read_id_from_fd(int fd_u32, int *out_id)
+static int evdi_read_id_from_file(struct file *file, int *out_id)
 {
 	loff_t pos = 0;
 	ssize_t rd;
 	int id;
-	struct file *memfd_file;
 	int ret = 0;
 
-	if (!out_id)
+	if (!file || !out_id)
 		return -EINVAL;
-	if (fd_u32 <= 0 || fd_u32 > INT_MAX)
-		return -EBADF;
 
-	memfd_file = fget(fd_u32);
-	if (!memfd_file)
-		return -EBADF;
-
-	rd = kernel_read(memfd_file, &id, sizeof(id), &pos);
+	rd = kernel_read(file, &id, sizeof(id), &pos);
 	if (rd != sizeof(id))
 		ret = -EINVAL;
 	else
 		*out_id = id;
 
-	if (!ret)
-		evdi_debug("Got handle id: %d from fd: %d\n", id, fd_u32);
-
-	fput(memfd_file);
 	return ret;
 }
 
@@ -474,16 +445,72 @@ int evdi_prime_fd_to_handle(struct drm_device *dev,
 			    int prime_fd,
 			    uint32_t *handle)
 {
-	int id, ret;
+	struct evdi_gem_object *obj;
+	struct drm_gem_object *gem_obj;
+	struct dma_buf *dma_buf;
+	struct file *dmabuf_file;
+	int ret, id;
 
-	if (!handle)
+	if (!handle || prime_fd < 0)
 		return -EINVAL;
 
-	ret = evdi_read_id_from_fd(prime_fd, &id);
-	if (ret)
-		return ret;
+	dma_buf = dma_buf_get(prime_fd);
+	if (!IS_ERR(dma_buf)) {
+		gem_obj = evdi_gem_prime_import(dev, dma_buf);
+		dma_buf_put(dma_buf);
 
-	*handle = (uint32_t)id;
+		if (IS_ERR(gem_obj))
+			return PTR_ERR(gem_obj);
+
+		ret = drm_gem_handle_create(file_priv, gem_obj, handle);
+		drm_gem_object_put(gem_obj);
+		return ret;
+	}
+
+	dmabuf_file = fget(prime_fd);
+	if (!dmabuf_file)
+		return -EBADF;
+
+	ret = evdi_read_id_from_file(dmabuf_file, &id);
+	if (ret) {
+		fput(dmabuf_file);
+		return ret;
+	}
+
+	obj = evdi_gem_cache_alloc(GFP_KERNEL);
+	if (!obj) {
+		fput(dmabuf_file);
+		return -ENOMEM;
+	}
+
+	mutex_init(&obj->pages_lock);
+	atomic_set(&obj->pages_pin_count, 0);
+
+	ret = drm_gem_object_init(dev, &obj->base, PAGE_SIZE);
+	if (ret) {
+		mutex_destroy(&obj->pages_lock);
+		kmem_cache_free(evdi_gem_cache, obj);
+		fput(dmabuf_file);
+		return ret;
+	}
+
+#if KERNEL_VERSION(5, 11, 0) <= LINUX_VERSION_CODE
+	obj->base.funcs = &gem_obj_funcs;
+#endif
+
+	obj->gralloc_id = id;
+	obj->dmabuf_file = dmabuf_file;
+
+	ret = drm_gem_handle_create(file_priv, &obj->base, handle);
+	if (ret) {
+		drm_gem_object_release(&obj->base);
+		mutex_destroy(&obj->pages_lock);
+		kmem_cache_free(evdi_gem_cache, obj);
+		fput(dmabuf_file);
+		return ret;
+	}
+
+	drm_gem_object_put(&obj->base);
 	return 0;
 }
 
@@ -533,7 +560,7 @@ void evdi_gem_vunmap(struct evdi_gem_object *obj)
 
 void evdi_gem_free_object(struct drm_gem_object *gem_obj)
 {
-	struct evdi_gem_object *obj = to_evdi_bo(gem_obj);
+	struct evdi_gem_object *obj = to_evdi_gem(gem_obj);
 
 	if (obj->vmapping)
 		evdi_gem_vunmap(obj);
@@ -542,6 +569,17 @@ void evdi_gem_free_object(struct drm_gem_object *gem_obj)
 		dma_buf_detach(gem_obj->import_attach->dmabuf,
 			       gem_obj->import_attach);
 		dma_buf_put(gem_obj->import_attach->dmabuf);
+	}
+
+	if (obj->dmabuf_file) {
+		fput(obj->dmabuf_file);
+		obj->dmabuf_file = NULL;
+	}
+
+	if (obj->sg) {
+		sg_free_table(obj->sg);
+		kfree(obj->sg);
+		obj->sg = NULL;
 	}
 
 	if (obj->pages)
@@ -558,7 +596,7 @@ void evdi_gem_free_object(struct drm_gem_object *gem_obj)
 
 struct sg_table *evdi_prime_get_sg_table(struct drm_gem_object *obj)
 {
-	struct evdi_gem_object *bo = to_evdi_bo(obj);
+	struct evdi_gem_object *bo = to_evdi_gem(obj);
 
 	if (unlikely(!obj))
 		return ERR_PTR(-EINVAL);
@@ -569,10 +607,15 @@ struct sg_table *evdi_prime_get_sg_table(struct drm_gem_object *obj)
 	if (unlikely(!bo->pages))
 		return ERR_PTR(-EINVAL);
 
+	if (bo->sg)
+		return bo->sg;
+
 #if KERNEL_VERSION(5, 10, 0) <= LINUX_VERSION_CODE
-	return drm_prime_pages_to_sg(obj->dev, bo->pages,
-				   bo->base.size >> PAGE_SHIFT);
+	bo->sg = drm_prime_pages_to_sg(obj->dev, bo->pages,
+				       bo->base.size >> PAGE_SHIFT);
 #else
-	return drm_prime_pages_to_sg(bo->pages, bo->base.size >> PAGE_SHIFT);
+	bo->sg = drm_prime_pages_to_sg(bo->pages, bo->base.size >> PAGE_SHIFT);
 #endif
+
+	return bo->sg;
 }

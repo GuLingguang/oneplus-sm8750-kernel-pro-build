@@ -160,7 +160,7 @@ struct evdi_gralloc_buf_user {
 };
 
 /* Must be +1 poll event types */
-#define EVDI_EVENT_TYPE_MAX 6
+#define EVDI_EVENT_TYPE_MAX 7
 
 struct evdi_event_pool {
 	struct kmem_cache *cache;
@@ -229,9 +229,14 @@ struct evdi_gem_object {
 #endif
 	bool vmap_is_vmram;
 	struct sg_table *sg;
+	struct file* dmabuf_file;
+	u32 gralloc_id;
 };
 
-#define to_evdi_bo(x) container_of(x, struct evdi_gem_object, base)
+static inline struct evdi_gem_object *to_evdi_gem(struct drm_gem_object *obj)
+{
+	return container_of(obj, struct evdi_gem_object, base);
+}
 
 struct evdi_swap {
 	int id;
@@ -239,8 +244,12 @@ struct evdi_swap {
 };
 
 struct evdi_swap_mailbox {
-	atomic64_t	seq;
-	atomic64_t	payload; /* (u32)id << 32 | (u32)display_id */
+	/*
+	 * Bit 63: lock bit
+	 * Bits 32-62: buffer id
+	 * Bits 0-31: display id
+	 */
+	atomic64_t	payload;
 	atomic_t	poll_id;
 	struct drm_file	*owner;
 };
@@ -248,6 +257,16 @@ struct evdi_swap_mailbox {
 static __always_inline u64 evdi_swap_pack(int id, int display_id)
 {
 	return ((u64)(u32)id << 32) | (u64)(u32)display_id;
+}
+
+static __always_inline u64 evdi_swap_pack_locked(int id, int display_id)
+{
+	return evdi_swap_pack(id, display_id) | (1ULL << 63);
+}
+
+static __always_inline bool evdi_swap_is_locked(u64 payload)
+{
+	return !!(payload & (1ULL << 63));
 }
 
 /*
@@ -265,20 +284,11 @@ struct evdi_display {
 	uint32_t height;
 	uint32_t refresh_rate;
 	uint32_t generation;
+	int power_mode;
 };
 
 struct evdi_file_priv {
-	struct mutex lock;
-#ifdef EVDI_HAVE_XARRAY
-	struct xarray bufid_to_handle;
-	struct xarray handle_to_bufid;
-	u32 next_handle;
-#else
-	struct idr bufid_to_handle;
-	struct idr handle_to_bufid;
-	u32 next_handle;
-#endif
-	u64 last_swap_seq[LINDROID_MAX_CONNECTORS];
+	u64 last_swap_payload[LINDROID_MAX_CONNECTORS];
 	u8 swap_rr;
 	unsigned long pending_swaps;
 };
@@ -383,6 +393,7 @@ int evdi_queue_swap_event(struct evdi_device *evdi, int id, int display_id, u32 
 			struct drm_file *owner);
 int evdi_queue_destroy_event(struct evdi_device *evdi, int id, struct drm_file *owner);
 int evdi_ioctl_vsync(struct drm_device *dev, void *data, struct drm_file *file);
+int evdi_ioctl_set_power_mode(struct drm_device *dev, void *data, struct drm_file *file);
 
 /* evdi_event.c */
 int evdi_event_init(struct evdi_device *evdi);
@@ -412,7 +423,6 @@ int evdi_drm_gem_mmap(struct file *filp, struct vm_area_struct *vma);
 void evdi_gem_free_object(struct drm_gem_object *gem_obj);
 int evdi_gem_cache_init(void);
 void evdi_gem_cache_cleanup(void);
-uint32_t evdi_gem_object_handle_lookup(struct drm_file *filp, struct drm_gem_object *obj);
 struct sg_table *evdi_prime_get_sg_table(struct drm_gem_object *obj);
 struct drm_gem_object *evdi_gem_prime_import(struct drm_device *dev,
 					     struct dma_buf *dma_buf);

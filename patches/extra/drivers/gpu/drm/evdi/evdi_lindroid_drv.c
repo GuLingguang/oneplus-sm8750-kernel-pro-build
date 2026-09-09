@@ -60,6 +60,8 @@ static const struct drm_ioctl_desc evdi_ioctls[] = {
 			 EVDI_IOCTL_FLAGS),
 	DRM_IOCTL_DEF_DRV(EVDI_VSYNC, evdi_ioctl_vsync,
 			DRM_RENDER_ALLOW),
+	DRM_IOCTL_DEF_DRV(EVDI_SET_POWER_MODE, evdi_ioctl_set_power_mode,
+			 EVDI_IOCTL_FLAGS),
 };
 
 static struct drm_driver evdi_driver = {
@@ -112,16 +114,6 @@ static int evdi_driver_open(struct drm_device *dev, struct drm_file *file)
 	if (!priv)
 		return -ENOMEM;
 
-	mutex_init(&priv->lock);
-#ifdef EVDI_HAVE_XARRAY
-	xa_init_flags(&priv->bufid_to_handle, XA_FLAGS_ALLOC);
-	xa_init_flags(&priv->handle_to_bufid, XA_FLAGS_ALLOC);
-	priv->next_handle = 1;
-#else
-	idr_init(&priv->bufid_to_handle);
-	idr_init(&priv->handle_to_bufid);
-	priv->next_handle = 1;
-#endif
 	priv->swap_rr = 0;
 	priv->pending_swaps = 0;
 	file->driver_priv = priv;
@@ -148,18 +140,9 @@ static void evdi_driver_postclose(struct drm_device *dev, struct drm_file *file)
 	evdi_event_cleanup_file(evdi, file);
 
 	if (priv) {
-		mutex_lock(&priv->lock);
-#ifdef EVDI_HAVE_XARRAY
-		xa_destroy(&priv->handle_to_bufid);
-		xa_destroy(&priv->bufid_to_handle);
-#else
-		idr_destroy(&priv->handle_to_bufid);
-		idr_destroy(&priv->bufid_to_handle);
-#endif
 		WRITE_ONCE(priv->pending_swaps, 0);
-		memset(priv->last_swap_seq, 0, sizeof(priv->last_swap_seq));
+		memset(priv->last_swap_payload, 0, sizeof(priv->last_swap_payload));
 		priv->swap_rr = 0;
-		mutex_unlock(&priv->lock);
 
 		kfree(priv);
 		file->driver_priv = NULL;
@@ -180,6 +163,7 @@ int evdi_device_init(struct evdi_device *evdi, struct platform_device *pdev)
 		evdi->displays[i].height = 1080;
 		evdi->displays[i].refresh_rate = 60;
 		evdi->displays[i].generation = 1;
+		evdi->displays[i].power_mode = 1;
 		evdi->connector[i] = NULL;
 	}
 	evdi->drm_client = NULL;
