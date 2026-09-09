@@ -8,16 +8,16 @@
   "capabilities": [
     "droidspaces-extend"
   ],
-  "blockers": [
-    "T11: EVDI candidate is object-only; full module modpost needs kernel Module.symvers",
-    "T11: create-disp candidate requires DRM_EVDI_SET_POWER_MODE (0x0f), absent from the locked EVDI UAPI",
-    "T11: virtual HCI/systemd-coredump/device userspace contract is not locked"
+  "blockers": [],
+  "warnings": [
+    "T11: EVDI module/userspace ABI and virtual HCI/systemd-coredump runtime remain unverified",
+    "T11: Ace6 ROM/framework/device display pipeline remains unverified"
   ],
   "experimental": true,
   "status": {
-    "code": "blocked",
-    "contract": "static-partial",
-    "build": "evdi-object-only",
+    "code": "build-capable-experimental",
+    "contract": "source-locked-runtime-pending",
+    "build": "pending",
     "runtime": "not-tested"
   }
 }
