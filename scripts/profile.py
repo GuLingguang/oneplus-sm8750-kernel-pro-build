@@ -21,6 +21,14 @@ PATH_VALIDATION_ROOT = ROOT / "work" / "_tmp" / "path-validation"
 SHA = re.compile(r"[0-9a-f]{40}\Z")
 DIGEST = re.compile(r"[0-9a-f]{64}\Z")
 MAIN_RELEASE_PROFILE = "ace6-main-release-compat-6.6"
+EVDI_DESTINATIONS = frozenset(
+    "drivers/gpu/drm/evdi/" + path
+    for path in (
+        "Kconfig", "LICENSE", "Makefile", "dkms.conf", "evdi_connector.c",
+        "evdi_drv.h", "evdi_event.c", "evdi_fb.c", "evdi_gem.c", "evdi_ioctl.c",
+        "evdi_lindroid_drv.c", "evdi_modeset.c", "evdi_sysfs.c", "uapi/evdi_drm.h",
+    )
+)
 
 
 class Invalid(ValueError):
@@ -270,6 +278,19 @@ def validate_lock(lock, config, p, root=ROOT):
             inside(PATH_VALIDATION_ROOT, step["destination"])
         if step["operation"] == "link":
             link_spec(inside(root, step["path"]), lock["sources"])
+    if f["droidspaces"] == "extend":
+        evdi = lock["resources"].get("evdi")
+        require(isinstance(evdi, dict), "extend lock missing EVDI source record")
+        require(evdi.get("repository", "").startswith("https://"), "EVDI repository must use HTTPS")
+        require(SHA.fullmatch(evdi.get("commit", "")), "EVDI commit is not locked")
+        require(SHA.fullmatch(evdi.get("tree", "")), "EVDI tree is not locked")
+        require(evdi.get("files") == len(EVDI_DESTINATIONS), "EVDI file count is incomplete")
+        copied = {
+            step["destination"]
+            for step in lock["steps"]
+            if step["source"] == "kernel" and step["operation"] == "copy"
+        }
+        require(EVDI_DESTINATIONS <= copied, "extend lock is missing an EVDI copy step")
     if f["kpm"]:
         kpm = lock["resources"].get("kpm")
         require(isinstance(kpm, dict) and kpm.get("version") and DIGEST.fullmatch(kpm.get("sha256", "")), "KPM lacks pinned version/hash")
