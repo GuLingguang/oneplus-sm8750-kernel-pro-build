@@ -110,11 +110,11 @@
     },
     {
       "path": "scripts/profile.py",
-      "sha256": "1b5db4c95590ee5f412167e5d23fe6427cbf2c0131f81d105ec6f607918eca3a"
+      "sha256": "9e3d7b35323b53a773b239a17c137791852791ee1a188033b50b357e89b01014"
     },
     {
       "path": "scripts/build.py",
-      "sha256": "dbbd8ec1fc6f8e1c1aeef9abb614b883c16078aa8ccb3665cf597471a3dd8924"
+      "sha256": "a38117e9277efd8d05328c86f33a7726ea6bd02653e2d60ab2db5a806063a976"
     },
     {
       "path": "manifests/build-features.json",

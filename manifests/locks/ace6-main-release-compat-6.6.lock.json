@@ -106,11 +106,11 @@
     },
     {
       "path": "scripts/profile.py",
-      "sha256": "1b5db4c95590ee5f412167e5d23fe6427cbf2c0131f81d105ec6f607918eca3a"
+      "sha256": "9e3d7b35323b53a773b239a17c137791852791ee1a188033b50b357e89b01014"
     },
     {
       "path": "scripts/build.py",
-      "sha256": "dbbd8ec1fc6f8e1c1aeef9abb614b883c16078aa8ccb3665cf597471a3dd8924"
+      "sha256": "a38117e9277efd8d05328c86f33a7726ea6bd02653e2d60ab2db5a806063a976"
     },
     {
       "path": "manifests/build-features.json",
@@ -206,31 +206,31 @@
     },
     {
       "path": "patches/extra/drivers/gpu/drm/evdi/evdi_drv.h",
-      "sha256": "e37a9466c7a63621d0fe826d57d8fdd5338349ac81dc206b909d5221826bf442"
+      "sha256": "128c334e0de05ea00ac63f37dcaadfe9b5f2a79c5432d84da1d45ee59717313d"
     },
     {
       "path": "patches/extra/drivers/gpu/drm/evdi/evdi_event.c",
-      "sha256": "e1d38b7c88a69b5e153e32d2f1afb0623bced9b8749d1cfc0f93187ed706b79f"
+      "sha256": "d7b02ba69e646a0762b3ff9eb5670297b9381dde9d967ab09488110176ca70ac"
     },
     {
       "path": "patches/extra/drivers/gpu/drm/evdi/evdi_fb.c",
-      "sha256": "c6d5a4fef50cbcbe2d9da1721400c80f87a2036f912c86c8a770f96a6272af4a"
+      "sha256": "d4c4440cca55fac14bc88b07c97546132fb8434d20410ab5f7e4b323ed1b0e2c"
     },
     {
       "path": "patches/extra/drivers/gpu/drm/evdi/evdi_gem.c",
-      "sha256": "f0d195fd6b608ba859eb6dfc98bc3d755ffa3b65853581ff61ca306bc2371fbc"
+      "sha256": "7b35ac9fd0d71b41f9da1e47b3c55cf76358f0b07b4fcebc557c17582fc6e9a5"
     },
     {
       "path": "patches/extra/drivers/gpu/drm/evdi/evdi_ioctl.c",
-      "sha256": "fba817969f57a0a40970fd22ceae9dc91d6db81960d2b76f3ad4714828556c05"
+      "sha256": "4a394747b7a52d65fe7f2c2677a2373654e1966c53d13acf49494f565ac5d84d"
     },
     {
       "path": "patches/extra/drivers/gpu/drm/evdi/evdi_lindroid_drv.c",
-      "sha256": "a154b3956ef7a9e2deadde5f8032b2eae3cda0eb713659788e6933ad9aebd8ff"
+      "sha256": "cd4d60f1f326805ea685ee69d8c58d361f88c0d877e4301fbf5bd1fdf0947288"
     },
     {
       "path": "patches/extra/drivers/gpu/drm/evdi/evdi_modeset.c",
-      "sha256": "6b9f96f036e7dec019fd980bc3e3d72d17154c89ffd3006cdcd5565a0f33e2da"
+      "sha256": "8da274d6234c8ad6b8e7ffbd50bb1d4356f37d26c4eeab07c300e72cc0f5cb8f"
     },
     {
       "path": "patches/extra/drivers/gpu/drm/evdi/evdi_sysfs.c",
@@ -238,7 +238,7 @@
     },
     {
       "path": "patches/extra/drivers/gpu/drm/evdi/uapi/evdi_drm.h",
-      "sha256": "40cea205c60f4712b3dd5da4ded2d29784a5de9ff7f54f0246043d45c3bf604a"
+      "sha256": "cd983b8878cd4c530e6492477f544619f4cca2403e3a49f086ab6b7b419fa5dc"
     }
   ],
   "steps": [
@@ -375,7 +375,7 @@
       "operation": "copy",
       "layer": "integration",
       "path": "patches/extra/drivers/gpu/drm/evdi/evdi_drv.h",
-      "sha256": "e37a9466c7a63621d0fe826d57d8fdd5338349ac81dc206b909d5221826bf442",
+      "sha256": "128c334e0de05ea00ac63f37dcaadfe9b5f2a79c5432d84da1d45ee59717313d",
       "destination": "drivers/gpu/drm/evdi/evdi_drv.h"
     },
     {
@@ -383,7 +383,7 @@
       "operation": "copy",
       "layer": "integration",
       "path": "patches/extra/drivers/gpu/drm/evdi/evdi_event.c",
-      "sha256": "e1d38b7c88a69b5e153e32d2f1afb0623bced9b8749d1cfc0f93187ed706b79f",
+      "sha256": "d7b02ba69e646a0762b3ff9eb5670297b9381dde9d967ab09488110176ca70ac",
       "destination": "drivers/gpu/drm/evdi/evdi_event.c"
     },
     {
@@ -391,7 +391,7 @@
       "operation": "copy",
       "layer": "integration",
       "path": "patches/extra/drivers/gpu/drm/evdi/evdi_fb.c",
-      "sha256": "c6d5a4fef50cbcbe2d9da1721400c80f87a2036f912c86c8a770f96a6272af4a",
+      "sha256": "d4c4440cca55fac14bc88b07c97546132fb8434d20410ab5f7e4b323ed1b0e2c",
       "destination": "drivers/gpu/drm/evdi/evdi_fb.c"
     },
     {
@@ -399,7 +399,7 @@
       "operation": "copy",
       "layer": "integration",
       "path": "patches/extra/drivers/gpu/drm/evdi/evdi_gem.c",
-      "sha256": "f0d195fd6b608ba859eb6dfc98bc3d755ffa3b65853581ff61ca306bc2371fbc",
+      "sha256": "7b35ac9fd0d71b41f9da1e47b3c55cf76358f0b07b4fcebc557c17582fc6e9a5",
       "destination": "drivers/gpu/drm/evdi/evdi_gem.c"
     },
     {
@@ -407,7 +407,7 @@
       "operation": "copy",
       "layer": "integration",
       "path": "patches/extra/drivers/gpu/drm/evdi/evdi_ioctl.c",
-      "sha256": "fba817969f57a0a40970fd22ceae9dc91d6db81960d2b76f3ad4714828556c05",
+      "sha256": "4a394747b7a52d65fe7f2c2677a2373654e1966c53d13acf49494f565ac5d84d",
       "destination": "drivers/gpu/drm/evdi/evdi_ioctl.c"
     },
     {
@@ -415,7 +415,7 @@
       "operation": "copy",
       "layer": "integration",
       "path": "patches/extra/drivers/gpu/drm/evdi/evdi_lindroid_drv.c",
-      "sha256": "a154b3956ef7a9e2deadde5f8032b2eae3cda0eb713659788e6933ad9aebd8ff",
+      "sha256": "cd4d60f1f326805ea685ee69d8c58d361f88c0d877e4301fbf5bd1fdf0947288",
       "destination": "drivers/gpu/drm/evdi/evdi_lindroid_drv.c"
     },
     {
@@ -423,7 +423,7 @@
       "operation": "copy",
       "layer": "integration",
       "path": "patches/extra/drivers/gpu/drm/evdi/evdi_modeset.c",
-      "sha256": "6b9f96f036e7dec019fd980bc3e3d72d17154c89ffd3006cdcd5565a0f33e2da",
+      "sha256": "8da274d6234c8ad6b8e7ffbd50bb1d4356f37d26c4eeab07c300e72cc0f5cb8f",
       "destination": "drivers/gpu/drm/evdi/evdi_modeset.c"
     },
     {
@@ -439,7 +439,7 @@
       "operation": "copy",
       "layer": "integration",
       "path": "patches/extra/drivers/gpu/drm/evdi/uapi/evdi_drm.h",
-      "sha256": "40cea205c60f4712b3dd5da4ded2d29784a5de9ff7f54f0246043d45c3bf604a",
+      "sha256": "cd983b8878cd4c530e6492477f544619f4cca2403e3a49f086ab6b7b419fa5dc",
       "destination": "drivers/gpu/drm/evdi/uapi/evdi_drm.h"
     },
     {
@@ -479,6 +479,14 @@
       "version_code": 35115,
       "version_name": "v4.2.0-rc1-9d0ff6ae",
       "status": "recorded from historical log; deterministic build injection pending T15"
+    },
+    "evdi": {
+      "repository": "https://github.com/Linux-on-droid/lindroid-drm-loopback.git",
+      "reference": "master",
+      "commit": "d3b85f3251beae4bc8481538f37d13b7f30abde0",
+      "tree": "5e437ce3db2ccf3f73a4d5f876d716105886b736",
+      "files": 14,
+      "verification": "checked-in files match the pinned source snapshot"
     }
   },
   "blockers": [],
