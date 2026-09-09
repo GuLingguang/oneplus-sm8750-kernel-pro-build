@@ -2,9 +2,9 @@
   "schema_version": 1,
   "task": "T11",
   "status": {
-    "code": "blocked",
-    "contract": "static-partial",
-    "build": "evdi-object-only",
+    "code": "build-capable-experimental",
+    "contract": "source-locked-runtime-pending",
+    "build": "2-of-2-image-ak3-verified",
     "runtime": "not-tested",
     "release_allowed": false
   },
@@ -14,14 +14,14 @@
       "base": "ace6-droidspaces-standard-6.6",
       "hook_mode": "none",
       "susfs": false,
-      "status": "blocked"
+      "status": "build-capable-experimental"
     },
     "resukisu_extend": {
       "name": "ace6-droidspaces-resukisu-extend-6.6",
       "base": "ace6-droidspaces-resukisu-standard-6.6",
       "hook_mode": "manual",
       "susfs": false,
-      "status": "blocked"
+      "status": "build-capable-experimental"
     }
   },
   "inheritance": {
@@ -41,24 +41,48 @@
   },
   "evdi_source_candidate": {
     "repository": "https://github.com/Linux-on-droid/lindroid-drm-loopback.git",
-    "commit": "f15bc3ee6e9a90e85e70ef3da057f027c68cbefd",
-    "tree": "e6fa7935a0bbd44f27ccf41e0cf6b2f18feca568",
+    "commit": "d3b85f3251beae4bc8481538f37d13b7f30abde0",
+    "tree": "5e437ce3db2ccf3f73a4d5f876d716105886b736",
     "local_files_compared": 14,
     "all_local_files_match": true,
-    "operational_extend_lock": false,
-    "reason_not_operational": "userspace ABI and full module/runtime contract are not validated"
+    "operational_extend_lock": true,
+    "reason_not_release_ready": "kernel source and display ioctl are now pinned; userspace, ROM and device runtime remain unverified"
   },
   "isolated_build": {
-    "config_symbol": "CONFIG_DRM_LINDROID_EVDI=m",
-    "target": "drivers/gpu/drm/evdi/evdi.o",
+    "config_symbol": "CONFIG_DRM_LINDROID_EVDI=y",
+    "target": "drivers/gpu/drm/evdi/built-in.a",
     "arch": "arm64",
     "llvm": true,
     "status": "passed",
-    "object_sha256": "33c6d03ffa625b963682d8f9d45ec90d8a7f8cd6d6f3c92d2e7b14f2f2d27d1e",
-    "config_sha256": "95d0d7a8540f61c36a9eebe229d47a78571dae4cfad6ebd87adcaf2f51ca639b",
+    "target_sha256": "e59ca5e30081a3066a45b21f1d0437ec975ea0e6f8d61155edbde0e852e7d3e5",
+    "config_sha256": "73a7318679dfbaf40a7af077878f76ce35457b850600f7e29b61080901cff56e",
     "full_kernel": false,
-    "module_link": "blocked: target Module.symvers absent",
+    "module_link": "not-applicable: EVDI is built in; full Image remains pending",
     "runtime": false
+  },
+  "full_builds": {
+    "extend": {
+      "config_id": "80b2fe70a7d6595682ba034ba0bb387d3f70af36c581dc40aabe65b13d72ed87",
+      "lock_id": "64759691a4b7aeccc620769435c9244cb8872e5454fdfdb6d2013a5774703e18",
+      "final_config_sha256": "cbad10cb063cf81d1485ccaaa0a239a966ed9d2360a1c6b06cc7f36ca45ba426",
+      "kernel_release": "6.6.142-4k-gcb967c26c2c5+",
+      "image_sha256": "6b42b85a28c5de08144aee43cdda6e69a5924447dde06ec3988197044b299d94",
+      "artifact": "out/droidspaces-extend-6.6/Kernel-Ace6-Lingguang-20260909.zip",
+      "artifact_sha256": "13ec71938df94b4ab65833e19ecbdf1f3d83dd37c968b5428de80fc97734ee69",
+      "zip_test": "passed",
+      "jobs": 30
+    },
+    "resukisu_extend": {
+      "config_id": "6999907ced7f5e4d79b9b014edb145f53a1e475c853ef1cdacc48dd7dc4b3c9a",
+      "lock_id": "bace53218b37336fc350fab70b3088001b81c9d684799dc3eaa9b54fc8986081",
+      "final_config_sha256": "7107ddbdfa801122d621660d371362aadadce2bb3afc4a4676372d95551a0888",
+      "kernel_release": "6.6.142-4k-gcb967c26c2c5+",
+      "image_sha256": "5a8a4ea2b9adab20cf651ae59fb34b695430424c5cfd665bf953b531408e475d",
+      "artifact": "out/droidspaces-resukisu-extend-6.6/Kernel-Ace6-Lingguang-ksu35115-20260909.zip",
+      "artifact_sha256": "b2a3245a3902762df1d4a7aaf4235f6c4e1357425a4ec703168674805d9986ef",
+      "zip_test": "passed",
+      "jobs": 30
+    }
   },
   "userspace_candidates": {
     "vendor_lindroid": {
@@ -94,12 +118,12 @@
     "acceptance": "candidate snapshots only; no Ace6 ROM/framework/rootfs lock"
   },
   "uapi_audit": {
-    "kernel_evdi_defines_set_power_mode": false,
+    "kernel_evdi_defines_set_power_mode": true,
     "userspace_create_disp_defines_set_power_mode": true,
     "userspace_create_disp_calls_set_power_mode": true,
     "ioctl_number": "0x0f",
     "condition": "ifndef TARGET_USES_REAL_HWC",
-    "result": "mismatch"
+    "result": "matched"
   },
   "dependencies": {
     "virtual_hci": {
@@ -114,7 +138,7 @@
   },
   "real_device": {
     "needed_now": false,
-    "reason": "static ABI mismatch must be resolved before device testing",
+    "reason": "source-level ABI now matches; target ROM/framework and runtime evidence are still required",
     "later_required_checks": [
       "EVDI card create/destroy and DPMS",
       "display resolution/frame delivery",

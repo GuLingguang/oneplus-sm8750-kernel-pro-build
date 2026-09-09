@@ -1,44 +1,44 @@
 # Ace6 T11 执行记录：Droidspaces extend 6.6
 
-日期：2026-09-06。范围是建立 extend 的独立能力清单，核对 EVDI/KABI 和
-userspace 边界；没有把 EVDI、HCI 或 systemd-coredump 宣称为 standard 能力，
-也没有进行完整内核、Android framework、真机或容器运行时验收。
+初始审计日期：2026-09-06。适配更新：2026-09-09。范围包括 extend 的独立
+能力清单、EVDI/KABI、userspace 边界和构建入口。完整 Image 已构建，Android
+framework、真机和容器运行时仍未验收。
 
 ## 结果
 
 | 项目 | 结果 | 边界 |
 | --- | --- | --- |
 | standard → extend 继承 | 通过 | 两个 extend profile 保留 base features/capabilities，仅切换 droidspaces |
-| EVDI 来源 | 已定位 | 14 个本地文件逐字匹配 `lindroid-drm-loopback@f15bc3e` |
-| EVDI 目标对象 | 通过 | `CONFIG_DRM_LINDROID_EVDI=m`，仅 `evdi.o` |
-| EVDI module/modpost | 受阻 | 临时输出没有目标 kernel `Module.symvers` |
-| create-disp ABI | 不匹配 | userspace 候选调用 `SET_POWER_MODE(0x0f)`，内核 UAPI 没有它 |
+| EVDI 来源 | 已锁定 | 14 个本地文件逐字匹配 `lindroid-drm-loopback@d3b85f3` |
+| EVDI 目标对象 | 通过 | `CONFIG_DRM_LINDROID_EVDI=y`，生成 `built-in.a` |
+| 完整 Image/AK3 | 通过 | 两个 extend profile 均以 30 线程完成并通过 `zip -T` |
+| EVDI module/modpost | 不适用 | extend 选择内建驱动，不生成独立模块 |
+| create-disp ABI | 已对齐 | userspace 与内核都定义 `SET_POWER_MODE(0x0f)` |
 | virtual HCI | 未验证 | 依赖 Android framework permission/uinput/device policy |
 | systemd-coredump | 未锁定 | 依赖 userspace systemd/rootfs、socket 和 `core_pattern` |
-| extend 状态 | blocked / experimental | 不进入 operational extend lock，不作 release claim |
+| extend 状态 | build-capable / experimental | 已进入 operational extend lock，仍不作 release claim |
 
 ## EVDI 源码与编译
 
-本地 EVDI 文件来自 legacy inventory，但此前没有来源 commit。使用镜像
-克隆的只读上游 `Linux-on-droid/lindroid-drm-loopback` 对比后，所有 14 个
-源文件（含 UAPI/Kconfig/Makefile）与
-`f15bc3ee6e9a90e85e70ef3da057f027c68cbefd` 完全匹配；该 commit 的 tree 是
-`e6fa7935a0bbd44f27ccf41e0cf6b2f18feca568`。没有采用当前 master 的漂移内容。
+使用镜像克隆的只读上游 `Linux-on-droid/lindroid-drm-loopback` 对比后，所有
+14 个源文件（含 UAPI/Kconfig/Makefile）与
+`d3b85f3251beae4bc8481538f37d13b7f30abde0` 完全匹配；该 commit 的 tree 是
+`5e437ce3db2ccf3f73a4d5f876d716105886b736`。该版本包含 power-mode ioctl、
+真实 dmabuf 导入修复及后续 EVDI 稳定性修复。
 
-在 T09 标准临时内核树中，仅应用 EVDI 的 DRM Kconfig/Makefile hunk，并接入
-本地 EVDI 目录；`olddefconfig` 后设置 `CONFIG_DRM_LINDROID_EVDI=m`，命令
-`make O=... ARCH=arm64 LLVM=1 drivers/gpu/drm/evdi/evdi.o` 通过。
+在 Ace6 主构建临时内核树中应用 EVDI 的 DRM Kconfig/Makefile hunk，接入
+本地 EVDI 目录，并设置 `CONFIG_DRM_LINDROID_EVDI=y`。命令
+`make ARCH=arm64 LLVM=1 LLVM_IAS=1 -j30 drivers/gpu/drm/evdi/` 通过。
 
 ```text
-drivers/gpu/drm/evdi/evdi.o:
-33c6d03ffa625b963682d8f9d45ec90d8a7f8cd6d6f3c92d2e7b14f2f2d27d1e
+drivers/gpu/drm/evdi/built-in.a:
+e59ca5e30081a3066a45b21f1d0437ec975ea0e6f8d61155edbde0e852e7d3e5
 config:
-95d0d7a8540f61c36a9eebe229d47a78571dae4cfad6ebd87adcaf2f51ca639b
+73a7318679dfbaf40a7af077878f76ce35457b850600f7e29b61080901cff56e
 ```
 
-尝试单独 `M=drivers/gpu/drm/evdi modules` 时，modpost 因临时树没有
-`Module.symvers` 报未解析符号。这不是把失败隐藏成成功：当前证据只能记为
-对象编译通过，完整模块链接仍需目标内核构建产出的符号表。
+当前证据覆盖 EVDI 目标目录的编译、静态链接、两个完整 Image 和 AK3 包。
+设备加载与显示帧传递需要真机验收。
 
 ## userspace/API 审计
 
@@ -48,9 +48,9 @@ config:
 组合形成可复现的 userspace lock。
 
 `create-disp` 在非 `TARGET_USES_REAL_HWC` 分支调用
-`DRM_IOCTL_EVDI_SET_POWER_MODE`，而当前 EVDI UAPI 只到 `DRM_EVDI_VSYNC`
-(`0x0e`)，内核驱动没有 `0x0f` 对应 ioctl。除非另有未锁定的 userspace
-分支/编译宏或同步 kernel UAPI，否则启动后的 DPMS/display path 不能成立。
+`DRM_IOCTL_EVDI_SET_POWER_MODE`。当前锁定的 EVDI UAPI 将它定义为 `0x0f`，
+驱动也注册了对应处理函数，静态 ABI 检查通过。Ace6 framework 构建和 DPMS
+运行路径仍未验证。
 
 virtual HCI 依赖 Android 的 `VIRTUAL_INPUT_DEVICE` permission、uinput 和
 framework/device policy；systemd-coredump 依赖目标 rootfs 的 systemd 服务、
@@ -59,10 +59,9 @@ socket activation 和 `kernel.core_pattern`。这些都不是内核 fragment 能
 
 ## 真机需求
 
-现在不需要真机测试：ABI 已经在静态层面出现明确缺口，先刷机只会把未锁定
-的变量混在一起。待后续选定兼容 userspace、Ace6 ROM/framework/rootfs 并完成
-完整 kernel/module build 后，才需要设备测试：EVDI card 创建/销毁、分辨率与
-DPMS、触摸/键鼠输入、容器启动退出、联网、coredump 捕获及重启恢复。
+内核构建已完成。选定兼容 userspace、Ace6 ROM/framework/rootfs 后，需要设备
+测试：EVDI card 创建/销毁、分辨率与 DPMS、触摸/键鼠输入、容器启动退出、联网、
+coredump 捕获及重启恢复。
 
-详细机器证据位于 `docs/evidence/t11-droidspaces-extend.json`；profile
-仍保持 experimental/blocked。
+详细机器证据位于 `docs/evidence/t11-droidspaces-extend.json`；两个 profile
+保持 experimental，构建前置检查已放行，运行时仍未验收。
