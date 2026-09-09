@@ -265,3 +265,20 @@
 4. Repository cleanup keeps all intermediates under `work/`, removes tracked
    WebUI dependencies from the source tree, and adds the network-free
    `scripts/ci.py` gate plus the WebUI build job.
+
+## 2026-09-09 — Droidspaces extend build adaptation
+
+1. Pin `Linux-on-droid/lindroid-drm-loopback@d3b85f3251beae4bc8481538f37d13b7f30abde0`
+   and update the 14 checked-in EVDI files. This revision contains the
+   `DRM_EVDI_SET_POWER_MODE` UAPI and handler used by the selected `create-disp`
+   candidate.
+2. Add the standard Droidspaces patch, extend patch and all EVDI copy steps to
+   both standalone extend locks. Their lock records use the same EVDI source
+   and per-file hashes as the main profile.
+3. Apply the standard 6.6 configuration fragment to both `standard` and
+   `extend` builds. The extend path must retain the standard namespace,
+   cgroup, filesystem, networking and NTSYNC settings.
+4. Move the remaining HCI, systemd-coredump, ROM/framework and device checks
+   to runtime warnings. Both profiles completed local full Image/AK3 builds;
+   they remain experimental with `release_allowed=false` until device tests
+   and the userspace path are checked.

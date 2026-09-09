@@ -11,6 +11,12 @@ The first bullets below are the original T27 handoff snapshot. A later
 profile, the enabled `azram-backing` hand-off, and the remaining untested
 EVDI/Droidspaces/Re:Kernel userspace flows.
 
+A 2026-09-09 T11 follow-up also supersedes the old extend preflight result:
+both standalone Droidspaces extend locks now include the standard configuration,
+extend integration and EVDI source at `d3b85f3`. They are build-capable
+experimental profiles. Display, input, coredump, container and device checks
+remain open.
+
 ## Artifact audit
 
 - Five non-blocked profiles have build manifests and AK3 zips.
