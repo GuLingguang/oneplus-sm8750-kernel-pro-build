@@ -1,0 +1,77 @@
+{
+  "current_result": {
+    "differing_regions": 3,
+    "everything_else": "identical; the allocated Image content matches byte for byte",
+    "identified_as": "the three build-id notes",
+    "image_differing_bytes": 60,
+    "image_identical": false,
+    "image_size": 36874752,
+    "reason": "--build-id=sha1 hashes the whole vmlinux, and the DWARF still varies even though every path is normalised",
+    "region_size_bytes": 20,
+    "vmlinux_build_ids": {
+      "a": "980c8d2f...",
+      "b": "051862b2..."
+    }
+  },
+  "date": "2026-09-11",
+  "evidence": "signing key and build id",
+  "key_is_not_a_secret": "no loadable module is built, CONFIG_MODULE_SIG_ALL and CONFIG_MODULE_SIG_FORCE are unset, and CONFIG_SYSTEM_TRUSTED_KEYS is empty, so the key signs nothing and anchors nothing",
+  "lock_id_at_build": "823138fc694e2a4f4d8031b59f1aa701f9754ad8da30b5331e418a0fc2c86da1",
+  "lock_id_current": "823138fc694e2a4f4d8031b59f1aa701f9754ad8da30b5331e418a0fc2c86da1",
+  "lock_id_matches_current": true,
+  "not_claimed": [
+    "device behaviour",
+    "release readiness",
+    "byte-identical reproducibility",
+    "the other eight profiles"
+  ],
+  "note": "scripts/build.py is a hashed local input and was edited again after these builds; each refresh moves the lock digest. sources, steps, resources, blockers and every other local_files entry are unchanged, so the kernel inputs these builds used are still the ones in the checked-in lock.",
+  "profile": "ace6-minimal-6.6",
+  "remaining_options": [
+    "pin the build id (for example --build-id=none or a fixed value) so the note stops varying",
+    "or find the remaining DWARF non-determinism that feeds the hash"
+  ],
+  "schema_version": 1,
+  "steps": [
+    {
+      "change": "install the checked-in keys/module-signing.pem and point CONFIG_MODULE_SIG_KEY at it",
+      "effect": {
+        "image_differing_bytes": "1128 -> 60"
+      },
+      "step": 1,
+      "why": "CONFIG_MODULE_SIG with the default certs/signing_key.pem makes the kernel generate a random RSA key and a certificate dated at generation time on every build"
+    },
+    {
+      "change": "take the artifact file name date from the locked commit",
+      "effect": {
+        "artifact": "Kernel-Ace6-Lingguang-20260818.zip",
+        "stable_across_builds": true
+      },
+      "step": 2,
+      "why": "the last wall-clock value reaching artifact_name and manifest_id"
+    },
+    {
+      "change": "add -ffile-prefix-map for the repository and the work directory",
+      "detail": {
+        "precedence": "clang applies the last matching map, so the narrower work path is listed last",
+        "verified": "DW_AT_comp_dir is now /ace6/work/src and no profile directory name remains in the vmlinux (0 occurrences of sign-a or sign-b)"
+      },
+      "effect": {
+        "image_differing_bytes": "60 -> 60, now traceable to the build id alone"
+      },
+      "step": 3,
+      "why": "DW_AT_comp_dir recorded the absolute build path; the linker build id hashes the whole vmlinux including debug sections, so a different work path changed the Image"
+    }
+  ],
+  "task": "T25",
+  "verified_working": {
+    "artifact_date": "from the locked commit (20260818) instead of the build day",
+    "module_signing_key": {
+      "config": "CONFIG_MODULE_SIG_KEY=\"certs/ace6-module-signing.pem\"",
+      "generated_key_absent": true,
+      "signing_key_x509_identical_across_builds": true,
+      "subject": "CN=Ace6 reproducible build module signing key"
+    },
+    "uts_version": "#1 SMP PREEMPT Tue Aug 18 16:57:28 UTC 2026 on both builds"
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "chain_of_causes": [
+    {
+      "cause": "kernel generated a random module signing key and a time-stamped certificate on every build",
+      "fix": "install the checked-in keys/module-signing.pem and point CONFIG_MODULE_SIG_KEY at it",
+      "step": 1,
+      "symptom": "1128 differing bytes"
+    },
+    {
+      "cause": "DW_AT_comp_dir embedded the absolute build path, and the linker build id hashes the whole vmlinux including debug sections",
+      "fix": "-ffile-prefix-map for the repository and work directory",
+      "step": 2,
+      "symptom": "60 differing bytes"
+    },
+    {
+      "cause": "assembly keeps its own line table and .S files build from KBUILD_AFLAGS, not KBUILD_CFLAGS",
+      "fix": "the same maps in KAFLAGS",
+      "step": 3,
+      "symptom": "40 differing bytes"
+    },
+    {
+      "cause": "the 32-bit compat vDSO builds from its own VDSO_CFLAGS/VDSO_AFLAGS and never saw the maps; its build id is embedded in .rodata and then hashed again by the vmlinux build id",
+      "fix": "the same maps in KCPPFLAGS_COMPAT, the variable that Makefile documents for user-supplied flags",
+      "step": 4,
+      "symptom": "0 differing bytes"
+    }
+  ],
+  "date": "2026-09-16",
+  "evidence": "byte-identical rebuild achieved",
+  "lock_id_at_build": "1f0ec34fa848377c90642e5c9e7a3142c19f12c11f56483b729eb013d77f78d4",
+  "method": "two full builds from one lock, fresh work/ and out/ each time",
+  "method_notes": [
+    "the build id was left intact; the debug information was made deterministic rather than the id being pinned",
+    "clang applies the last matching prefix map, so the narrower work path is listed after the repository path",
+    "with CONFIG_DEBUG_INFO_COMPRESSED_ZSTD the compressed debug sections avalanche, so byte counts from cmp on the compressed vmlinux are not a reproducibility measure; decompress first"
+  ],
+  "not_claimed": [
+    "device behaviour",
+    "release readiness",
+    "the other eight profiles",
+    "CI equivalence"
+  ],
+  "profile": "ace6-minimal-6.6",
+  "result": {
+    "ak3_sha256": {
+      "a": "ad27c54f132c41c6d99408c4a7f2940b972342adacd19f0072751ba9d25f7caf",
+      "b": "ad27c54f132c41c6d99408c4a7f2940b972342adacd19f0072751ba9d25f7caf",
+      "identical": true
+    },
+    "artifact_name": "Kernel-Ace6-Lingguang-20260818.zip",
+    "image_sha256": {
+      "a": "7e4dd0bb023904b76208b6845958747e4504a53675be53d524d1e75837a83d07",
+      "b": "7e4dd0bb023904b76208b6845958747e4504a53675be53d524d1e75837a83d07",
+      "identical": true
+    },
+    "image_size": 36743680,
+    "manifest_differs_only_by": [
+      "build.started_utc",
+      "manifest_id"
+    ],
+    "uts_version": "#1 SMP PREEMPT Tue Aug 18 16:57:28 UTC 2026"
+  },
+  "schema_version": 1,
+  "task": "T25"
+}

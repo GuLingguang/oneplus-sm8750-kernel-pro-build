@@ -1,0 +1,94 @@
+{
+  "ci_run": {
+    "head_sha": "515f82d1c1d91f98734d81942ffa07b245c5ac67",
+    "id": "34310782005",
+    "started_utc": "2026-09-09T04:23:28Z"
+  },
+  "conclusion": {
+    "actionable": "pin pahole to one version and fix KBUILD_BUILD_TIMESTAMP before asserting byte-identical builds",
+    "byte_identical": false,
+    "cause": "the host pahole version is not locked, and the build timestamp is not fixed",
+    "config_semantically_identical": true,
+    "previously_recorded_status": "ci_local_comparison: not-run"
+  },
+  "date": "2026-09-11",
+  "embedded_config_diff": {
+    "ci_pahole": "1.25-0ubuntu3 (installed by the runner host setup)",
+    "differing_lines": 2,
+    "lines_ci": 8757,
+    "lines_local": 8757,
+    "local_pahole": "v1.31 (host package)",
+    "method": "scripts/extract-ikconfig on the Image inside each AK3 package",
+    "only_difference": {
+      "ci": "CONFIG_PAHOLE_VERSION=125",
+      "local": "CONFIG_PAHOLE_VERSION=131"
+    }
+  },
+  "evidence": "ci-local-same-lock-comparison",
+  "identical_inputs": {
+    "feature_lock_id": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "feature_lock_id_matches": true,
+    "lock_id_at_build": "778e65a45b1a3bff5a1e5eb284aa95ee17a0bf09bdb636782cf68bc45b62f62f",
+    "lock_id_current": "823138fc694e2a4f4d8031b59f1aa701f9754ad8da30b5331e418a0fc2c86da1",
+    "lock_id_matches_between_builds": true,
+    "lock_id_matches_current": false,
+    "note": "scripts/build.py is a hashed local input and was edited again after these builds; each refresh moves the lock digest. sources, steps, resources, blockers and every other local_files entry are unchanged, so the kernel inputs these builds used are still the ones in the checked-in lock.",
+    "profile_id": "82e01652c809f9f5a3d0c80cddf4fc2ac2adb96425cc4803217e8796b1e09db0",
+    "profile_id_matches": true
+  },
+  "image_shape": {
+    "ci_size": 36940288,
+    "local_size": 36874752,
+    "note": "Large regions are byte-identical at the same offsets; the differing bytes concentrate in the later sections rather than forming a uniform shift.",
+    "size_delta": 65536
+  },
+  "inputs_unchanged_since_build": true,
+  "local_build": {
+    "jobs": 30,
+    "out": "out/ci-local-compare-minimal-6.6",
+    "source_providers": "local clean checkouts at the locked commits",
+    "started_utc": "2026-09-11T04:20:12.710408+00:00",
+    "work": "work/ci-local-compare-minimal-6.6"
+  },
+  "not_claimed": [
+    "device behaviour",
+    "release readiness",
+    "byte-identical reproducibility",
+    "the other eight profiles"
+  ],
+  "observed_differences": [
+    {
+      "ci": true,
+      "effect": "metadata only; the debug workflow enables ccache logging, the local default is false",
+      "field": "config.artifacts.ccache_debug",
+      "local": false
+    },
+    {
+      "ci": "#1 SMP PREEMPT Wed Sep  9 04:40:27 UTC 2026",
+      "effect": "KBUILD_BUILD_TIMESTAMP is not fixed, so the embedded build stamp differs",
+      "field": "build.image.uts_version",
+      "local": "#1 SMP PREEMPT Fri Sep 11 12:22:03 CST 2026"
+    },
+    {
+      "ci": "9d3291facbbfc38694cac5fa6ba2ec50e3420ad0f15e11283da7157ad686b826",
+      "effect": "see embedded_config_diff: one line differs",
+      "field": "final_config.sha256",
+      "local": "4800d32c1a393e5094c655130c7cb67bf2670edc0c4755d9e0e3224a5f7775a3"
+    },
+    {
+      "ci": "f73aa04aa1b12da3198494ae8e294978e6aa8923748eec7026994d89591109d6",
+      "effect": "consequence of the two inputs above",
+      "field": "build.image.sha256",
+      "local": "28012be53279e770896f72674e40a592605ad4b228d02d6df6d325e47768907a"
+    },
+    {
+      "ci": "20a32b85f28e37917caca3603763a37236ca18c16c19af2d9f8364e1c3be1161",
+      "effect": "consequence of the Image difference",
+      "field": "artifacts[0].sha256",
+      "local": "d1d0dc224dbc7a405c44677da6c07c7d31589d5f99fdd37493e8d5158b565e4c"
+    }
+  ],
+  "profile": "ace6-minimal-6.6",
+  "schema_version": 1,
+  "task": "T25"
+}
