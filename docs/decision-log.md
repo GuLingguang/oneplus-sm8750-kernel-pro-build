@@ -282,3 +282,156 @@
    to runtime warnings. Both profiles completed local full Image/AK3 builds;
    they remain experimental with `release_allowed=false` until device tests
    and the userspace path are checked.
+
+## 2026-09-11 — Provider drift monitoring and baseline identity
+
+1. Monitor every locked source against the current tip of its branch. The
+   kernel side was already compared through the candidate snapshot, but the
+   ReSukiSU and SUSFS providers were only fetched to satisfy `link` steps.
+   Those two are the inputs most likely to move, so `scripts/drift.py` now
+   resolves each locked source's branch head and records `current`, `drift`,
+   `unresolved`, or `unmonitored`.
+2. Read only the leading token of a lock `reference`. Those fields are
+   descriptive (`main (candidate from historical run; not floating)`,
+   `gki-android15-6.6 / v2.3.0`), and a build still uses the full commit only.
+   A reference that is not a plain branch name stays `unmonitored` instead of
+   being guessed, and the resolved branch is printed so the parse is auditable.
+3. Treat an unreadable remote as `unresolved`. A network failure is neither
+   drift nor success, so it is reported and does not fail the run. The
+   `git ls-remote` lookup carries a bounded timeout so an offline check cannot
+   hang. `--skip-provider-check` restores the previous behaviour.
+4. Stop reporting a fetched archive baseline as `locked-baseline-mismatch`. A
+   snapshot materialized from an archive has no git identity, and comparing
+   that absent SHA with the locked commit produced a mismatch on every profile
+   while the same row also said `no-observed-drift`. Only a readable and
+   genuinely different SHA is identity drift now; `identity_available` records
+   whether the identity could be read at all.
+
+## 2026-09-11 — CI/local comparison and the pahole gap
+
+1. Run the CI/local comparison on one lock instead of leaving it open. The
+   earlier local artifacts were built before the 2026-09-09 lock refresh, so
+   their `lock_id` no longer matches any checked-in lock and they cannot serve
+   as the local side of a same-lock comparison. `ace6-minimal-6.6` was rebuilt
+   from the current lock and compared with Run `34310782005`.
+2. Record the finding as a host-input gap, not as a code defect. Both builds
+   used one lock, one profile and one feature lock, and their embedded
+   configurations are identical across all 8,757 lines except
+   `CONFIG_PAHOLE_VERSION` (`131` locally, `125` on the runner). That is the
+   host pahole package. The locks do not pin it: their `build_environment`
+   limitations name apt dependencies and mkbootimg only.
+3. Keep `byte_identical_build=false`. Two inputs differ between the two builds,
+   the pahole version and the build stamp, and the Image sizes differ by 65,536
+   bytes. That gap is reported as observed rather than attributed to either
+   input on its own, since the comparison does not separate them.
+4. Do not treat `ccache_debug` or the runner locale as build inputs. The first
+   changes only `config_id`, the second only the wording of patch logs. Both
+   appeared in the comparison and neither reaches the kernel.
+5. Do not reuse a pre-refresh artifact for validation. Editing a hashed local
+   input such as `scripts/build.py` changes every lock that lists it, and the
+   artifacts built from the earlier locks describe a configuration that is no
+   longer checked in.
+
+## 2026-09-11 — Deterministic build stamp
+
+1. Derive the embedded build stamp instead of taking the wall clock. `init/Makefile`
+   writes `KBUILD_BUILD_TIMESTAMP` into `UTS_VERSION` verbatim and falls back to
+   `date` when it is unset, which made the Image depend on the build moment and
+   on the host timezone. An empty `build_time` now resolves to the locked kernel
+   commit's committer date in UTC; an explicit value is still used unchanged.
+2. Keep the value tied to a locked input rather than to a fixed constant. A
+   hard-coded date would need editing whenever the kernel lock moves; the commit
+   date follows the lock automatically and stays meaningful in `uname -a`.
+3. Record the resolved stamp and its origin. The manifest carries
+   `build.build_timestamp` and `build.build_timestamp_source`
+   (`explicit` or `locked-commit-date`), so a reader can tell where the value
+   came from without re-running the build.
+4. Record the host pahole version as `toolchain.pahole`. It changes the
+   generated BTF and therefore the Image bytes, and it is the one remaining
+   unlocked input that separates this host from the runner. It is recorded, not
+   asserted: pinning it would break either the host or the runner until both
+   use one version.
+5. Refresh the `scripts/build.py` digest in all nine locks. The locks hash that
+   file, so the change invalidated them, and artifacts built from the previous
+   lock IDs no longer describe a checked-in configuration. The earlier CI
+   artifacts stay valid for device testing; they simply do not match a future
+   lock.
+6. Stamp the packaged entries from the same locked commit date and run `zip`
+   with `TZ=UTC`. Two builds from one lock still produced different archives
+   because `zip` records each entry's modification time and because the DOS
+   fields follow the local timezone. Two packaging runs over one Image now
+   produce the same file, so the archive no longer adds a variable of its own.
+   The date inside the artifact file name is taken from the same locked commit,
+   so `artifact_name` and `manifest_id` follow the lock rather than the build
+   day.
+7. Leave the module signing key alone. `CONFIG_MODULE_SIG=y` with the default
+   `certs/signing_key.pem` makes the kernel generate a random RSA key and a
+   time-stamped self-signed certificate on every build, which is the last input
+   that separates two builds from one lock. Supplying a fixed key is a
+   key-management decision for the repository owner and is not taken here.
+
+## 2026-09-11 — Fixed module signing key and artifact date
+
+1. Use the checked-in `keys/module-signing.pem` instead of a generated key.
+   `CONFIG_MODULE_SIG=y` with the default `certs/signing_key.pem` made the
+   kernel create a random RSA key and a certificate dated at generation time on
+   every build, which was the last input separating two builds from one lock.
+   `certs/Makefile` only generates a key when `CONFIG_MODULE_SIG_KEY` is exactly
+   `certs/signing_key.pem`, so the build now points that option at the
+   checked-in file and the embedded certificate stops moving.
+2. Treat that key as a build input, not a secret. It signs nothing here: no
+   loadable module is built, `CONFIG_MODULE_SIG_ALL` is unset, and
+   `CONFIG_MODULE_SIG_FORCE` is unset, so signature enforcement is off and the
+   key is not a trust anchor. What it buys is a reproducible Image. If
+   enforcement is ever turned on, this key is public and must be replaced
+   first.
+3. Record it in each lock's `local_files`, so a missing or edited key fails
+   validation instead of silently changing every artifact.
+4. Take the date in artifact names from the locked commit as well. It was the
+   last wall-clock value reaching `artifact_name` and `manifest_id`; the
+   archive bytes were already fixed. A build now produces the same file name
+   for as long as the lock does not move, and the workflow's Release tag still
+   carries the run timestamp where a per-run identifier is wanted.
+5. Normalise the build path with `-ffile-prefix-map`. Debug info recorded the
+   absolute build directory, and `--build-id=sha1` hashes the whole vmlinux
+   including debug sections, so building in a different directory changed the
+   Image even when every other input matched. This also makes a local build
+   comparable with a CI one, which lives under a different path. clang applies
+   the last matching map, so the narrower work path is listed after the
+   repository path.
+6. Leave the remaining 60 bytes open rather than papering over them. After the
+   three changes above the Image differs only in its three build-id notes,
+   because the DWARF still varies somewhere that the prefix map does not reach.
+   Removing or pinning the build id would close it, and that trades a debugging
+   aid for a byte count, so it is recorded as a decision to take rather than
+   taken here.
+
+## 2026-09-16 — Byte-identical builds
+
+This entry supersedes item 6 of the 2026-09-11 note, which left the last 60
+bytes open.
+
+1. Cover every flag channel with the prefix map. Two channels were still
+   missing, and each one held the absolute build path in a line table:
+   `KAFLAGS`, because `.S` files build from `KBUILD_AFLAGS` rather than
+   `KBUILD_CFLAGS`; and `KCPPFLAGS_COMPAT`, because the 32-bit compat vDSO
+   Makefile assembles its own `VDSO_CFLAGS`/`VDSO_AFLAGS` and documents that
+   variable as the place for user-supplied flags.
+2. Fix the cause instead of the symptom. The remaining difference was two
+   20-byte GNU build ids, one for the vmlinux and one for the embedded compat
+   vDSO. Pinning or dropping the build id would have closed the byte count in
+   one line, but it trades away a debugging aid. Making the debug information
+   deterministic removes the difference and keeps the build id meaningful.
+3. Record the result. Two builds of `ace6-minimal-6.6` from one lock now produce
+   the same Image (`7e4dd0bb…`) and the same AK3 (`ad27c54f…`); only
+   `build.started_utc` and the `manifest_id` derived from it differ. Evidence is
+   in `docs/evidence/t25-byte-identical-20260916.json`.
+4. Keep the pahole caveat. These two builds share a host, so they share a pahole
+   version. A lock is a byte-identical claim only across hosts whose pahole
+   versions match, since pahole changes `CONFIG_PAHOLE_VERSION` and the
+   generated BTF.
+5. Note the measurement trap for anyone repeating this. With
+   `CONFIG_DEBUG_INFO_COMPRESSED_ZSTD=y` the compressed sections avalanche, so
+   `cmp` on the compressed vmlinux reported 38 million differing bytes while the
+   real difference was one string. Decompress first, and compare section hashes
+   rather than byte counts.

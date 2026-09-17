@@ -126,14 +126,35 @@ runtime evidence separately, keyed by build manifest ID and artifact SHA-256;
 it must not edit the original build identity.
 
 The toolchain digest is recorded in the lock and is verified before an actual
-build. Host image, apt package versions and mkbootimg are not fully locked.
-Empty build time and auto tag are valid requests, and their resolved values
-enter the build manifest before handoff. The manifest also records the build
-preflight report and a publication object with `requested`, `allowed` and
-`published=false`; a requested Release is auditable without being published.
-KBUILD build number, timezone, environment, tool versions, user/host, KSU
-identity and packaging timestamps must still be fixed before asserting
-byte-identical builds. **A source lock is not a byte-identical-build claim.**
+build. Host image, apt package versions, pahole and mkbootimg are not fully
+locked. An empty build time resolves to the locked kernel commit's committer
+date, so the embedded build stamp comes from a locked input instead of the wall
+clock; an explicit value is still used unchanged. Packaged entries are stamped
+from the same commit date and `zip` runs with `TZ=UTC`, so an archive does not
+carry the moment it was written. The resolved value and its source are recorded
+as `build.build_timestamp` and `build.build_timestamp_source` in the manifest,
+alongside `toolchain.pahole`.
+The manifest also records the build preflight report and a publication object
+with `requested`, `allowed` and `published=false`; a requested Release is
+auditable without being published.
+The build installs the checked-in `keys/module-signing.pem` and points
+`CONFIG_MODULE_SIG_KEY` at it, so the kernel no longer generates a random,
+time-stamped certificate per build. That key is a build input rather than a
+secret: it signs nothing and enforcement is off.
+
+Debug information records the build directory, and the linker's `--build-id=sha1`
+hashes the whole vmlinux including debug sections, so the build normalises paths
+with `-ffile-prefix-map` on all three flag channels the tree uses: `KCFLAGS` for
+C, `KAFLAGS` for `.S`, and `KCPPFLAGS_COMPAT` for the 32-bit compat vDSO, whose
+Makefile builds from its own flags. clang applies the last matching map, so the
+narrower work path is listed after the repository path.
+
+Two builds of one profile from one lock on one host therefore produce the same
+Image and the same AK3, verified on 2026-09-16 (`docs/evidence/t25-byte-identical-20260916.json`).
+The build id is left intact rather than pinned. What still separates one host
+from another is the pahole version: it changes `CONFIG_PAHOLE_VERSION` and the
+generated BTF, so a lock is a byte-identical claim only across hosts whose pahole
+versions match.
 
 ## Output and feature boundaries
 
