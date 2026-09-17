@@ -110,7 +110,7 @@
     },
     {
       "path": "scripts/build.py",
-      "sha256": "0e0d8aa6b2c666642588082125bc2db4ca3b52cc1e27e67f1315d44d4a5ce864"
+      "sha256": "827cfaf488efbfc76eec75c0df319dc77dc130378006a46aa092d3697a670f81"
     },
     {
       "path": "manifests/build-features.json",

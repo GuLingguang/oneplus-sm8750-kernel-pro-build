@@ -564,7 +564,18 @@ def toolchain_info(lock):
     version = command_output([clang, "--version"]).splitlines()[0]
     require(re.search(r"clang version 21\.", version) is not None,
             f"clang does not match locked AOSP Clang 21: {version}")
-    return {"clang": version, "linker": "ld.lld", "locked": lock["resources"]["clang"]["version"]}
+    # The pahole version is recorded, never asserted: it is not pinned, so a
+    # missing or unreadable tool must not stop a build that is otherwise fine.
+    pahole_version = "absent"
+    pahole = shutil.which("pahole") or ""
+    if pahole:
+        try:
+            output = command_output([pahole, "--version"]).strip()
+            pahole_version = output.splitlines()[-1] if output else "unreadable"
+        except (BuildError, OSError, IndexError):
+            pahole_version = "unreadable"
+    return {"clang": version, "linker": "ld.lld", "locked": lock["resources"]["clang"]["version"],
+            "pahole": pahole_version}
 
 
 def verify_image(kernel):
