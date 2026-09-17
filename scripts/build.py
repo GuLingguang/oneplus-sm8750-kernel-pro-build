@@ -377,6 +377,15 @@ def fragment_config_symbols(path: Path):
     ]
 
 
+def artifact_date(stamp_epoch):
+    """Date part of an artifact name, taken from the locked commit.
+
+    Using the build day here would make the artifact name, and therefore the
+    manifest ID, differ between two builds that produce identical bytes.
+    """
+    return dt.datetime.fromtimestamp(stamp_epoch, dt.timezone.utc).strftime("%Y%m%d")
+
+
 def configure_kernel(kernel, config, lock):
     config_path = kernel / ".config"
     copy_file(ROOT / "config/config_ace6_final.config", config_path)
@@ -494,6 +503,34 @@ def configure_kernel(kernel, config, lock):
     return {"sha256": hash_file(config_path), "default_compressor": expected.strip('"')}
 
 
+def reproducible_build_timestamp(kernel, identity):
+    """Resolve the stamp embedded in the kernel's ``UTS_VERSION``.
+
+    ``init/Makefile`` takes ``KBUILD_BUILD_TIMESTAMP`` verbatim and falls back
+    to ``date`` when it is unset, so leaving it empty makes the Image depend on
+    the wall clock and on the build host's timezone. An explicit ``build_time``
+    is still used unchanged; otherwise the locked kernel commit's committer
+    date supplies the value, which keeps the stamp tied to a locked input and
+    lets two runs from the same lock produce the same bytes. The commit date is
+    returned as an epoch as well, so packaging can stamp entries from the same
+    locked input.
+    """
+    result = subprocess.run(
+        ["git", "-C", str(kernel), "log", "-1", "--format=%ct"],
+        text=True, capture_output=True, check=False,
+    )
+    value = (result.stdout or "").strip()
+    require(result.returncode == 0 and value.isdigit(),
+            "cannot derive a reproducible timestamp from the locked kernel commit")
+    epoch = int(value)
+    moment = dt.datetime.fromtimestamp(epoch, dt.timezone.utc)
+    derived = f"{moment.strftime('%a %b')} {moment.day:2d} {moment.strftime('%H:%M:%S')} UTC {moment.year}"
+    explicit = identity["build_time"]
+    if explicit and explicit.lower() != "n":
+        return explicit, "explicit", epoch
+    return derived, "locked-commit-date", epoch
+
+
 def toolchain_info(lock):
     clang = shutil.which("clang") or ""
     lld = shutil.which("ld.lld") or ""
@@ -526,7 +563,7 @@ def verify_image(kernel):
             "release": release, "banner_release": banner_release, "uts_version": version}
 
 
-def package_independent_modules(work, out):
+def package_independent_modules(work, out, stamp_epoch):
     """Package only runtime files for the self-authored KSU modules.
 
     These zips are deliberately separate from AK3.  Build sources and npm
@@ -538,7 +575,7 @@ def package_independent_modules(work, out):
     require(source_root.is_dir(), "self-authored module directory is missing")
     require(not pack_root.exists(), "module-pack directory unexpectedly exists in fresh workspace")
     pack_root.mkdir()
-    stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%d")
+    stamp = artifact_date(stamp_epoch)
     artifacts = []
     for source in sorted(source_root.iterdir()):
         if not source.is_dir():
@@ -576,7 +613,7 @@ def package_independent_modules(work, out):
     return artifacts
 
 
-def prepare_package(kernel, config, lock, work, out, image_record):
+def prepare_package(kernel, config, lock, work, out, image_record, stamp_epoch):
     out.mkdir(parents=True, exist_ok=True)
     mode = config["artifacts"]["artifact_mode"]
     require(mode not in ("boot", "all"),
@@ -599,13 +636,25 @@ def prepare_package(kernel, config, lock, work, out, image_record):
         identity = config["identity"]
         user = safe_component(identity["build_user"]) if identity["attribution_enable"] else "Ace6"
         suffix_part = "-" + safe_component(identity["kernel_suffix"]) if identity["kernel_suffix"] else ""
-        stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%d")
+        stamp = artifact_date(stamp_epoch)
         ksu = lock["resources"].get("ksu_identity") or {}
         suffix = f"-ksu{ksu['version_code']}" if config["features"]["ksu_type"] != "none" else ""
         zip_name = f"Kernel-Ace6-{user}{suffix_part}{suffix}-{stamp}.zip"
         zip_path = out / zip_name
         require(not zip_path.exists(), f"artifact already exists: {zip_path}")
-        run_command(["zip", "-r9", zip_path, ".", "-x", "*.git*"], cwd=pack, capture=True)
+        # zip records each entry's modification time, so two builds from one
+        # lock would still differ once the Image matches. Stamp every entry
+        # from the same locked input and keep the DOS time in UTC.
+        for entry in sorted(pack.rglob("*")):
+            try:
+                os.utime(entry, (stamp_epoch, stamp_epoch), follow_symlinks=False)
+            except NotImplementedError:
+                # Platforms without lutimes; the template has no symlinks, so
+                # following them here cannot change another file's times.
+                os.utime(entry, (stamp_epoch, stamp_epoch))
+        zip_env = dict(os.environ)
+        zip_env["TZ"] = "UTC"
+        run_command(["zip", "-r9", zip_path, ".", "-x", "*.git*"], cwd=pack, capture=True, env=zip_env)
         artifacts.append({"kind": "ak3", "path": zip_name, "sha256": hash_file(zip_path), "size": zip_path.stat().st_size})
     if mode in ("image", "all"):
         image_path = out / "Image"
@@ -613,7 +662,7 @@ def prepare_package(kernel, config, lock, work, out, image_record):
         copy_file(kernel / "arch/arm64/boot/Image", image_path)
         artifacts.append({"kind": "Image", "path": "Image", "sha256": hash_file(image_path), "size": image_path.stat().st_size})
     if config["artifacts"]["independent_modules"]:
-        artifacts.extend(package_independent_modules(work, out))
+        artifacts.extend(package_independent_modules(work, out, stamp_epoch))
     primary = zip_name or (artifacts[0]["path"] if artifacts else "")
     require(primary, "artifact selection produced no output")
     return primary, artifacts
@@ -769,6 +818,7 @@ def build(args):
     build_status = "skipped"
     image_record = None
     build_started = dt.datetime.now(dt.timezone.utc).isoformat()
+    build_stamp, stamp_source, stamp_epoch = reproducible_build_timestamp(kernel, config["identity"])
     if config["artifacts"]["debug_skip_build"]:
         image = kernel / "arch/arm64/boot/Image"
         require(not image.exists(), "debug skip refuses to reuse an existing Image")
@@ -781,8 +831,7 @@ def build(args):
         identity = config["identity"]
         env["KBUILD_BUILD_USER"] = identity["build_user"] if identity["attribution_enable"] else ""
         env["KBUILD_BUILD_HOST"] = identity["build_host"] if identity["attribution_enable"] else ""
-        if identity["build_time"] and identity["build_time"].lower() != "n":
-            env["KBUILD_BUILD_TIMESTAMP"] = identity["build_time"]
+        env["KBUILD_BUILD_TIMESTAMP"] = build_stamp
         jobs = args.jobs or int(os.environ.get("ACE6_JOBS", os.cpu_count() or 1))
         make = ["make", "LLVM=1", "LLVM_IAS=1", "ARCH=arm64", f"-j{jobs}", "Image"]
         if "CC" not in env and config["artifacts"]["ccache_enable"] and shutil.which("ccache"):
@@ -802,7 +851,7 @@ def build(args):
         "path": "arch/arm64/boot/Image", "sha256": hash_file(kernel / "arch/arm64/boot/Image"),
         "size": (kernel / "arch/arm64/boot/Image").stat().st_size, "debug_dummy": True,
     }
-    artifact_name, artifacts = prepare_package(kernel, config, lock, work, out, image_record)
+    artifact_name, artifacts = prepare_package(kernel, config, lock, work, out, image_record, stamp_epoch)
     ak3_name = next((item["path"] for item in artifacts if item["kind"] == "ak3"), "")
     final_sources = {}
     for name, source in lock["sources"].items():
@@ -818,7 +867,6 @@ def build(args):
     filename_suffix = safe_component(identity["kernel_suffix"]) if identity["kernel_suffix"] else ""
     ksu_identity = lock["resources"].get("ksu_identity") or {}
     ksu_marker = f"ksu{ksu_identity['version_code']}" if features["ksu_type"] != "none" else ""
-    resolved_build_time = identity["build_time"] if identity["build_time"] and identity["build_time"].lower() != "n" else build_started
     manifest = {
         "schema_version": 1, "manifest_type": "build", "phase": "debug-skipped" if build_status == "skipped" else "built",
         "config": config, "config_id": profile_rules.digest(config), "profile": selected["name"],
@@ -827,6 +875,7 @@ def build(args):
         "feature_lock_id": profile_rules.digest(feature_lock), "feature_sources": feature_lock,
         "steps": records, "toolchain": toolchain, "final_config": config_record,
         "build": {"status": build_status, "started_utc": build_started, "kernel_release": image_record.get("release"),
+                   "build_timestamp": build_stamp, "build_timestamp_source": stamp_source,
                    "image": image_record},
         "artifacts": artifacts, "runtime": "not-tested", "preflight": report,
         "publication": {
@@ -837,8 +886,8 @@ def build(args):
         },
         "reproducibility": {"source_preparation": True, "byte_identical_build": False},
         "resolved": {
-            "build_date_utc": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d"),
-            "build_time": resolved_build_time,
+            "build_date_utc": dt.datetime.fromtimestamp(stamp_epoch, dt.timezone.utc).strftime("%Y-%m-%d"),
+            "build_time": build_stamp, "build_time_source": stamp_source,
             "kernel_commit": lock["sources"]["kernel"]["commit"],
             "kernel_localversion": localversion,
             "artifact_name": artifact_name,
