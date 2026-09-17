@@ -36,10 +36,17 @@ configuration, build and runtime evidence before status is promoted.
 
 Use `check_upstream.sh` for the T22 cumulative drift report. It applies the
 locked steps to disposable snapshots, writes JSON/Markdown plus an Issue draft,
-and never edits locks or GitHub Issues. The T23 scheduled workflow has only
-`contents: read` permission and uploads the report as an artifact; it does not
-create, comment on, or close an Issue. Local snapshots and default reports live
-under `work/_tmp/` so a large check does not fill system `/tmp`. M1 only pins
-its Actions references; it does not dispatch the workflow or change Issue #3.
-The T15 build entry creates local manifests and artifacts, but release
+and never edits locks or GitHub Issues. It also compares every locked source
+with the current tip of its branch and reports `current`, `drift`, `unresolved`,
+or `unmonitored` per source, because the ReSukiSU and SUSFS providers move
+independently of the kernel. That lookup reads the leading token of the
+descriptive `reference` and never becomes a build input; pass
+`--skip-provider-check` together with `--local` for a run that touches no
+network at all. A source that cannot be read is reported as `unresolved`, the
+report counts how many were read, and `--ci` fails when none could be. The T23 scheduled workflow
+has only `contents: read` permission and uploads the report as an artifact; it
+does not create, comment on, or close an Issue. Local snapshots and default
+reports live under `work/_tmp/` so a large check does not fill system `/tmp`.
+M1 only pins its Actions references; it does not dispatch the workflow or change
+Issue #3. The T15 build entry creates local manifests and artifacts, but release
 publication, full feature acceptance and runtime evidence remain T18/T25–T27.
