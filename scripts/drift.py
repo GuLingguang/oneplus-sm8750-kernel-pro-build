@@ -247,7 +247,7 @@ def rule_checks(kernel: Path, config):
     return {"version": version, "type_and_consumer": consumers, "config": {"status": config_status}}
 
 
-def check_variant(config, lock, profile, source: Path, source_roots, label, temp_root):
+def check_variant(config, lock, profile, source: Path, source_roots, label, temp_root, identity_expected=True):
     identity = source_identity(source)
     snapshot = temp_root / label
     copy_snapshot(source, snapshot)
@@ -258,14 +258,18 @@ def check_variant(config, lock, profile, source: Path, source_roots, label, temp
     if status == "passed" and any(item.get("status") == "failed" for item in checks.values()):
         status = "failed"
     expected = lock["sources"]["kernel"]["commit"]
-    if label == "baseline" and identity["sha"] != expected:
-        category = "locked-baseline-mismatch"
-    elif label == "candidate" and identity["sha"] and identity["sha"] != expected:
-        category = "candidate-source-identity-drift"
+    # A snapshot materialized from an archive has no git identity. That is a
+    # property of the fetch path, not a lock mismatch, so only a readable and
+    # genuinely different SHA is reported as identity drift.
+    identity_available = bool(identity["sha"])
+    if identity_available and identity["sha"] != expected:
+        category = ("locked-baseline-mismatch" if label == "baseline"
+                    else "candidate-source-identity-drift")
     else:
         category = "none"
     return {
         "source": identity, "expected_kernel_commit": expected,
+        "identity_available": identity_available, "identity_expected": identity_expected,
         "status": status, "identity_category": category,
         "steps": steps, "contracts": checks,
     }
@@ -291,6 +295,13 @@ def profile_result(name, profile, baseline, candidate):
         classes.append("no-observed-drift")
         if candidate["identity_category"] != "none":
             classes.append("semantic-review-required; not evidence of upstream-absorption")
+    # A tree the caller supplied without a readable commit cannot be checked
+    # against the lock at all, which is different from a fetched archive that
+    # never carries one.
+    if baseline.get("identity_expected") and not baseline.get("identity_available"):
+        classes.append("baseline-identity-unavailable")
+    if candidate.get("identity_expected") and not candidate.get("identity_available"):
+        classes.append("candidate-identity-unavailable")
     return {
         "profile": name, "baseline": baseline, "candidate": candidate,
         "classification": list(dict.fromkeys(classes)) or ["unclassified-review"],

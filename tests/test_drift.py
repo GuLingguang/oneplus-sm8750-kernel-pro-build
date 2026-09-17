@@ -66,3 +66,44 @@ class DriftSourceTests(unittest.TestCase):
                 ('first', None, minimal, None),
                 ('second', None, changed, None),
             ])
+
+
+class DriftIdentityTests(unittest.TestCase):
+    def test_supplied_baseline_without_identity_is_reported(self):
+        baseline = {'status': 'passed', 'identity_category': 'none',
+                    'identity_available': False, 'identity_expected': True}
+        candidate = {'status': 'passed', 'identity_category': 'none',
+                     'identity_available': True, 'identity_expected': True}
+        result = drift.profile_result('p', None, baseline, candidate)
+        self.assertIn('baseline-identity-unavailable', result['classification'])
+
+    def test_fetched_baseline_without_identity_is_not_reported(self):
+        baseline = {'status': 'passed', 'identity_category': 'none',
+                    'identity_available': False, 'identity_expected': False}
+        candidate = {'status': 'passed', 'identity_category': 'none',
+                     'identity_available': False, 'identity_expected': False}
+        result = drift.profile_result('p', None, baseline, candidate)
+        self.assertNotIn('baseline-identity-unavailable', result['classification'])
+        self.assertNotIn('candidate-identity-unavailable', result['classification'])
+
+    def test_archive_baseline_is_not_reported_as_a_lock_mismatch(self):
+        temp_root = drift.ROOT / 'work' / '_tmp'
+        temp_root.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=temp_root) as path:
+            root = Path(path)
+            source = root / 'source'
+            (source / 'drivers').mkdir(parents=True)
+            scratch = root / 'temp'
+            scratch.mkdir()
+            lock = {
+                'sources': {'kernel': {
+                    'url': 'https://example.invalid/k.git', 'reference': 'main',
+                    'commit': 'a' * 40, 'directory': 'src',
+                }},
+                'steps': [],
+            }
+            result = drift.check_variant(
+                {'features': {}}, lock, {'blockers': []}, source, {}, 'baseline', scratch,
+            )
+            self.assertFalse(result['identity_available'])
+            self.assertEqual(result['identity_category'], 'none')
