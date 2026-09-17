@@ -183,7 +183,7 @@
 | **Kernel suffix** | 空 | 自定义版本后缀（如 `perf` → `6.6.142-4k-perf`） |
 | **Attribution** | 开 | 构建标签（user/host/REPO_NAME/AK3） |
 | **Artifacts** | ak3 | `ak3` 候选 zip；裸 `Image` 仅本地，`boot.img`/`all` 被阻止 |
-| 🕐 **Build time** | 空 | 自定义构建时间戳（`KBUILD_BUILD_TIMESTAMP`）。CI 上所有构建时间戳通过 faketime 固定为 `2025-05-25` 以保证可复现 —— 自定义值会覆盖内核内嵌时间。本地（reproduce.sh）留空 = 当前 UTC |
+| 🕐 **Build time** | 空 | 自定义构建时间戳（`KBUILD_BUILD_TIMESTAMP`）。留空时取**锁定内核 commit 的提交日期**（UTC），使同 lock 的构建得到相同的内嵌版本串；填写则原样使用 |
 | 💾 **Public ccache** | 关 | 上传构建缓存到 Release，加速重复构建 |
 | 🔍 **ccache debug** | 关 | 上传 ccache 日志 |
 

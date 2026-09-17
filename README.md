@@ -182,7 +182,7 @@ Still pending: **KPM/KPN** (not tested on device yet).
 | **Kernel suffix** | empty | Custom version suffix (e.g. `perf` → `6.6.142-4k-perf`) |
 | **Attribution** | on | Build tags (user/host/REPO_NAME/AK3) |
 | **Artifacts** | ak3 | `ak3` candidate zip; raw `Image` is local-only and `boot.img`/`all` are blocked |
-| 🕐 **Build time** | empty | Custom build timestamp (`KBUILD_BUILD_TIMESTAMP`). On CI all build timestamps are fixed to `2025-05-25` via faketime for reproducibility — a custom value overrides the kernel-embedded one. Locally (reproduce.sh) empty = current UTC |
+| 🕐 **Build time** | empty | Custom build timestamp (`KBUILD_BUILD_TIMESTAMP`). When empty it resolves to the locked kernel commit's committer date (UTC), so builds from one lock embed the same version string; an explicit value is used unchanged |
 | 💾 **Public ccache** | off | Upload build cache to Release for fast rebuilds |
 | 🔍 **ccache debug** | off | Upload ccache logs |
 

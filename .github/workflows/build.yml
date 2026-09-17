@@ -117,7 +117,7 @@ on:
         type: string
         default: ''
       build_time:
-        description: 'KBUILD_BUILD_TIMESTAMP; empty leaves the toolchain default'
+        description: 'KBUILD_BUILD_TIMESTAMP; empty resolves to the locked kernel commit date'
         required: false
         type: string
         default: ''
