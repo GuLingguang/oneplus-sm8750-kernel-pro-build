@@ -875,6 +875,30 @@ def build(args):
             env["CC"] = "ccache clang"
         if "LD" not in env and shutil.which("ld.lld"):
             env["LD"] = "ld.lld"
+        # Debug info records the absolute build directory, and the linker's
+        # --build-id=sha1 hashes the whole vmlinux including debug sections.
+        # Without a prefix map the Image would depend on where it was built,
+        # which also stops a local build from matching a CI one.
+        # clang applies the last matching map, so the narrower work path goes
+        # last: a path under the build directory must become the same string
+        # regardless of which profile directory or host produced it.
+        prefix_maps = " ".join([
+            f"-ffile-prefix-map={ROOT}=/ace6",
+            f"-ffile-prefix-map={work}=/ace6/work",
+        ])
+        env.setdefault("KCFLAGS", prefix_maps)
+        # Assembly keeps its own debug line table, and .S files are built from
+        # KBUILD_AFLAGS rather than KBUILD_CFLAGS, so the map has to be passed
+        # there as well. Without it one line-table directory entry keeps the
+        # absolute build path, and the linker build id hashes it.
+        env.setdefault("KAFLAGS", prefix_maps)
+        # The 32-bit compat vDSO builds from its own VDSO_CFLAGS/VDSO_AFLAGS
+        # rather than KBUILD_CFLAGS, and its Makefile offers KCPPFLAGS_COMPAT
+        # as the supported place to add flags. Without it the compat vDSO keeps
+        # the absolute build path in its line table, its build id moves, and
+        # that build id is embedded in .rodata and then hashed again by the
+        # vmlinux build id.
+        env.setdefault("KCPPFLAGS_COMPAT", prefix_maps)
         if config["artifacts"]["ccache_debug"]:
             debug_dir = work / "_tmp"
             debug_dir.mkdir(parents=True, exist_ok=True)
