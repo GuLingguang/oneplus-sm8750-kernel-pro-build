@@ -386,6 +386,31 @@ def artifact_date(stamp_epoch):
     return dt.datetime.fromtimestamp(stamp_epoch, dt.timezone.utc).strftime("%Y%m%d")
 
 
+MODULE_SIGNING_KEY = "keys/module-signing.pem"
+MODULE_SIGNING_KEY_IN_TREE = "certs/ace6-module-signing.pem"
+
+
+def install_module_signing_key(kernel):
+    """Use the checked-in module signing key instead of a generated one.
+
+    ``certs/Makefile`` only generates a random key when ``CONFIG_MODULE_SIG_KEY``
+    is exactly ``certs/signing_key.pem``, and it extracts the embedded
+    certificate from whatever file that option names. Pointing the option at the
+    checked-in key therefore keeps the certificate identical between builds.
+
+    The key signs nothing in this tree: no loadable module is built, the config
+    does not set ``CONFIG_MODULE_SIG_ALL``, and signature enforcement
+    (``CONFIG_MODULE_SIG_FORCE``) is off. It exists so the Image is
+    reproducible, not as a trust anchor, and it is not secret.
+    """
+    source = ROOT / MODULE_SIGNING_KEY
+    require(source.is_file(), f"module signing key is missing: {MODULE_SIGNING_KEY}")
+    destination = kernel / MODULE_SIGNING_KEY_IN_TREE
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    copy_file(source, destination)
+    set_config(kernel, "--set-str", "CONFIG_MODULE_SIG_KEY", MODULE_SIGNING_KEY_IN_TREE)
+
+
 def configure_kernel(kernel, config, lock):
     config_path = kernel / ".config"
     copy_file(ROOT / "config/config_ace6_final.config", config_path)
@@ -397,6 +422,7 @@ def configure_kernel(kernel, config, lock):
         run_command(["bash", merge, "-m", config_path, fragment], cwd=kernel, capture=True)
 
     set_config(kernel, "--set-str", "CONFIG_LOCALVERSION", kernel_localversion(config, lock), "-d", "CONFIG_LOCALVERSION_AUTO")
+    install_module_signing_key(kernel)
     if features["ksu_type"] == "none":
         set_config(kernel, "-d", "CONFIG_KSU", "-d", "CONFIG_KSU_SUSFS")
     else:

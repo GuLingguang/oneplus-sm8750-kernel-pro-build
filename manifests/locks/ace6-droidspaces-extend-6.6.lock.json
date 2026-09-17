@@ -114,11 +114,15 @@
     },
     {
       "path": "scripts/build.py",
-      "sha256": "633a8f89cb6af3d513a20e6015e294168067bc1355fda38e8938ca449479af64"
+      "sha256": "0e0d8aa6b2c666642588082125bc2db4ca3b52cc1e27e67f1315d44d4a5ce864"
     },
     {
       "path": "manifests/build-features.json",
       "sha256": "4b7d65d6036e3ede638bcff91d664b3839d285157488ab37b1238f04be02eb67"
+    },
+    {
+      "path": "keys/module-signing.pem",
+      "sha256": "d69f22c3702e4ced8236215400f50e672d99c47263228fe397036cb363efd3a5"
     },
     {
       "path": "schemas/config.schema.json",
