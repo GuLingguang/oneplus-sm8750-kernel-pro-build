@@ -140,7 +140,7 @@ jobs:
     timeout-minutes: 90
     strategy:
       fail-fast: true
-      max-parallel: 2
+      max-parallel: 3
       matrix:
         profile:
           - ace6-minimal-6.6
@@ -247,12 +247,14 @@ jobs:
           set -euo pipefail
           sudo sysctl -w vm.max_map_count=1048576
           mkdir -p "$GITHUB_WORKSPACE/out/${{ matrix.profile }}"
+          ccache -s || true
           timeout --foreground --kill-after=60s 70m \
             python3 scripts/build.py \
             --workflow --profile "${{ matrix.profile }}" \
             --jobs "$(nproc)" \
             --work "$GITHUB_WORKSPACE/work/${{ matrix.profile }}" \
             --out "$GITHUB_WORKSPACE/out/${{ matrix.profile }}"
+          ccache -s || true
 
       - name: Verify packaged artifacts
         run: |
@@ -302,7 +304,7 @@ jobs:
     timeout-minutes: 90
     strategy:
       fail-fast: false
-      max-parallel: 2
+      max-parallel: 9
       matrix:
         profile:
           - ace6-minimal-6.6
@@ -415,12 +417,14 @@ jobs:
           set -euo pipefail
           sudo sysctl -w vm.max_map_count=1048576
           mkdir -p "$GITHUB_WORKSPACE/out/${{ matrix.profile }}"
+          ccache -s || true
           timeout --foreground --kill-after=60s 70m \
             python3 scripts/build.py \
             --workflow --profile "${{ matrix.profile }}" \
             --jobs "$(nproc)" \
             --work "$GITHUB_WORKSPACE/work/${{ matrix.profile }}" \
             --out "$GITHUB_WORKSPACE/out/${{ matrix.profile }}"
+          ccache -s || true
 
       - name: Save ccache for full debug run
         if: ${{ success() && steps.ccache-restore.outputs.cache-hit != 'true' }}
