@@ -9,13 +9,19 @@
 #
 # The build follows the Arch `pahole` package (dwarves 1.32, LIBBPF_EMBEDDED=ON,
 # CMAKE_BUILD_TYPE=None). Arch builds against libbpf master at build time, which
-# is not reproducible, so libbpf is pinned to a release tag instead.
+# is not reproducible, so both sources are pinned below instead.
 #
 # Usage: scripts/install-pahole.sh [prefix]     (default work/_tools/pahole)
 set -euo pipefail
 
 DWARVES=v1.32
-LIBBPF=v1.7.0
+# The distribution package builds against libbpf master, and that is not
+# reproducible, so this pins one master commit instead. It has to be a commit
+# rather than a release tag: `struct btf_header` gained `layout_off`/`layout_len`
+# after v1.7.0, which changes the BTF header from 24 to 32 bytes and with it the
+# Image. A release tag would silently produce a different kernel from the same
+# lock.
+LIBBPF=f90a9c487d7542d91fa584b83b6a624a4fbeb341
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PREFIX="${1:-$ROOT/work/_tools/pahole}"
@@ -50,7 +56,7 @@ fetch() { # url file
 
 echo "== sources =="
 fetch "https://github.com/acmel/dwarves/archive/refs/tags/$DWARVES.tar.gz" "dwarves-$DWARVES.tar.gz"
-fetch "https://github.com/libbpf/libbpf/archive/refs/tags/$LIBBPF.tar.gz" "libbpf-$LIBBPF.tar.gz"
+fetch "https://github.com/libbpf/libbpf/archive/$LIBBPF.tar.gz" "libbpf-$LIBBPF.tar.gz"
 
 rm -rf "dwarves-${DWARVES#v}" "libbpf-${LIBBPF#v}"
 tar xzf "dwarves-$DWARVES.tar.gz"
@@ -67,6 +73,7 @@ rm -rf build
 cmake -S "dwarves-${DWARVES#v}" -B build -G Ninja \
   -D CMAKE_BUILD_TYPE=None \
   -D CMAKE_INSTALL_PREFIX="$PREFIX" \
+  -D CMAKE_INSTALL_RPATH="$PREFIX/lib" \
   -D CMAKE_POLICY_VERSION_MINIMUM=3.5 \
   -D GIT_SUBMODULE=OFF \
   -D LIBBPF_EMBEDDED=ON >/dev/null
