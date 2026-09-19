@@ -24,6 +24,23 @@ BUILD="${PAHOLE_BUILD_DIR:-$ROOT/work/_tmp/pahole-build}"
 mkdir -p "$BUILD" "$PREFIX"
 cd "$BUILD"
 
+# Report the missing headers by name instead of letting cmake fail on a library.
+# Debian/Ubuntu: libelf-dev libdw-dev zlib1g-dev libzstd-dev liblzma-dev libbz2-dev
+# Arch:          libelf zlib zstd xz bzip2
+missing=()
+for header in libelf.h libdw.h zlib.h; do
+  found=""
+  for dir in /usr/include /usr/include/elfutils; do
+    if [ -f "$dir/$header" ]; then found=1; break; fi
+  done
+  if [ -z "$found" ]; then missing+=("$header"); fi
+done
+if [ ${#missing[@]} -gt 0 ]; then
+  echo "missing build headers: ${missing[*]}" >&2
+  echo "install the libelf/libdw/zlib development packages first" >&2
+  exit 1
+fi
+
 fetch() { # url file
   if [ ! -s "$2" ]; then
     curl -fsSL --retry 3 --retry-delay 3 -o "$2" "$1"

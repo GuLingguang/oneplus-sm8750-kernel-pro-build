@@ -169,7 +169,8 @@ jobs:
           timeout --foreground --kill-after=30s 10m sudo apt-get update
           timeout --foreground --kill-after=30s 10m sudo apt-get install -y \
             zip unzip zstd patch bc flex bison libssl-dev libncurses-dev \
-            libelf-dev dwarves python3 ccache mkbootimg cmake ninja-build
+            libelf-dev libdw-dev zlib1g-dev libzstd-dev liblzma-dev libbz2-dev \
+            dwarves python3 ccache mkbootimg cmake ninja-build
           archive="$GITHUB_WORKSPACE/work/_tmp/clang-r563880c.tar.gz"
           mkdir -p "$(dirname "$archive")"
           timeout --foreground --kill-after=30s 8m \
@@ -336,7 +337,8 @@ jobs:
           timeout --foreground --kill-after=30s 10m sudo apt-get update
           timeout --foreground --kill-after=30s 10m sudo apt-get install -y \
             zip unzip zstd patch bc flex bison libssl-dev libncurses-dev \
-            libelf-dev dwarves python3 ccache mkbootimg cmake ninja-build
+            libelf-dev libdw-dev zlib1g-dev libzstd-dev liblzma-dev libbz2-dev \
+            dwarves python3 ccache mkbootimg cmake ninja-build
           archive="$GITHUB_WORKSPACE/work/_tmp/clang-r563880c.tar.gz"
           mkdir -p "$(dirname "$archive")"
           timeout --foreground --kill-after=30s 8m \

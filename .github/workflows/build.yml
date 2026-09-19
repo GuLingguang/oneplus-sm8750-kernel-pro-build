@@ -186,7 +186,7 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y zip zstd patch bc flex bison libssl-dev libncurses-dev libelf-dev dwarves python3 ccache mkbootimg cmake ninja-build
+          sudo apt-get install -y zip zstd patch bc flex bison libssl-dev libncurses-dev libelf-dev libdw-dev zlib1g-dev libzstd-dev liblzma-dev libbz2-dev dwarves python3 ccache mkbootimg cmake ninja-build
           TOOLCHAIN_ARCHIVE="$GITHUB_WORKSPACE/work/_tmp/clang-r563880c.tar.gz"
           mkdir -p "$(dirname "$TOOLCHAIN_ARCHIVE")"
           gh release download toolchain-AOSP-Clang-21.0.0-r563880c \
