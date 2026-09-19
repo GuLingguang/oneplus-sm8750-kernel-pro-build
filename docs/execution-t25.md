@@ -226,3 +226,47 @@ file.
 
 Machine-readable detail is in
 `docs/evidence/t25-byte-identical-20260916.json`.
+
+## Follow-up 2026-09-18 — all nine profiles, two builds each
+
+The result above covered one profile and said so: the other eight had not been
+rebuilt this way. All nine have now been built twice from one lock, each build
+into a fresh `work/` and `out/` directory, with the locked sources cloned
+locally from pinned checkouts so the build itself touches no network.
+
+| Profile | AK3 SHA-256 | Image SHA-256 | Image size | AK3 size |
+| --- | --- | --- | --- | --- |
+| `ace6-droidspaces-extend-6.6` | `a3c1cf8d5a67…` | `59824997e634…` | 37,210,624 | 18,648,161 |
+| `ace6-droidspaces-resukisu-extend-6.6` | `ee5251597590…` | `564c773029e0…` | 37,411,328 | 18,728,446 |
+| `ace6-droidspaces-resukisu-standard-6.6` | `84c88c12f2a2…` | `6c6f82712663…` | 37,276,160 | 18,706,719 |
+| `ace6-droidspaces-standard-6.6` | `c0371b0eee99…` | `5705dfe85f6f…` | 37,079,552 | 18,627,254 |
+| `ace6-main-release-compat-6.6` | `a7d7a495ed9c…` | `2607e2666aa7…` | 37,411,328 | 18,745,011 |
+| `ace6-minimal-6.6` | `ad27c54f132c…` | `7e4dd0bb0239…` | 36,743,680 | 18,437,868 |
+| `ace6-rekernel-experimental` | `e72ca551922d…` | `8407c6bc05ae…` | 36,874,752 | 18,521,793 |
+| `ace6-resukisu-manual-6.6` | `e0e38a05aa54…` | `56aaf60ba332…` | 36,874,752 | 18,517,784 |
+| `ace6-resukisu-susfs-inline-6.6` | `81d799e7a627…` | `1921d331655f…` | 36,878,848 | 18,529,853 |
+
+Both builds of each profile carry the same `lock_id`, `config_id`,
+`build_timestamp`, build-stamp source and recorded pahole version. The only
+fields that move between them are `build.started_utc` and the `manifest_id`
+derived from it, exactly as in the single-profile result above.
+
+`ace6-minimal-6.6` reproduces its 2026-09-16 artifact byte for byte
+(`7e4dd0bb…`, `ad27c54f…`), so the property also held across the twelve commits
+that landed in between. Those commits changed packaging and stamp inputs, not
+kernel inputs.
+
+Three of the nine were listed as blocked in the tables above. They build, and
+they also built in the 2026-09-09 CI run that compiled all nine. The blockers
+recorded for them are acceptance conditions — the EVDI ABI and the NoActive
+userspace protocol — not build-time refusals. Nothing here changes those
+conditions, and `release_allowed` stays false for every profile.
+
+The cross-host bound from 2026-09-16 is unaffected and still applies: a lock is
+a byte-identical claim across hosts only when both use the same pahole version.
+This host records `v1.32`; the CI runner installs `1.25`, so the same lock does
+not produce the same bytes there. Closing that gap needs one pinned pahole
+version on both sides, and it is not done here.
+
+Machine-readable detail is in
+`docs/evidence/t25-nine-profile-reproducibility-20260918.json`.

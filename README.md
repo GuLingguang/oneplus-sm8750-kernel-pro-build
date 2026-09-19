@@ -327,11 +327,11 @@ This project adapts patches from several sources (primarily the [cctv18/oppo_opl
 ## Reproducibility
 
 - **Real commit** in LOCALVERSION (from GitHub API, since source is a zip without .git)
-- **`KBUILD_BUILD_TIMESTAMP`** for custom/fixed build time
+- **`KBUILD_BUILD_TIMESTAMP`** always set: an empty `build_time` resolves to the locked kernel commit's date, so two builds of one lock carry the same stamp and the same artifact name
 - **ccache** with sloppiness config (file mtime/ctime ignored) for fast rebuilds
 - **Public ccache** (optional `ccache_update`): packages and uploads the cache to a Release for near-instant rebuilds
 - **Upstream drift check**: `check_upstream.sh` (also a weekly workflow) cumulatively applies the locked steps to the latest `lineage-23.2` snapshot and uploads a JSON/Markdown report plus an Issue draft; it never creates or edits Issues automatically
-- Verified locally: the shared entry produced five manifest-backed AK3 candidates; one ReSukiSU + SUSFS Inline candidate passed partial device acceptance. CI equivalence and full feature acceptance remain unclaimed.
+- Verified locally: every profile has been rebuilt twice from one lock and both builds agree byte for byte, Image and AK3 alike (`docs/evidence/t25-nine-profile-reproducibility-20260918.json`). One ReSukiSU + SUSFS Inline candidate additionally passed partial device acceptance. Cross-host equivalence and full feature acceptance remain unclaimed: a lock only yields the same bytes on hosts with the same pahole version, and the CI runner's differs from this host's.
 
 **GitHub free-tier limits**: Actions provides 2,000 minutes per month and 1 GB of caches; this repository's ccache Release asset is about 630 MB and the toolchain asset about 1.5 GB. Repeated builds consume that allocation. Use `reproduce.sh` for frequent local builds and CI when a hosted runner is required.
 

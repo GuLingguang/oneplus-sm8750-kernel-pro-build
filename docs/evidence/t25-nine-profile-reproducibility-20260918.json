@@ -1,0 +1,291 @@
+{
+  "date": "2026-09-18",
+  "evidence": "two rebuilds of every profile from one lock, per profile",
+  "method": "each profile built twice into fresh work/ and out/ directories, sources cloned locally from pinned checkouts (no network during the build)",
+  "host": {
+    "jobs": 30,
+    "pahole": "v1.32",
+    "clang": "AOSP Clang 21.0.0 r563880c (locked)"
+  },
+  "not_claimed": [
+    "device behaviour",
+    "release readiness",
+    "byte-identical results across hosts with a different pahole version"
+  ],
+  "profiles": {
+    "ace6-droidspaces-extend-6.6": {
+      "a": {
+        "lock_id": "6825233a32247428872855a148f0913986607a4632687e5127bd26c5101d7ed9",
+        "config_id": "80b2fe70a7d6595682ba034ba0bb387d3f70af36c581dc40aabe65b13d72ed87",
+        "image_sha256": "59824997e6341fe45c9f988fd6974827c63d07a855fc879cc3c28591abf497c6",
+        "image_size": 37210624,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "build_timestamp_source": "locked-commit-date",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-18T14:34:17.343335+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-20260818.zip",
+        "ak3_sha256": "a3c1cf8d5a67008bad756393fe5d137e2e4ef0967fed0ac7377d5c7fd4b1d0bc",
+        "ak3_size": 18648161
+      },
+      "b": {
+        "lock_id": "6825233a32247428872855a148f0913986607a4632687e5127bd26c5101d7ed9",
+        "config_id": "80b2fe70a7d6595682ba034ba0bb387d3f70af36c581dc40aabe65b13d72ed87",
+        "image_sha256": "59824997e6341fe45c9f988fd6974827c63d07a855fc879cc3c28591abf497c6",
+        "image_size": 37210624,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "build_timestamp_source": "locked-commit-date",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-18T14:36:18.207751+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-20260818.zip",
+        "ak3_sha256": "a3c1cf8d5a67008bad756393fe5d137e2e4ef0967fed0ac7377d5c7fd4b1d0bc",
+        "ak3_size": 18648161
+      },
+      "differing_fields": [],
+      "byte_identical": true
+    },
+    "ace6-droidspaces-resukisu-extend-6.6": {
+      "a": {
+        "lock_id": "54c24c3162ad183a2eaf6a423885f5aceb1edc186d08e6ce341fbee6e54a6cd7",
+        "config_id": "6999907ced7f5e4d79b9b014edb145f53a1e475c853ef1cdacc48dd7dc4b3c9a",
+        "image_sha256": "564c773029e05353477ac23351e16950563fecfc208334c200c6c7050a5f51ea",
+        "image_size": 37411328,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "build_timestamp_source": "locked-commit-date",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-18T14:38:16.599214+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-ksu35115-20260818.zip",
+        "ak3_sha256": "ee525159759085837d88c332af2e6f8c003f22082a00998f3aed5fb181fd9518",
+        "ak3_size": 18728446
+      },
+      "b": {
+        "lock_id": "54c24c3162ad183a2eaf6a423885f5aceb1edc186d08e6ce341fbee6e54a6cd7",
+        "config_id": "6999907ced7f5e4d79b9b014edb145f53a1e475c853ef1cdacc48dd7dc4b3c9a",
+        "image_sha256": "564c773029e05353477ac23351e16950563fecfc208334c200c6c7050a5f51ea",
+        "image_size": 37411328,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "build_timestamp_source": "locked-commit-date",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-18T14:40:17.065207+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-ksu35115-20260818.zip",
+        "ak3_sha256": "ee525159759085837d88c332af2e6f8c003f22082a00998f3aed5fb181fd9518",
+        "ak3_size": 18728446
+      },
+      "differing_fields": [],
+      "byte_identical": true
+    },
+    "ace6-droidspaces-resukisu-standard-6.6": {
+      "a": {
+        "lock_id": "9479507cd300efb7cdee60bb9db97896464c380b97deaa879dfa719bdcf8a818",
+        "config_id": "172f25ac7bf71faab71b742daa96bc493364d0b5b4bbc09a90304a431c2ae330",
+        "image_sha256": "6c6f8271266302a1ba44bd3d521a131c4f2d994d752a791abe95af7be3dc4e1f",
+        "image_size": 37276160,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "build_timestamp_source": "locked-commit-date",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-18T14:30:14.511466+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-ksu35115-20260818.zip",
+        "ak3_sha256": "84c88c12f2a204d29ff62bb0c7573f3f8b7efb86d65acb2f65712acf4c0deb65",
+        "ak3_size": 18706719
+      },
+      "b": {
+        "lock_id": "9479507cd300efb7cdee60bb9db97896464c380b97deaa879dfa719bdcf8a818",
+        "config_id": "172f25ac7bf71faab71b742daa96bc493364d0b5b4bbc09a90304a431c2ae330",
+        "image_sha256": "6c6f8271266302a1ba44bd3d521a131c4f2d994d752a791abe95af7be3dc4e1f",
+        "image_size": 37276160,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "build_timestamp_source": "locked-commit-date",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-18T14:32:15.020468+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-ksu35115-20260818.zip",
+        "ak3_sha256": "84c88c12f2a204d29ff62bb0c7573f3f8b7efb86d65acb2f65712acf4c0deb65",
+        "ak3_size": 18706719
+      },
+      "differing_fields": [],
+      "byte_identical": true
+    },
+    "ace6-droidspaces-standard-6.6": {
+      "a": {
+        "lock_id": "d2047340394220a101dca0b3c9c4d7e3ce2b5370ad5c7ea5af98ec45b3397fa0",
+        "config_id": "22d5db5d559aa3d18463328990dc2833543e430a67c48372000ac083d821ade2",
+        "image_sha256": "5705dfe85f6f6e0ad1028858913214b30e09c480e3d22393babcfbef5585cd06",
+        "image_size": 37079552,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "build_timestamp_source": "locked-commit-date",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-18T14:26:25.275324+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-20260818.zip",
+        "ak3_sha256": "c0371b0eee996128513ce3468fed25f85c4c2031c13c5eb77e5372b5ca92e27e",
+        "ak3_size": 18627254
+      },
+      "b": {
+        "lock_id": "d2047340394220a101dca0b3c9c4d7e3ce2b5370ad5c7ea5af98ec45b3397fa0",
+        "config_id": "22d5db5d559aa3d18463328990dc2833543e430a67c48372000ac083d821ade2",
+        "image_sha256": "5705dfe85f6f6e0ad1028858913214b30e09c480e3d22393babcfbef5585cd06",
+        "image_size": 37079552,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "build_timestamp_source": "locked-commit-date",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-18T14:28:16.800449+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-20260818.zip",
+        "ak3_sha256": "c0371b0eee996128513ce3468fed25f85c4c2031c13c5eb77e5372b5ca92e27e",
+        "ak3_size": 18627254
+      },
+      "differing_fields": [],
+      "byte_identical": true
+    },
+    "ace6-main-release-compat-6.6": {
+      "a": {
+        "lock_id": "824760fe4157dbe5bc8f4037cf83adae5fd703dea88abd04072d894495fa1861",
+        "config_id": "08002a334e0a7b8f0c78869e355c07c3e81a759b58d33856562e445bbd4cf4eb",
+        "image_sha256": "2607e2666aa7bd2e881f73c45ca3fcbb11d5f8ed60e279707b71de0ccacfdf98",
+        "image_size": 37411328,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "build_timestamp_source": "locked-commit-date",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-18T14:46:17.857499+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-ksu35115-20260818.zip",
+        "ak3_sha256": "a7d7a495ed9c25499710621523f2750a29da9cbbf84d7b50bae931ce0e8f8066",
+        "ak3_size": 18745011
+      },
+      "b": {
+        "lock_id": "824760fe4157dbe5bc8f4037cf83adae5fd703dea88abd04072d894495fa1861",
+        "config_id": "08002a334e0a7b8f0c78869e355c07c3e81a759b58d33856562e445bbd4cf4eb",
+        "image_sha256": "2607e2666aa7bd2e881f73c45ca3fcbb11d5f8ed60e279707b71de0ccacfdf98",
+        "image_size": 37411328,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "build_timestamp_source": "locked-commit-date",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-18T14:48:18.736704+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-ksu35115-20260818.zip",
+        "ak3_sha256": "a7d7a495ed9c25499710621523f2750a29da9cbbf84d7b50bae931ce0e8f8066",
+        "ak3_size": 18745011
+      },
+      "differing_fields": [],
+      "byte_identical": true
+    },
+    "ace6-minimal-6.6": {
+      "a": {
+        "lock_id": "1f0ec34fa848377c90642e5c9e7a3142c19f12c11f56483b729eb013d77f78d4",
+        "config_id": "b0f963f43d5a37f491044f5bcb0901f3864286e9cc006a3ee728692340504da7",
+        "image_sha256": "7e4dd0bb023904b76208b6845958747e4504a53675be53d524d1e75837a83d07",
+        "image_size": 36743680,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "build_timestamp_source": "locked-commit-date",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-18T14:50:35.885339+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-20260818.zip",
+        "ak3_sha256": "ad27c54f132c41c6d99408c4a7f2940b972342adacd19f0072751ba9d25f7caf",
+        "ak3_size": 18437868
+      },
+      "b": {
+        "lock_id": "1f0ec34fa848377c90642e5c9e7a3142c19f12c11f56483b729eb013d77f78d4",
+        "config_id": "b0f963f43d5a37f491044f5bcb0901f3864286e9cc006a3ee728692340504da7",
+        "image_sha256": "7e4dd0bb023904b76208b6845958747e4504a53675be53d524d1e75837a83d07",
+        "image_size": 36743680,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "build_timestamp_source": "locked-commit-date",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-18T14:52:33.107501+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-20260818.zip",
+        "ak3_sha256": "ad27c54f132c41c6d99408c4a7f2940b972342adacd19f0072751ba9d25f7caf",
+        "ak3_size": 18437868
+      },
+      "differing_fields": [],
+      "byte_identical": true
+    },
+    "ace6-rekernel-experimental": {
+      "a": {
+        "lock_id": "60300a96da900bda8cd831577a4b8d9ea523b74e8268a0bcfb14768e327a3465",
+        "config_id": "3b40bf04d97c8774da79f6cf578a28ccb7641093494b42319e5563e76ec2c68a",
+        "image_sha256": "8407c6bc05ae6f925d8c2023f56fd15a5d049d948d585428fcb1d35b1cd169bc",
+        "image_size": 36874752,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "build_timestamp_source": "locked-commit-date",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-18T14:42:18.466355+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-ksu35115-20260818.zip",
+        "ak3_sha256": "e72ca551922d81f11219ac0e55a9f7681794901db86b19b156d996a919100fba",
+        "ak3_size": 18521793
+      },
+      "b": {
+        "lock_id": "60300a96da900bda8cd831577a4b8d9ea523b74e8268a0bcfb14768e327a3465",
+        "config_id": "3b40bf04d97c8774da79f6cf578a28ccb7641093494b42319e5563e76ec2c68a",
+        "image_sha256": "8407c6bc05ae6f925d8c2023f56fd15a5d049d948d585428fcb1d35b1cd169bc",
+        "image_size": 36874752,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "build_timestamp_source": "locked-commit-date",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-18T14:44:19.923022+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-ksu35115-20260818.zip",
+        "ak3_sha256": "e72ca551922d81f11219ac0e55a9f7681794901db86b19b156d996a919100fba",
+        "ak3_size": 18521793
+      },
+      "differing_fields": [],
+      "byte_identical": true
+    },
+    "ace6-resukisu-manual-6.6": {
+      "a": {
+        "lock_id": "9db4d039759ae07c669e6811890eb6a5ac975017110e8cd3e3672128efe576fc",
+        "config_id": "fb177f1e62e19b1df2e18625014d7ce5eaf7002293494bd9bad3a3496be72525",
+        "image_sha256": "56aaf60ba3325d94bb07b1337a9b70f90354f8cca322c39e30c6880806d3781e",
+        "image_size": 36874752,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "build_timestamp_source": "locked-commit-date",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-18T14:21:20.471658+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-ksu35115-20260818.zip",
+        "ak3_sha256": "e0e38a05aa54f6d5ed42f3cebb5fc66e93713765cd1261198eb6810b43cde9ac",
+        "ak3_size": 18517784
+      },
+      "b": {
+        "lock_id": "9db4d039759ae07c669e6811890eb6a5ac975017110e8cd3e3672128efe576fc",
+        "config_id": "fb177f1e62e19b1df2e18625014d7ce5eaf7002293494bd9bad3a3496be72525",
+        "image_sha256": "56aaf60ba3325d94bb07b1337a9b70f90354f8cca322c39e30c6880806d3781e",
+        "image_size": 36874752,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "build_timestamp_source": "locked-commit-date",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-18T14:24:31.761343+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-ksu35115-20260818.zip",
+        "ak3_sha256": "e0e38a05aa54f6d5ed42f3cebb5fc66e93713765cd1261198eb6810b43cde9ac",
+        "ak3_size": 18517784
+      },
+      "differing_fields": [],
+      "byte_identical": true
+    },
+    "ace6-resukisu-susfs-inline-6.6": {
+      "a": {
+        "lock_id": "b4755b05cc6253ba74b3fafc65b78685c310a3a73ff57d206a3f154a5faac7fa",
+        "config_id": "8f27df126bda1f578127ee69e8273f1f9b0c08bfda9e0c3e083db2f5f906244e",
+        "image_sha256": "1921d331655f69b26ee57ba817964bef9e54fea155ffb5f4f9c810767fec70fc",
+        "image_size": 36878848,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "build_timestamp_source": "locked-commit-date",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-18T14:12:09.051416+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-ksu35115-20260818.zip",
+        "ak3_sha256": "81d799e7a6279596f0b25411b3e9798a93571d9c18077d5d13809abd5eef6e03",
+        "ak3_size": 18529853
+      },
+      "b": {
+        "lock_id": "b4755b05cc6253ba74b3fafc65b78685c310a3a73ff57d206a3f154a5faac7fa",
+        "config_id": "8f27df126bda1f578127ee69e8273f1f9b0c08bfda9e0c3e083db2f5f906244e",
+        "image_sha256": "1921d331655f69b26ee57ba817964bef9e54fea155ffb5f4f9c810767fec70fc",
+        "image_size": 36878848,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "build_timestamp_source": "locked-commit-date",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-18T14:14:29.377132+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-ksu35115-20260818.zip",
+        "ak3_sha256": "81d799e7a6279596f0b25411b3e9798a93571d9c18077d5d13809abd5eef6e03",
+        "ak3_size": 18529853
+      },
+      "differing_fields": [],
+      "byte_identical": true
+    }
+  },
+  "summary": {
+    "profiles_built": 9,
+    "profiles_byte_identical": 9
+  }
+}
