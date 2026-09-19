@@ -689,9 +689,21 @@ def prepare_package(kernel, config, lock, work, out, image_record, stamp_epoch):
                 # Platforms without lutimes; the template has no symlinks, so
                 # following them here cannot change another file's times.
                 os.utime(entry, (stamp_epoch, stamp_epoch))
+        # zip walks a directory in readdir order, so the entry order — and with
+        # it the whole archive — follows the filesystem rather than the lock: an
+        # ext4 runner and a btrfs host packed the same Image into different
+        # zips. Hand zip an explicit sorted list of every entry instead, and let
+        # -X drop the uid/gid and extended timestamp fields that would otherwise
+        # come from whichever host packed it.
+        entries = sorted(
+            path.relative_to(pack).as_posix()
+            for path in pack.rglob("*")
+            if ".git" not in path.relative_to(pack).parts
+        )
+        require(entries, "AK3 template is empty")
         zip_env = dict(os.environ)
         zip_env["TZ"] = "UTC"
-        run_command(["zip", "-r9", zip_path, ".", "-x", "*.git*"], cwd=pack, capture=True, env=zip_env)
+        run_command(["zip", "-9", "-X", zip_path, *entries], cwd=pack, capture=True, env=zip_env)
         artifacts.append({"kind": "ak3", "path": zip_name, "sha256": hash_file(zip_path), "size": zip_path.stat().st_size})
     if mode in ("image", "all"):
         image_path = out / "Image"
