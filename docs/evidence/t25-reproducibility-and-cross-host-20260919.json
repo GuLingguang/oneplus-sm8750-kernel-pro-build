@@ -1,0 +1,289 @@
+{
+  "date": "2026-09-19",
+  "method": "every profile built twice on this host from one lock, sources cloned from pinned checkouts, then compared with the artifacts of CI run 35442823271 (main @ 5f9daf8, scope=compile)",
+  "host": {
+    "jobs": 30,
+    "pahole": "v1.32 (scripts/install-pahole.sh)",
+    "clang": "AOSP Clang 21.0.0 r563880c"
+  },
+  "not_claimed": [
+    "device behaviour",
+    "release readiness",
+    "profiles the CI run did not build"
+  ],
+  "profiles": {
+    "ace6-droidspaces-extend-6.6": {
+      "local_a": {
+        "lock_id": "0973e928f3c6e8dc79ed7fb80814a90ab0ed5fcc36e5a897ad5f29a2d2965f24",
+        "config_id": "80b2fe70a7d6595682ba034ba0bb387d3f70af36c581dc40aabe65b13d72ed87",
+        "image_sha256": "59824997e6341fe45c9f988fd6974827c63d07a855fc879cc3c28591abf497c6",
+        "image_size": 37210624,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-19T13:29:16.825299+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-20260818.zip",
+        "ak3_sha256": "74a3ddf2992d978cc3d791fdff504db3f44a2a3d77af7ef79b24eb47872ff2ec",
+        "ak3_size": 18647225
+      },
+      "local_b": {
+        "lock_id": "0973e928f3c6e8dc79ed7fb80814a90ab0ed5fcc36e5a897ad5f29a2d2965f24",
+        "config_id": "80b2fe70a7d6595682ba034ba0bb387d3f70af36c581dc40aabe65b13d72ed87",
+        "image_sha256": "59824997e6341fe45c9f988fd6974827c63d07a855fc879cc3c28591abf497c6",
+        "image_size": 37210624,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-19T13:31:30.278014+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-20260818.zip",
+        "ak3_sha256": "74a3ddf2992d978cc3d791fdff504db3f44a2a3d77af7ef79b24eb47872ff2ec",
+        "ak3_size": 18647225
+      },
+      "differing_fields": [],
+      "byte_identical_locally": true
+    },
+    "ace6-droidspaces-resukisu-extend-6.6": {
+      "local_a": {
+        "lock_id": "5f2b4203677344351ebada83c9b3d04cbab66f94c54c5050638dce1436d6c594",
+        "config_id": "6999907ced7f5e4d79b9b014edb145f53a1e475c853ef1cdacc48dd7dc4b3c9a",
+        "image_sha256": "d772a7c6091adfd236f848bfc414e5af2b542182eedd153363c07b2248228d08",
+        "image_size": 37411328,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-19T14:00:39.696416+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-ksu35115-20260818.zip",
+        "ak3_sha256": "735bdbc0ea460ce81126f7674272b5bd6a3c2b361474a02a72ae0b70080a8ed8",
+        "ak3_size": 18727687
+      },
+      "local_b": {
+        "lock_id": "5f2b4203677344351ebada83c9b3d04cbab66f94c54c5050638dce1436d6c594",
+        "config_id": "6999907ced7f5e4d79b9b014edb145f53a1e475c853ef1cdacc48dd7dc4b3c9a",
+        "image_sha256": "d772a7c6091adfd236f848bfc414e5af2b542182eedd153363c07b2248228d08",
+        "image_size": 37411328,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-19T14:02:40.077758+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-ksu35115-20260818.zip",
+        "ak3_sha256": "735bdbc0ea460ce81126f7674272b5bd6a3c2b361474a02a72ae0b70080a8ed8",
+        "ak3_size": 18727687
+      },
+      "differing_fields": [],
+      "byte_identical_locally": true
+    },
+    "ace6-droidspaces-resukisu-standard-6.6": {
+      "local_a": {
+        "lock_id": "0b1b0665e1a274214249c4f8b8ef1d617f758d7d6fb55d647ce07608c82ff03d",
+        "config_id": "172f25ac7bf71faab71b742daa96bc493364d0b5b4bbc09a90304a431c2ae330",
+        "image_sha256": "df96277f2aaace5bc8d4cbe9163df4ab3a03979cfcf59db2c05be8e9933a6f74",
+        "image_size": 37276160,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-19T13:56:40.327841+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-ksu35115-20260818.zip",
+        "ak3_sha256": "0a9800c88243b496dc223582b5d19408327cae91019f26e6f5d11bee73c9d5d0",
+        "ak3_size": 18706132
+      },
+      "local_b": {
+        "lock_id": "0b1b0665e1a274214249c4f8b8ef1d617f758d7d6fb55d647ce07608c82ff03d",
+        "config_id": "172f25ac7bf71faab71b742daa96bc493364d0b5b4bbc09a90304a431c2ae330",
+        "image_sha256": "df96277f2aaace5bc8d4cbe9163df4ab3a03979cfcf59db2c05be8e9933a6f74",
+        "image_size": 37276160,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-19T13:58:40.157573+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-ksu35115-20260818.zip",
+        "ak3_sha256": "0a9800c88243b496dc223582b5d19408327cae91019f26e6f5d11bee73c9d5d0",
+        "ak3_size": 18706132
+      },
+      "differing_fields": [],
+      "byte_identical_locally": true
+    },
+    "ace6-droidspaces-standard-6.6": {
+      "local_a": {
+        "lock_id": "f14985821e31bbb5a097ebd27cb8355f3b2543efcf21aac33abfe55cc5add039",
+        "config_id": "22d5db5d559aa3d18463328990dc2833543e430a67c48372000ac083d821ade2",
+        "image_sha256": "5705dfe85f6f6e0ad1028858913214b30e09c480e3d22393babcfbef5585cd06",
+        "image_size": 37079552,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-19T13:19:38.074714+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-20260818.zip",
+        "ak3_sha256": "6d47197753eebc57e014647d368e5bdbca34db0eb14d18cdbdbf5794debc151a",
+        "ak3_size": 18626318
+      },
+      "local_b": {
+        "lock_id": "f14985821e31bbb5a097ebd27cb8355f3b2543efcf21aac33abfe55cc5add039",
+        "config_id": "22d5db5d559aa3d18463328990dc2833543e430a67c48372000ac083d821ade2",
+        "image_sha256": "5705dfe85f6f6e0ad1028858913214b30e09c480e3d22393babcfbef5585cd06",
+        "image_size": 37079552,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-19T13:21:59.106483+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-20260818.zip",
+        "ak3_sha256": "6d47197753eebc57e014647d368e5bdbca34db0eb14d18cdbdbf5794debc151a",
+        "ak3_size": 18626318
+      },
+      "differing_fields": [],
+      "byte_identical_locally": true
+    },
+    "ace6-main-release-compat-6.6": {
+      "local_a": {
+        "lock_id": "8a9134c4516d270a1082d9f7cb3263835cd3f9518dff18bf420c4f6c9ff697a7",
+        "config_id": "08002a334e0a7b8f0c78869e355c07c3e81a759b58d33856562e445bbd4cf4eb",
+        "image_sha256": "cc4de61fd7189d58ca7c8839064e498e858870dbdec70d82ca38e89c93ab4ef5",
+        "image_size": 37411328,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-19T13:43:07.554024+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-ksu35115-20260818.zip",
+        "ak3_sha256": "612beb313f205489297df57aa6b8a04c2811fe812bbeb4f1ed80ebc2aefb493c",
+        "ak3_size": 18744032
+      },
+      "local_b": {
+        "lock_id": "8a9134c4516d270a1082d9f7cb3263835cd3f9518dff18bf420c4f6c9ff697a7",
+        "config_id": "08002a334e0a7b8f0c78869e355c07c3e81a759b58d33856562e445bbd4cf4eb",
+        "image_sha256": "cc4de61fd7189d58ca7c8839064e498e858870dbdec70d82ca38e89c93ab4ef5",
+        "image_size": 37411328,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-19T13:45:34.076800+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-ksu35115-20260818.zip",
+        "ak3_sha256": "612beb313f205489297df57aa6b8a04c2811fe812bbeb4f1ed80ebc2aefb493c",
+        "ak3_size": 18744032
+      },
+      "differing_fields": [],
+      "byte_identical_locally": true,
+      "ci": {
+        "ak3_sha256": "612beb313f205489297df57aa6b8a04c2811fe812bbeb4f1ed80ebc2aefb493c",
+        "ak3_size": 18744032,
+        "matches_local": true
+      }
+    },
+    "ace6-minimal-6.6": {
+      "local_a": {
+        "lock_id": "faafde14df99f557e45152c5fb22b35c23dc122194fcaf9ba358c5cc4a04f66f",
+        "config_id": "b0f963f43d5a37f491044f5bcb0901f3864286e9cc006a3ee728692340504da7",
+        "image_sha256": "7e4dd0bb023904b76208b6845958747e4504a53675be53d524d1e75837a83d07",
+        "image_size": 36743680,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-19T13:04:43.193262+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-20260818.zip",
+        "ak3_sha256": "fbb2ce482e81527aa38f6cf0d2e1030327b22d4d29c9ac9349546622e80b5ffa",
+        "ak3_size": 18436932
+      },
+      "local_b": {
+        "lock_id": "faafde14df99f557e45152c5fb22b35c23dc122194fcaf9ba358c5cc4a04f66f",
+        "config_id": "b0f963f43d5a37f491044f5bcb0901f3864286e9cc006a3ee728692340504da7",
+        "image_sha256": "7e4dd0bb023904b76208b6845958747e4504a53675be53d524d1e75837a83d07",
+        "image_size": 36743680,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-19T13:07:04.971925+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-20260818.zip",
+        "ak3_sha256": "fbb2ce482e81527aa38f6cf0d2e1030327b22d4d29c9ac9349546622e80b5ffa",
+        "ak3_size": 18436932
+      },
+      "differing_fields": [],
+      "byte_identical_locally": true,
+      "ci": {
+        "ak3_sha256": "fbb2ce482e81527aa38f6cf0d2e1030327b22d4d29c9ac9349546622e80b5ffa",
+        "ak3_size": 18436932,
+        "matches_local": true
+      }
+    },
+    "ace6-rekernel-experimental": {
+      "local_a": {
+        "lock_id": "78a478fa31b5540d02da4a61f6393be84c9c46fb5deda9c406b91833cdd9043f",
+        "config_id": "3b40bf04d97c8774da79f6cf578a28ccb7641093494b42319e5563e76ec2c68a",
+        "image_sha256": "a8ddc628a63439f74669a4df10e331f09ee318d6f4d90cf9c6a22b36d5cde26f",
+        "image_size": 36874752,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-19T14:04:41.351590+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-ksu35115-20260818.zip",
+        "ak3_sha256": "7aea6f2ba997972c2ff92546476c1217bbabd306f44c4b9203223cd063ae5a24",
+        "ak3_size": 18521440
+      },
+      "local_b": {
+        "lock_id": "78a478fa31b5540d02da4a61f6393be84c9c46fb5deda9c406b91833cdd9043f",
+        "config_id": "3b40bf04d97c8774da79f6cf578a28ccb7641093494b42319e5563e76ec2c68a",
+        "image_sha256": "a8ddc628a63439f74669a4df10e331f09ee318d6f4d90cf9c6a22b36d5cde26f",
+        "image_size": 36874752,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-19T14:06:41.769047+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-ksu35115-20260818.zip",
+        "ak3_sha256": "7aea6f2ba997972c2ff92546476c1217bbabd306f44c4b9203223cd063ae5a24",
+        "ak3_size": 18521440
+      },
+      "differing_fields": [],
+      "byte_identical_locally": true
+    },
+    "ace6-resukisu-manual-6.6": {
+      "local_a": {
+        "lock_id": "9846acc4db10a44dfbc69ca995573c2cb120dd4c3b9a127ce8cb935ef0493db1",
+        "config_id": "fb177f1e62e19b1df2e18625014d7ce5eaf7002293494bd9bad3a3496be72525",
+        "image_sha256": "78bdf0980ebd6e6d6d92e3680cbbf149564748314305f8e56eb0897693f7ddfd",
+        "image_size": 36874752,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-19T13:48:17.165635+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-ksu35115-20260818.zip",
+        "ak3_sha256": "e970c92edc56b18df4b41c69c5f7e1d3b2335112f075b0dda52264ce819b77b7",
+        "ak3_size": 18516931
+      },
+      "local_b": {
+        "lock_id": "9846acc4db10a44dfbc69ca995573c2cb120dd4c3b9a127ce8cb935ef0493db1",
+        "config_id": "fb177f1e62e19b1df2e18625014d7ce5eaf7002293494bd9bad3a3496be72525",
+        "image_sha256": "78bdf0980ebd6e6d6d92e3680cbbf149564748314305f8e56eb0897693f7ddfd",
+        "image_size": 36874752,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-19T13:50:29.114005+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-ksu35115-20260818.zip",
+        "ak3_sha256": "e970c92edc56b18df4b41c69c5f7e1d3b2335112f075b0dda52264ce819b77b7",
+        "ak3_size": 18516931
+      },
+      "differing_fields": [],
+      "byte_identical_locally": true
+    },
+    "ace6-resukisu-susfs-inline-6.6": {
+      "local_a": {
+        "lock_id": "f13496b972167443faaa80b6fef72c5eb23ee167cdabd5ce048d8102af721673",
+        "config_id": "8f27df126bda1f578127ee69e8273f1f9b0c08bfda9e0c3e083db2f5f906244e",
+        "image_sha256": "3effccf368bb8b84c103fdb05d1f06de28058f73d8b395122893e042b92029dd",
+        "image_size": 36878848,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-19T13:52:43.634380+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-ksu35115-20260818.zip",
+        "ak3_sha256": "38d4636568cb13c941b2ccd4c8a74221c953923c0389d3c3c39652d13b2e6eec",
+        "ak3_size": 18529397
+      },
+      "local_b": {
+        "lock_id": "f13496b972167443faaa80b6fef72c5eb23ee167cdabd5ce048d8102af721673",
+        "config_id": "8f27df126bda1f578127ee69e8273f1f9b0c08bfda9e0c3e083db2f5f906244e",
+        "image_sha256": "3effccf368bb8b84c103fdb05d1f06de28058f73d8b395122893e042b92029dd",
+        "image_size": 36878848,
+        "build_timestamp": "Tue Aug 18 16:57:28 UTC 2026",
+        "pahole": "v1.32",
+        "started_utc": "2026-09-19T13:54:41.792389+00:00",
+        "ak3_name": "Kernel-Ace6-Lingguang-ksu35115-20260818.zip",
+        "ak3_sha256": "38d4636568cb13c941b2ccd4c8a74221c953923c0389d3c3c39652d13b2e6eec",
+        "ak3_size": 18529397
+      },
+      "differing_fields": [],
+      "byte_identical_locally": true,
+      "ci": {
+        "ak3_sha256": "38d4636568cb13c941b2ccd4c8a74221c953923c0389d3c3c39652d13b2e6eec",
+        "ak3_size": 18529397,
+        "matches_local": true
+      }
+    }
+  },
+  "summary": {
+    "profiles_built_locally": 9,
+    "profiles_byte_identical_locally": 9,
+    "profiles_compared_with_ci": 3,
+    "profiles_matching_ci": 3
+  }
+}

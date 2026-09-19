@@ -270,3 +270,51 @@ version on both sides, and it is not done here.
 
 Machine-readable detail is in
 `docs/evidence/t25-nine-profile-reproducibility-20260918.json`.
+
+## Follow-up 2026-09-19 — the same bytes on another host
+
+The section above left one bound: a lock was a byte-identical claim on one host,
+with the note that pahole had to match for it to hold across hosts. Two inputs
+were still free. Both are now pinned.
+
+| Input | Before | Now |
+| --- | --- | --- |
+| pahole | whatever the host installs — `v1.32` here, `1.25` on the runner | `scripts/install-pahole.sh` builds dwarves 1.32 with the distribution's options and a pinned libbpf |
+| AK3 entry order | `zip -r` walked the directory in readdir order, so ext4 and btrfs packed the same Image into different archives | `prepare_package` hands zip an explicit sorted entry list |
+
+The libbpf pin has to be a commit rather than a release tag. `struct btf_header`
+gained `layout_off` and `layout_len` after v1.7.0, so a build against v1.7.0
+writes a 24-byte BTF header where the distribution's writes 32. Everything else
+in that comparison matched — same configuration, same size, same type and string
+section lengths — and those eight bytes still moved every byte after the BTF
+section.
+
+`ace6-minimal-6.6`, `ace6-resukisu-susfs-inline-6.6` and
+`ace6-main-release-compat-6.6` were built on the runner (run 35442823271,
+`main` at `5f9daf8`) and twice on this host, all from one lock per profile. The
+archives agree exactly:
+
+| Profile | AK3 SHA-256 | Image SHA-256 | AK3 size |
+| --- | --- | --- | --- |
+| `ace6-main-release-compat-6.6` | `612beb313f20…` | `cc4de61fd718…` | 18,744,032 |
+| `ace6-minimal-6.6` | `fbb2ce482e81…` | `7e4dd0bb0239…` | 18,436,932 |
+| `ace6-resukisu-susfs-inline-6.6` | `38d4636568cb…` | `3effccf368bb…` | 18,529,397 |
+
+All nine profiles were also rebuilt twice on this host and both builds of every
+one agree. Machine-readable detail is in
+`docs/evidence/t25-reproducibility-and-cross-host-20260919.json`, which replaces
+`t25-nine-profile-reproducibility-20260918.json`; that file is removed because
+its AK3 hashes predate the archive order fix, and its ReSukiSU profiles were
+built from a clone without tags.
+
+One input does not show up in the numbers but changes them. ReSukiSU's
+`Kernel/Kbuild` takes its version name from `git describe --abbrev=0 --tags` and
+falls back to a hardcoded string when the repository carries no tags, so a build
+from a tag-less clone embeds `v4.1.0` where a normal build embeds `v4.2.0-rc1`
+and produces a different kernel. The clones this repository prepares fetch the
+tags the remote advertises; `--source NAME=PATH` bypasses that and has to be
+given a checkout that carries them too.
+
+Two limits stand. This covers one host and one runner, and a run only compares
+the profiles it built — here three of nine. And none of it says anything about
+device behaviour; `release_allowed` stays false.

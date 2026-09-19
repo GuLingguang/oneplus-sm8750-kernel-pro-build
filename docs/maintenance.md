@@ -29,6 +29,13 @@ corresponding `local_files` entry only after reviewing the change. Run
 `python3 -m unittest discover -s tests -v` and the relevant real-source preparation
 case. Store the actual manifest/lock IDs and results in the execution record.
 
+A prepared clone has to carry the tags the remote advertises. ReSukiSU's
+`Kernel/Kbuild` takes its version name from `git describe --abbrev=0 --tags` and
+falls back to a hardcoded string when there are none, so a build from a tag-less
+clone embeds a different version name and produces a different kernel.
+`--source NAME=PATH` supplies the checkout directly and therefore has to be
+given one that carries the tags.
+
 The original input plan and dossier remain historical source documents. The
 execution record tracks completion/partial/blocked states without rewriting those
 documents or implying later tasks have run. Feature tasks require their own

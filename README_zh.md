@@ -310,7 +310,7 @@
 - **ccache** 配 sloppiness（忽略文件 mtime/ctime）加速重复构建
 - **Public ccache**（可选 `ccache_update`）：打包并上传缓存到 Release，近乎即时重建
 - **上游漂移体检**：`check_upstream.sh`（以及每周 workflow）把锁定步骤按顺序应用到最新 `lineage-23.2` 快照，上传 JSON/Markdown 报告和 Issue 草稿；不会自动创建或修改 Issue
-- 已在本地验证：每个 profile 都从同一个 lock 连编两次，Image 与 AK3 均逐字节一致（证据 `docs/evidence/t25-nine-profile-reproducibility-20260918.json`）；其中一个 ReSukiSU + SUSFS Inline 候选另外通过了部分真机验收。跨主机等价与完整功能验收仍未宣称：同一个 lock 只有在两侧 pahole 版本相同时才产出相同字节，而 CI runner 的版本与本机不同
+- 已验证：每个 profile 都从同一个 lock 连编两次，Image 与 AK3 均逐字节一致；其中三个另外在 CI runner 上构建，产物与本机逐字节相同（证据 `docs/evidence/t25-reproducibility-and-cross-host-20260919.json`）。一个 ReSukiSU + SUSFS Inline 候选另外通过了部分真机验收。完整功能验收仍未宣称。
 
 **GitHub 免费额度**：Actions 每月提供 2,000 分钟和 1 GB 缓存；本仓库的 ccache Release asset 约 630 MB，toolchain asset 约 1.5 GB。重复构建会消耗这些额度。频繁的本地构建可使用 `reproduce.sh`，CI 适合需要托管 runner 的场景。
 
