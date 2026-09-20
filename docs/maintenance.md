@@ -57,3 +57,23 @@ reports live under `work/_tmp/` so a large check does not fill system `/tmp`.
 M1 only pins its Actions references; it does not dispatch the workflow or change
 Issue #3. The T15 build entry creates local manifests and artifacts, but release
 publication, full feature acceptance and runtime evidence remain T18/T25–T27.
+
+Runtime evidence is collected with `./check_device.sh`, which drives `adb` and
+writes one file in the shape of `docs/evidence/t26-runtime.json`:
+
+```sh
+./check_device.sh --build-out out/ace6-resukisu-susfs-inline-6.6 --soak-seconds 300
+```
+
+It is read-only: every check reads device state and the only file written is the
+evidence on this host. Nothing is flashed, installed, started or stopped, so it
+is safe to run against a phone in daily use. A few checks are hard gates and set
+the exit code — the device must have finished booting, the kernel banner must
+match the artifact named by `--build-out`, and neither the log nor the soak may
+carry a panic or oops. Everything else is recorded as observed state, including
+`unavailable` when the device does not answer, and the run is a `partial-pass` by
+construction: startup is what it proves. Camera capture, call and data
+throughput, charging, suspend/resume, rollback and long-duration stability stay
+outside it, and the record lists them under `limits` so a reader is not left to
+infer the boundary. Without a device attached, `--dry-run` prints the commands a
+run would issue and contacts nothing.
