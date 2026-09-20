@@ -103,11 +103,26 @@ exited non-zero. That is the checker reporting a result, not a fault in it:
   ```
 
 `check_exit_code` treats a failed candidate as a hard failure whether or not
-`--ci` is set, so a red drift job is the expected outcome until the patch stack
-is reworked against the newer tip. Nothing here invalidates a build: the nine
-compile jobs in the same run built from the locked commit and all succeeded,
-and the profiles stay byte-identical on both hosts. Following upstream means
-reworking `07_compile_fixes.patch` first, which this record does not do.
+`--ci` is set, so a red drift job is the expected outcome here. Nothing in the
+run invalidates a build: the nine compile jobs built from the locked commit and
+all succeeded, and the profiles stay byte-identical on both hosts.
+
+The failure has one cause, and it is absorption rather than breakage. The patch
+wraps a single call in `certs/extract-cert.c`:
+
+```
++#ifdef USE_PKCS11_ENGINE
+ 		if (key_pass)
+ 			ERR(!ENGINE_ctrl_cmd_string(e, "PIN", key_pass, 0), "Set PKCS#11 PIN");
++#endif
+```
+
+The locked commit does not carry that `#ifdef`; the current `lineage-23.2` tip
+of the locked repository does, character for character. The patch is therefore
+redundant rather than stale, and the next kernel bump has to drop
+`patches/split/07_compile_fixes.patch` from the lock instead of reworking it.
+Until a bump happens nothing changes: builds from the locked commit still apply
+it, as the same run's nine successful compile jobs show.
 
 The report is in the run's `ace6-debug-drift` artifact; the checker still edits
 no lock, provider, or Issue.
