@@ -21,18 +21,25 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import shutil
 import subprocess
 import sys
 import time
+import zipfile
+import zlib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_INTERVAL = 10
 DEFAULT_SOAK = 300
 UNAVAILABLE = "unavailable"
+
+# Every profile shares one kernel commit, so the banner cannot say which of them
+# is on the device. The embedded configuration can: it differs per profile.
+IKCFG_MARK = b"IKCFG_ST"
 
 PANIC_PATTERNS = (
     r"Kernel panic",
@@ -138,6 +145,7 @@ def read_build_out(path):
         "artifact": artifact.get("path"),
         "artifact_sha256": artifact.get("sha256"),
         "expected_kernel": data.get("resolved", {}).get("kernel_localversion"),
+        "config_sha256": artifact_config(path, artifact.get("path")),
     }
 
 
@@ -163,7 +171,10 @@ def collect_observations(run, profile):
     uname_release = shell(run, "uname -r")
     identity = shell(run, "id")
     release = kernel_release(proc_version)
-    config = parse_config(shell(run, "zcat /proc/config.gz"))
+    config_text = shell(run, "zcat /proc/config.gz")
+    config = parse_config(config_text)
+    running_config = config_sha256(config_text if config_text != UNAVAILABLE else "")
+    expected_config = profile.get("config_sha256")
     ksud = shell(run, "ksud --version")
     expected = profile.get("kernel_release")
     return {
@@ -179,6 +190,12 @@ def collect_observations(run, profile):
         "kernel_banner_matches_artifact": (
             None if not expected else release.startswith(expected.rstrip("+"))
         ),
+        # The banner is identical across profiles; this is what says the running
+        # kernel is the one this artifact built, rather than a sibling profile.
+        "running_config_matches_artifact": (
+            None if not expected_config or not running_config
+            else running_config == expected_config
+        ),
     }
 
 
@@ -192,18 +209,21 @@ def collect_smoke(run):
     sensors = shell(run, "dumpsys sensorservice 2>/dev/null | grep -c 'handle='")
     modules = shell(run, "lsmod | tail -n +2 | wc -l")
     battery = shell(run, "dumpsys battery")
+    thermal = shell(run, "dumpsys thermalservice | grep -m1 -i 'Thermal Status'")
     disksize = shell(run, "cat /sys/block/zram0/disksize")
     algorithm = shell(run, "cat /sys/block/zram0/comp_algorithm")
     swaps = shell(run, "cat /proc/swaps")
+    # Field names follow the recorded T26 evidence so the two are comparable.
     return {
         "wifi": wifi if wifi else UNAVAILABLE,
         "cellular": cellular if cellular else UNAVAILABLE,
-        "bluetooth_enabled": bluetooth if bluetooth else UNAVAILABLE,
+        "bluetooth": bluetooth if bluetooth else UNAVAILABLE,
         "display": display if display else UNAVAILABLE,
-        "touch_mt_axes": touch if touch else UNAVAILABLE,
-        "camera_subdevices": cameras if cameras else UNAVAILABLE,
+        "touch": touch if touch else UNAVAILABLE,
+        "camera_service_devices": cameras if cameras else UNAVAILABLE,
         "hardware_sensors": sensors if sensors else UNAVAILABLE,
         "loaded_kernel_modules": modules if modules else UNAVAILABLE,
+        "thermal_status": thermal if thermal else UNAVAILABLE,
         "battery": parse_battery(battery),
         "zram": parse_zram(disksize, algorithm, swaps),
     }
@@ -233,29 +253,72 @@ def parse_zram(disksize, algorithm, swaps):
     }
 
 
+def temperature_celsius(text):
+    """`dumpsys battery` reports tenths of a degree; None when it says nothing."""
+    value = parse_battery(text).get("temperature_c")
+    if value in (None, UNAVAILABLE):
+        return None
+    try:
+        return round(int(value) / 10, 1)
+    except (TypeError, ValueError):
+        return None
+
+
+def sample(run):
+    """One soak sample: the facts T26 recorded, each allowed to be unknown."""
+    wifi = shell(run, "cmd wifi status")
+    return {
+        "boot_completed": boot_completed(run),
+        "kernel_release": kernel_release(shell(run, "cat /proc/version")),
+        "wifi_validated": (None if not wifi or wifi == UNAVAILABLE
+                           else "validated" in wifi.lower()),
+        "zram_visible": bool(shell(run, "cat /sys/block/zram0/disksize")),
+        "battery_temperature_c": temperature_celsius(shell(run, "dumpsys battery")),
+        "dmesg_panics": panic_matches(shell(run, "dmesg | tail -n 200", timeout=20)),
+    }
+
+
+def all_or_none(values):
+    """`all()` over what answered, or None when nothing did."""
+    known = [value for value in values if value is not None]
+    return all(known) if known else None
+
+
 def soak(run, seconds, interval):
     """Sample the same handful of facts every interval, for the given duration."""
-    samples = []
     if seconds <= 0:
-        return {"duration_seconds": 0, "samples": 0, "note": "soak skipped"}
+        # Same keys as a real soak, so a skipped one is not a different shape.
+        return {
+            "duration_seconds": 0,
+            "samples": 0,
+            "sample_interval_seconds": interval,
+            "boot_completed_stable": None,
+            "kernel_release_stable": None,
+            "wifi_validated_stable": None,
+            "zram_visible_stable": None,
+            "battery_temperature_c_range": None,
+            "panic_or_oops_match": False,
+            "note": "soak skipped",
+        }
+    samples = []
     deadline = time.monotonic() + seconds
     while True:
-        samples.append({
-            "boot_completed": boot_completed(run),
-            "kernel_release": kernel_release(shell(run, "cat /proc/version")),
-            "dmesg_panics": panic_matches(shell(run, "dmesg | tail -n 200", timeout=20)),
-        })
+        samples.append(sample(run))
         if time.monotonic() + interval > deadline:
             break
         time.sleep(interval)
-    releases = {sample["kernel_release"] for sample in samples}
+    temperatures = [s["battery_temperature_c"] for s in samples
+                    if s["battery_temperature_c"] is not None]
     return {
         "duration_seconds": seconds,
         "samples": len(samples),
         "sample_interval_seconds": interval,
-        "boot_completed_stable": all(sample["boot_completed"] for sample in samples),
-        "kernel_release_stable": len(releases) == 1,
-        "panic_or_oops_match": any(sample["dmesg_panics"] for sample in samples),
+        "boot_completed_stable": all(item["boot_completed"] for item in samples),
+        "kernel_release_stable": len({item["kernel_release"] for item in samples}) == 1,
+        "wifi_validated_stable": all_or_none([item["wifi_validated"] for item in samples]),
+        "zram_visible_stable": all_or_none([item["zram_visible"] for item in samples]),
+        "battery_temperature_c_range": [min(temperatures), max(temperatures)] if temperatures else None,
+        "panic_or_oops_match": any(item["dmesg_panics"] for item in samples),
     }
 
 
@@ -276,6 +339,9 @@ def build_evidence(run, profile, soak_seconds, interval):
         raise DeviceError("the kernel release changed during the soak")
     # The recorded T26 evidence keeps the soak inside smoke_tests; stay with it.
     smoke["stability_soak"] = stability
+    smoke["explicit_panic_or_oops_scan"] = (
+        "no actionable match" if not last_panics else "; ".join(last_panics[:3])
+    )
     evidence = {
         "schema_version": 1,
         "task": "T26",
@@ -314,6 +380,44 @@ def dry_run(profile):
     for item in plan:
         print(f"  adb shell {item}")
     return 0
+
+
+def embedded_config(blob):
+    """The kernel configuration the build baked into the Image, or None.
+
+    The kernel stores it as a gzip stream behind an IKCFG_ST marker. zlib does
+    the decompressing because this interpreter's gzip module rejects the stream.
+    """
+    start = blob.find(IKCFG_MARK)
+    if start < 0:
+        return None
+    try:
+        text = zlib.decompressobj(16 + 15).decompress(blob[start + len(IKCFG_MARK):])
+    except zlib.error:
+        return None
+    return text.decode("utf-8", "replace")
+
+
+def config_sha256(text):
+    """One hash for a configuration dump, so host and device can be compared."""
+    if not text:
+        return None
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def artifact_config(build_out, artifact_name):
+    """Pull the Image out of a packaged AK3 and hash its embedded configuration."""
+    if not artifact_name:
+        return None
+    path = Path(build_out) / artifact_name
+    if not path.is_file():
+        return None
+    try:
+        with zipfile.ZipFile(path) as archive:
+            with archive.open("Image") as image:
+                return config_sha256(embedded_config(image.read()))
+    except (zipfile.BadZipFile, KeyError, OSError):
+        return None
 
 
 def parse_args(argv=None):

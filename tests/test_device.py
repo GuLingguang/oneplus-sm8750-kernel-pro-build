@@ -121,14 +121,42 @@ RECORDED_SHAPE = json.loads(
 
 
 class EvidenceTests(unittest.TestCase):
-    def test_shape_matches_the_recorded_t26_evidence(self):
+    def test_shape_covers_the_recorded_t26_evidence(self):
+        """The recorded evidence is the floor: the harness may add, never drop."""
         evidence = d.build_evidence(fake_device(), PROFILE, soak_seconds=0, interval=1)
-        self.assertEqual(set(evidence), set(RECORDED_SHAPE))
-        self.assertEqual(set(evidence['status']), set(RECORDED_SHAPE['status']))
-        self.assertEqual(set(evidence['device']), set(RECORDED_SHAPE['device']))
-        self.assertEqual(set(evidence['observations']), set(RECORDED_SHAPE['observations']))
+        for key in RECORDED_SHAPE:
+            self.assertIn(key, evidence)
+        for block in ('status', 'device', 'observations', 'smoke_tests'):
+            missing = set(RECORDED_SHAPE[block]) - set(evidence[block])
+            self.assertEqual(missing, set(), f'{block} dropped {missing}')
+        self.assertEqual(set(RECORDED_SHAPE['smoke_tests']['stability_soak']) -
+                         set(evidence['smoke_tests']['stability_soak']), set())
         self.assertEqual(evidence['status']['release_allowed'], False)
         self.assertEqual(evidence['status']['runtime'], 'partial-pass')
+
+    def test_the_embedded_config_is_extracted_from_a_packaged_image(self):
+        import zlib as _zlib
+        config = b'CONFIG_KSU=y\nCONFIG_KSU_SUSFS=y\n'
+        compressor = _zlib.compressobj(9, _zlib.DEFLATED, 16 + 15)
+        stream = compressor.compress(config) + compressor.flush()
+        blob = b'\x00' * 32 + d.IKCFG_MARK + stream + b'\x00' * 32
+        self.assertEqual(d.embedded_config(blob), config.decode())
+        self.assertIsNone(d.embedded_config(b'no marker here'))
+        self.assertIsNone(d.embedded_config(d.IKCFG_MARK + b'not a gzip stream'))
+        self.assertEqual(d.config_sha256('x'), d.config_sha256('x'))
+        self.assertIsNone(d.config_sha256(''))
+
+    def test_config_mismatch_is_visible_when_the_device_answers(self):
+        profile = dict(PROFILE, config_sha256='a' * 64)
+        evidence = d.build_evidence(fake_device(), profile, soak_seconds=0, interval=1)
+        self.assertFalse(evidence['observations']['running_config_matches_artifact'])
+        profile = dict(PROFILE, config_sha256=d.config_sha256(CONFIG))
+        evidence = d.build_evidence(fake_device(), profile, soak_seconds=0, interval=1)
+        self.assertTrue(evidence['observations']['running_config_matches_artifact'])
+
+    def test_config_comparison_stays_unknown_without_an_answer(self):
+        evidence = d.build_evidence(fake_device(), PROFILE, soak_seconds=0, interval=1)
+        self.assertIsNone(evidence['observations']['running_config_matches_artifact'])
 
     def test_observations_come_from_the_device(self):
         evidence = d.build_evidence(fake_device(), PROFILE, soak_seconds=0, interval=1)
