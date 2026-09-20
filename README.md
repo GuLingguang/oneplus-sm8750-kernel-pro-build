@@ -331,7 +331,7 @@ This project adapts patches from several sources (primarily the [cctv18/oppo_opl
 - **ccache** with sloppiness config (file mtime/ctime ignored) for fast rebuilds
 - **Public ccache** (optional `ccache_update`): packages and uploads the cache to a Release for near-instant rebuilds
 - **Upstream drift check**: `check_upstream.sh` (also a weekly workflow) cumulatively applies the locked steps to the latest `lineage-23.2` snapshot and uploads a JSON/Markdown report plus an Issue draft; it never creates or edits Issues automatically
-- Verified: every profile has been rebuilt twice from one lock and both builds agree byte for byte, Image and AK3 alike. Three of them were also built on the CI runner, and those archives match this host exactly (`docs/evidence/t25-reproducibility-and-cross-host-20260919.json`). One ReSukiSU + SUSFS Inline candidate additionally passed partial device acceptance. Full feature acceptance remains unclaimed.
+- Verified: every profile has been rebuilt twice from one lock and both builds agree byte for byte, Image and AK3 alike. All nine were also built on the CI runner, and those archives match this host exactly (`docs/evidence/t25-reproducibility-and-cross-host-20260919.json`). One ReSukiSU + SUSFS Inline candidate additionally passed partial device acceptance. Full feature acceptance remains unclaimed.
 
 **GitHub free-tier limits**: Actions provides 2,000 minutes per month and 1 GB of caches; this repository's ccache Release asset is about 630 MB and the toolchain asset about 1.5 GB. Repeated builds consume that allocation. Use `reproduce.sh` for frequent local builds and CI when a hosted runner is required.
 

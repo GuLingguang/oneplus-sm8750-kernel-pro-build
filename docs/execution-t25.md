@@ -296,12 +296,17 @@ archives agree exactly:
 
 | Profile | AK3 SHA-256 | Image SHA-256 | AK3 size |
 | --- | --- | --- | --- |
+| `ace6-droidspaces-extend-6.6` | `74a3ddf2992d…` | `59824997e634…` | 18,647,225 |
+| `ace6-droidspaces-resukisu-extend-6.6` | `735bdbc0ea46…` | `d772a7c6091a…` | 18,727,687 |
+| `ace6-droidspaces-resukisu-standard-6.6` | `0a9800c88243…` | `df96277f2aaa…` | 18,706,132 |
+| `ace6-droidspaces-standard-6.6` | `6d47197753ee…` | `5705dfe85f6f…` | 18,626,318 |
 | `ace6-main-release-compat-6.6` | `612beb313f20…` | `cc4de61fd718…` | 18,744,032 |
 | `ace6-minimal-6.6` | `fbb2ce482e81…` | `7e4dd0bb0239…` | 18,436,932 |
+| `ace6-rekernel-experimental` | `7aea6f2ba997…` | `a8ddc628a634…` | 18,521,440 |
+| `ace6-resukisu-manual-6.6` | `e970c92edc56…` | `78bdf0980ebd…` | 18,516,931 |
 | `ace6-resukisu-susfs-inline-6.6` | `38d4636568cb…` | `3effccf368bb…` | 18,529,397 |
 
-All nine profiles were also rebuilt twice on this host and both builds of every
-one agree. Machine-readable detail is in
+Machine-readable detail is in
 `docs/evidence/t25-reproducibility-and-cross-host-20260919.json`, which replaces
 `t25-nine-profile-reproducibility-20260918.json`; that file is removed because
 its AK3 hashes predate the archive order fix, and its ReSukiSU profiles were
@@ -315,6 +320,10 @@ and produces a different kernel. The clones this repository prepares fetch the
 tags the remote advertises; `--source NAME=PATH` bypasses that and has to be
 given a checkout that carries them too.
 
-Two limits stand. This covers one host and one runner, and a run only compares
-the profiles it built — here three of nine. And none of it says anything about
-device behaviour; `release_allowed` stays false.
+The first pass covered the three profiles a `scope=compile` run builds. The
+`scope=full` run 35448366308 then built all nine on the runner, and every one of
+them matches this host as well — so the table above is nine for nine on both
+counts: each profile agrees with its own rebuild, and with the runner's.
+
+Two limits stand. This covers one host and one runner, and none of it says
+anything about device behaviour; `release_allowed` stays false.

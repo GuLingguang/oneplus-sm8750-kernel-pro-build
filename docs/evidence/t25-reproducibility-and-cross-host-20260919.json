@@ -1,6 +1,6 @@
 {
   "date": "2026-09-19",
-  "method": "every profile built twice on this host from one lock, sources cloned from pinned checkouts, then compared with the artifacts of CI run 35442823271 (main @ 5f9daf8, scope=compile)",
+  "method": "every profile built twice on this host from one lock, sources cloned from pinned checkouts, then compared with the artifacts of CI run 35448366308 (main, scope=full: all nine profiles built on the runner)",
   "host": {
     "jobs": 30,
     "pahole": "v1.32 (scripts/install-pahole.sh)",
@@ -38,7 +38,12 @@
         "ak3_size": 18647225
       },
       "differing_fields": [],
-      "byte_identical_locally": true
+      "byte_identical_locally": true,
+      "ci": {
+        "ak3_sha256": "74a3ddf2992d978cc3d791fdff504db3f44a2a3d77af7ef79b24eb47872ff2ec",
+        "ak3_size": 18647225,
+        "matches_local": true
+      }
     },
     "ace6-droidspaces-resukisu-extend-6.6": {
       "local_a": {
@@ -66,7 +71,12 @@
         "ak3_size": 18727687
       },
       "differing_fields": [],
-      "byte_identical_locally": true
+      "byte_identical_locally": true,
+      "ci": {
+        "ak3_sha256": "735bdbc0ea460ce81126f7674272b5bd6a3c2b361474a02a72ae0b70080a8ed8",
+        "ak3_size": 18727687,
+        "matches_local": true
+      }
     },
     "ace6-droidspaces-resukisu-standard-6.6": {
       "local_a": {
@@ -94,7 +104,12 @@
         "ak3_size": 18706132
       },
       "differing_fields": [],
-      "byte_identical_locally": true
+      "byte_identical_locally": true,
+      "ci": {
+        "ak3_sha256": "0a9800c88243b496dc223582b5d19408327cae91019f26e6f5d11bee73c9d5d0",
+        "ak3_size": 18706132,
+        "matches_local": true
+      }
     },
     "ace6-droidspaces-standard-6.6": {
       "local_a": {
@@ -122,7 +137,12 @@
         "ak3_size": 18626318
       },
       "differing_fields": [],
-      "byte_identical_locally": true
+      "byte_identical_locally": true,
+      "ci": {
+        "ak3_sha256": "6d47197753eebc57e014647d368e5bdbca34db0eb14d18cdbdbf5794debc151a",
+        "ak3_size": 18626318,
+        "matches_local": true
+      }
     },
     "ace6-main-release-compat-6.6": {
       "local_a": {
@@ -216,7 +236,12 @@
         "ak3_size": 18521440
       },
       "differing_fields": [],
-      "byte_identical_locally": true
+      "byte_identical_locally": true,
+      "ci": {
+        "ak3_sha256": "7aea6f2ba997972c2ff92546476c1217bbabd306f44c4b9203223cd063ae5a24",
+        "ak3_size": 18521440,
+        "matches_local": true
+      }
     },
     "ace6-resukisu-manual-6.6": {
       "local_a": {
@@ -244,7 +269,12 @@
         "ak3_size": 18516931
       },
       "differing_fields": [],
-      "byte_identical_locally": true
+      "byte_identical_locally": true,
+      "ci": {
+        "ak3_sha256": "e970c92edc56b18df4b41c69c5f7e1d3b2335112f075b0dda52264ce819b77b7",
+        "ak3_size": 18516931,
+        "matches_local": true
+      }
     },
     "ace6-resukisu-susfs-inline-6.6": {
       "local_a": {
@@ -283,7 +313,7 @@
   "summary": {
     "profiles_built_locally": 9,
     "profiles_byte_identical_locally": 9,
-    "profiles_compared_with_ci": 3,
-    "profiles_matching_ci": 3
+    "profiles_compared_with_ci": 9,
+    "profiles_matching_ci": 9
   }
 }

@@ -86,3 +86,28 @@ checker fetched itself never carries one, so it is not flagged.
 
 This record does not claim a device or build result, and it does not change
 any lock, provider, or Issue state.
+
+## Follow-up 2026-09-19 — the locked patch stack no longer applies upstream
+
+The `scope=full` debug run (35448366308) ran the checker with `--ci`, and it
+exited non-zero. That is the checker reporting a result, not a fault in it:
+
+- all five monitored sources have moved past their locks (`drift` 5, `resolved`
+  5, `unresolved` 0);
+- every one of the nine profiles reports `patch-apply-failure-needs-review` on
+  its first integration step, `patches/split/07_compile_fixes.patch`:
+
+  ```
+  error: patch failed: certs/extract-cert.c:149
+  error: certs/extract-cert.c: patch does not apply
+  ```
+
+`check_exit_code` treats a failed candidate as a hard failure whether or not
+`--ci` is set, so a red drift job is the expected outcome until the patch stack
+is reworked against the newer tip. Nothing here invalidates a build: the nine
+compile jobs in the same run built from the locked commit and all succeeded,
+and the profiles stay byte-identical on both hosts. Following upstream means
+reworking `07_compile_fixes.patch` first, which this record does not do.
+
+The report is in the run's `ace6-debug-drift` artifact; the checker still edits
+no lock, provider, or Issue.
