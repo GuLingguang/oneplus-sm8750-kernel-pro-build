@@ -134,8 +134,22 @@ def read_build_out(path):
         raise DeviceError(f"no build-manifest.json under {path}")
     data = json.loads(manifest.read_text())
     image = data.get("build", {}).get("image", {})
-    artifacts = data.get("artifacts") or [{}]
-    artifact = artifacts[0]
+    artifact = next((item for item in data.get("artifacts", [])
+                     if item.get("kind") == "ak3"), None)
+    if not artifact or not artifact.get("path") or not artifact.get("sha256"):
+        raise DeviceError(f"no AK3 artifact identity in {manifest}")
+    artifact_path = path / artifact["path"]
+    if not artifact_path.is_file():
+        raise DeviceError(f"AK3 artifact is missing: {artifact_path}")
+    digest = hashlib.sha256()
+    with artifact_path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    if digest.hexdigest() != artifact["sha256"]:
+        raise DeviceError(f"AK3 artifact hash differs from {manifest}: {artifact_path}")
+    embedded_hash = artifact_config(path, artifact["path"])
+    if not embedded_hash:
+        raise DeviceError(f"AK3 Image has no readable embedded config: {artifact_path}")
     return {
         "name": data.get("profile") or data.get("config", {}).get("version", {}).get("profile"),
         "config_id": data.get("config_id"),
@@ -145,7 +159,8 @@ def read_build_out(path):
         "artifact": artifact.get("path"),
         "artifact_sha256": artifact.get("sha256"),
         "expected_kernel": data.get("resolved", {}).get("kernel_localversion"),
-        "config_sha256": artifact_config(path, artifact.get("path")),
+        "config_sha256": embedded_hash,
+        "ksu_type": data.get("config", {}).get("features", {}).get("ksu_type"),
     }
 
 
@@ -184,7 +199,8 @@ def collect_observations(run, profile):
         "root_adbd": "uid=0" in (identity or ""),
         "ksud": ksud if ksud and ksud != UNAVAILABLE else UNAVAILABLE,
         "spoof_uname_observed": bool(
-            uname_release and release and release != UNAVAILABLE and uname_release != release
+            uname_release and uname_release != UNAVAILABLE and release != UNAVAILABLE
+            and uname_release != release
         ),
         "embedded_config": config,
         "kernel_banner_matches_artifact": (
@@ -267,14 +283,18 @@ def temperature_celsius(text):
 def sample(run):
     """One soak sample: the facts T26 recorded, each allowed to be unknown."""
     wifi = shell(run, "cmd wifi status")
+    zram = shell(run, "cat /sys/block/zram0/disksize")
+    kernel_log = shell(run, "dmesg | tail -n 200", timeout=20)
+    if kernel_log in ("", UNAVAILABLE):
+        raise DeviceError("kernel log is unavailable during the soak")
     return {
         "boot_completed": boot_completed(run),
         "kernel_release": kernel_release(shell(run, "cat /proc/version")),
         "wifi_validated": (None if not wifi or wifi == UNAVAILABLE
                            else "validated" in wifi.lower()),
-        "zram_visible": bool(shell(run, "cat /sys/block/zram0/disksize")),
+        "zram_visible": None if zram in ("", UNAVAILABLE) else True,
         "battery_temperature_c": temperature_celsius(shell(run, "dumpsys battery")),
-        "dmesg_panics": panic_matches(shell(run, "dmesg | tail -n 200", timeout=20)),
+        "dmesg_panics": panic_matches(kernel_log),
     }
 
 
@@ -327,9 +347,16 @@ def build_evidence(run, profile, soak_seconds, interval):
     if not boot_completed(run):
         raise DeviceError("device has not finished booting (sys.boot_completed != 1)")
     observations = collect_observations(run, profile)
+    if observations["kernel_banner_matches_artifact"] is not True:
+        raise DeviceError("running kernel banner does not match the build artifact")
+    if observations["running_config_matches_artifact"] is not True:
+        raise DeviceError("running kernel config is unavailable or does not match the AK3 Image")
     observations["boot_completed"] = True
     smoke = collect_smoke(run)
-    last_panics = panic_matches(shell(run, "dmesg | tail -n 200", timeout=20))
+    kernel_log = shell(run, "dmesg | tail -n 200", timeout=20)
+    if kernel_log in ("", UNAVAILABLE):
+        raise DeviceError("kernel log is unavailable; cannot check for panic/oops")
+    last_panics = panic_matches(kernel_log)
     if last_panics:
         raise DeviceError("kernel log carries a panic/oops: " + "; ".join(last_panics[:3]))
     stability = soak(run, soak_seconds, interval)
@@ -346,8 +373,10 @@ def build_evidence(run, profile, soak_seconds, interval):
         "schema_version": 1,
         "task": "T26",
         "status": {
-            "code": "booted-and-root-verified",
-            "contract": "runtime-startup-and-ksu",
+            "code": ("booted-and-root-verified" if observations["root_adbd"]
+                     else "booted-and-profile-verified"),
+            "contract": ("runtime-startup-and-ksu" if profile.get("ksu_type") not in
+                         (None, "none") else "runtime-startup"),
             "build": "built",
             "runtime": RUNTIME_STATUS,
             "release_allowed": False,
@@ -399,10 +428,10 @@ def embedded_config(blob):
 
 
 def config_sha256(text):
-    """One hash for a configuration dump, so host and device can be compared."""
+    """Hash config content independent of adb's terminal newline trimming."""
     if not text:
         return None
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+    return hashlib.sha256(text.replace("\r\n", "\n").strip().encode("utf-8")).hexdigest()
 
 
 def artifact_config(build_out, artifact_name):

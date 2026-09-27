@@ -106,13 +106,15 @@ def fake_device(overrides=None):
 
 
 PROFILE = {
-    'name': 'ace6-minimal-6.6',
+    'name': 'ace6-resukisu-susfs-inline-6.6',
     'config_id': 'x' * 64,
     'lock_id': 'y' * 64,
     'kernel_release': '6.6.142-4k-gcb967c26c2c5+',
     'image_sha256': 'z' * 64,
     'artifact': 'Kernel-Ace6-Lingguang-20260818.zip',
     'artifact_sha256': 'w' * 64,
+    'config_sha256': d.config_sha256(CONFIG),
+    'ksu_type': 'resukisu',
 }
 
 RECORDED_SHAPE = json.loads(
@@ -148,15 +150,37 @@ class EvidenceTests(unittest.TestCase):
 
     def test_config_mismatch_is_visible_when_the_device_answers(self):
         profile = dict(PROFILE, config_sha256='a' * 64)
-        evidence = d.build_evidence(fake_device(), profile, soak_seconds=0, interval=1)
-        self.assertFalse(evidence['observations']['running_config_matches_artifact'])
+        with self.assertRaisesRegex(d.DeviceError, 'config'):
+            d.build_evidence(fake_device(), profile, soak_seconds=0, interval=1)
         profile = dict(PROFILE, config_sha256=d.config_sha256(CONFIG))
         evidence = d.build_evidence(fake_device(), profile, soak_seconds=0, interval=1)
         self.assertTrue(evidence['observations']['running_config_matches_artifact'])
 
-    def test_config_comparison_stays_unknown_without_an_answer(self):
-        evidence = d.build_evidence(fake_device(), PROFILE, soak_seconds=0, interval=1)
-        self.assertIsNone(evidence['observations']['running_config_matches_artifact'])
+    def test_config_comparison_requires_an_answer(self):
+        run = fake_device({'zcat /proc/config.gz': d.UNAVAILABLE})
+        with self.assertRaisesRegex(d.DeviceError, 'config'):
+            d.build_evidence(run, PROFILE, soak_seconds=0, interval=1)
+
+    def test_config_comparison_survives_adb_stdout_trimming(self):
+        base = fake_device()
+
+        def run(args, timeout=30):
+            return base(args, timeout).strip()
+
+        evidence = d.build_evidence(run, PROFILE, soak_seconds=0, interval=1)
+        self.assertTrue(evidence['observations']['running_config_matches_artifact'])
+
+    def test_wrong_kernel_banner_is_a_hard_failure(self):
+        run = fake_device({'cat /proc/version': 'Linux version 6.6.1-test'})
+        with self.assertRaisesRegex(d.DeviceError, 'banner'):
+            d.build_evidence(run, PROFILE, soak_seconds=0, interval=1)
+
+    def test_unrooted_device_does_not_claim_root(self):
+        profile = dict(PROFILE, ksu_type='none')
+        run = fake_device({'id': 'uid=2000(shell) gid=2000(shell)'})
+        evidence = d.build_evidence(run, profile, soak_seconds=0, interval=1)
+        self.assertEqual(evidence['status']['code'], 'booted-and-profile-verified')
+        self.assertEqual(evidence['status']['contract'], 'runtime-startup')
 
     def test_observations_come_from_the_device(self):
         evidence = d.build_evidence(fake_device(), PROFILE, soak_seconds=0, interval=1)
@@ -177,6 +201,15 @@ class EvidenceTests(unittest.TestCase):
         with self.assertRaises(d.DeviceError):
             d.build_evidence(run, PROFILE, soak_seconds=0, interval=1)
 
+    def test_unavailable_kernel_log_does_not_count_as_clean(self):
+        run = fake_device({'dmesg | tail -n 200': d.UNAVAILABLE})
+        with self.assertRaisesRegex(d.DeviceError, 'kernel log is unavailable'):
+            d.build_evidence(run, PROFILE, soak_seconds=0, interval=1)
+
+    def test_unavailable_zram_does_not_count_as_visible(self):
+        run = fake_device({'cat /sys/block/zram0/disksize': d.UNAVAILABLE})
+        self.assertIsNone(d.sample(run)['zram_visible'])
+
     def test_soak_counts_its_samples(self):
         stability = d.soak(fake_device(), seconds=2, interval=1)
         self.assertGreaterEqual(stability['samples'], 2)
@@ -191,6 +224,12 @@ class EvidenceTests(unittest.TestCase):
 
 class BuildOutTests(unittest.TestCase):
     def test_reads_profile_and_artifact_from_a_build_output(self):
+        import hashlib
+        import zipfile
+        import zlib
+
+        compressor = zlib.compressobj(9, zlib.DEFLATED, 16 + 15)
+        compressed = compressor.compress(CONFIG.encode()) + compressor.flush()
         manifest = {
             'profile': 'ace6-minimal-6.6',
             'config_id': 'a' * 64,
@@ -198,14 +237,22 @@ class BuildOutTests(unittest.TestCase):
             'build': {'kernel_release': '6.6.142-4k-gcb967c26c2c5+',
                       'image': {'sha256': 'c' * 64}},
             'resolved': {'kernel_localversion': '-4k-gcb967c26c2c5'},
-            'artifacts': [{'kind': 'ak3', 'path': 'Kernel-x.zip', 'sha256': 'd' * 64}],
+            'artifacts': [{'kind': 'ak3', 'path': 'Kernel-x.zip'}],
         }
         with tempfile.TemporaryDirectory() as tmp:
+            archive = Path(tmp) / 'Kernel-x.zip'
+            with zipfile.ZipFile(archive, 'w') as z:
+                z.writestr('Image', d.IKCFG_MARK + compressed)
+            manifest['artifacts'][0]['sha256'] = hashlib.sha256(archive.read_bytes()).hexdigest()
             path = Path(tmp) / 'build-manifest.json'
             path.write_text(json.dumps(manifest))
             profile = d.read_build_out(Path(tmp))
+            self.assertEqual(profile['config_sha256'], d.config_sha256(CONFIG))
+            manifest['artifacts'][0]['sha256'] = 'd' * 64
+            path.write_text(json.dumps(manifest))
+            with self.assertRaisesRegex(d.DeviceError, 'hash differs'):
+                d.read_build_out(Path(tmp))
         self.assertEqual(profile['name'], 'ace6-minimal-6.6')
-        self.assertEqual(profile['artifact_sha256'], 'd' * 64)
         self.assertEqual(profile['kernel_release'], '6.6.142-4k-gcb967c26c2c5+')
 
     def test_a_directory_without_a_manifest_is_rejected(self):
